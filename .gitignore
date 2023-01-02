@@ -3,6 +3,7 @@
 input
 output
 dev
+config.json
 
 # Logs
 logs

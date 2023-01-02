@@ -1,0 +1,70 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Steam App Id from game names configuration schema",
+	"description": "Validates configuration input for the Steam App ID from game names script.",
+	"type": "object",
+	"properties": {
+		"$schema": {
+			"description": "The JSON schema to use for the configuration file.",
+			"type": "string",
+			"default": "config.schema.json"
+		},
+		"inputFile": {
+			"description": "The file to read the game names from.",
+			"type": "object",
+			"default": {
+				"fileName": "gameNames",
+				"fileEnding": "txt",
+				"delimiter": ","
+			},
+			"properties": {
+				"fileName": {
+					"description": "The name of the file to read the game names from.",
+					"type": "string",
+					"default": "gameNames"
+				},
+				"fileEnding": {
+					"description": "The file type of the input file. Choose from any of the supported file types listed.",
+					"type": "string",
+					"default": "txt",
+					"enum": [
+						"txt",
+						"csv",
+						"json"
+					]
+				},
+				"delimiter": {
+					"description": "The delimiter between game names when reading the game names from the input file.",
+					"type": "string",
+					"default": ","
+				}
+			},
+			"required": [
+				"fileName",
+				"fileEnding"
+			],
+			"if": {
+				"properties": {
+					"fileEnding": {
+						"enum": [
+							"csv",
+							"txt"
+						]
+					}
+				}
+			},
+			"then": {
+				"required": [
+					"delimiter"
+				]
+			},
+			"additionalProperties": false
+		},
+		"onlyFullMatches": {
+			"description": "Whether to only get Steam App ID's for full matches or also for partial matches. If set to false, partial matches will be saved to a different output file.",
+			"type": "boolean",
+			"default": false
+		}
+	},
+	"additionalProperties": false
+}
