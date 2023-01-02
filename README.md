@@ -1,4 +1,4 @@
-# Game name to Steam App Id
+# Game Name to Steam App ID
 
 ![Steam Banner](./images/GameNameToSteamAppIdBanner.png)
 
