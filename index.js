@@ -9,8 +9,8 @@ import stringSimilarity from 'string-similarity';
 
 // ----- Config -----
 
-console.log("Loading config.json...");
-import CONFIG from './config.json' assert { type: "json" };
+// console.log("Loading config.json...");
+// import CONFIG from './config.json' assert { type: "json" };
 
 // ----- Other -----
 
@@ -29,18 +29,8 @@ console.log("Found " + steamApps.length + " Steam games.\n");
 
 // ---------- Import the game names ----------
 
-let gameNames = {}
-
-const readLine = readline.createInterface({
-	input: fs.createReadStream('./input/gameNames.txt')
-});
-
-// Set a default App ID value of -1 for each game
-readLine.on('line', (line) => {
-	gameNames[line] = -1;
-});
-
-await new Promise((res) => readLine.once('close', res));
+let gameNames = fs.readFileSync("./input/gameNames.txt", "utf-8");
+gameNames = Object.assign({}, ...gameNames.split("\r\n").map((game) => ({[game]: -1})));
 
 const numGameNames = Object.keys(gameNames).length;
 console.log("\"./input/gameNames.txt\" contained " + numGameNames + " game names for which to find the Steam App ID's.\n");
