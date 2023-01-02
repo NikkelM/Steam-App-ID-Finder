@@ -1,0 +1,10 @@
+{
+	"name": "steam-id-from-game-name",
+	"type": "module",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"dependencies": {
+		"string-similarity": "^4.0.4"
+	}
+}
