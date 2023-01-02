@@ -1,5 +1,7 @@
 # Game name to Steam App Id
 
+![Steam Banner](./images/GameNameToSteamAppIdBanner.png)
+
 Do you have a list of game names and want to know which Steam App ID's they correspond to? Then this is the utility for you!
 
 ## Setup

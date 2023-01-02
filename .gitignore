@@ -4,6 +4,7 @@ input
 output
 dev
 config.json
+**.xcf
 
 # Logs
 logs
