@@ -5,6 +5,7 @@
 	"description": "Utility that is able to find Steam App ID's from a set of game names. Non-exact matches are tried to be found using string similarity.",
 	"main": "index.js",
 	"dependencies": {
+		"jsonschema": "^1.4.1",
 		"string-similarity": "^4.0.4"
 	}
 }
