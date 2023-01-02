@@ -23,14 +23,13 @@
 					"type": "string",
 					"default": "gameNames"
 				},
-				"fileEnding": {
+				"fileType": {
 					"description": "The file type of the input file. Choose from any of the supported file types listed.",
 					"type": "string",
 					"default": "txt",
 					"enum": [
 						"txt",
-						"csv",
-						"json"
+						"csv"
 					]
 				},
 				"delimiter": {
@@ -41,11 +40,11 @@
 			},
 			"required": [
 				"fileName",
-				"fileEnding"
+				"fileType"
 			],
 			"if": {
 				"properties": {
-					"fileEnding": {
+					"fileType": {
 						"enum": [
 							"csv",
 							"txt"

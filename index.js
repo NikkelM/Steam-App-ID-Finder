@@ -2,7 +2,6 @@
 process.removeAllListeners('warning');
 
 import fs from 'fs';
-import readline from 'readline';
 import stringSimilarity from 'string-similarity';
 
 // ---------- Setup ----------

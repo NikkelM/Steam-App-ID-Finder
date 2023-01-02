@@ -1,9 +1,9 @@
 {
 	"$schema": "./config.schema.json",
 	"inputFile": {
-		"fileName": "input/gameNames",
-		"fileEnding": "txt",
-		"delimiter": "\r\n"
+		"fileName": "gameNames",
+		"fileType": "txt",
+		"delimiter": ","
 	},
 	"onlyFullMatches": false
 }
