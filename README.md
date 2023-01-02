@@ -54,6 +54,8 @@ In this case, the matched game was correct, but this is not always the case:
 
 Such a mismatch can have a number of reasons, in the case of `DEATH STRANDING` it is that Steam only has the `DEATH STRANDING DIRECTOR'S CUT` in its database, but not the original game, which leads to `Witch Strandings` being the closest match.
 
+**For this reason, you should always verify that the Steam App ID's for these partial matches are correct, which may require manual cleaning of the data.**
+
 ## Configuration
 
 ### Schema validation
