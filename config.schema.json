@@ -65,5 +65,8 @@
 			"default": false
 		}
 	},
-	"additionalProperties": false
+	"additionalProperties": false,
+	"required": [
+		"inputFile"
+	]
 }
