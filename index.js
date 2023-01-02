@@ -8,6 +8,7 @@ process.removeAllListeners('warning');
 import fs from 'fs';
 import jsonschema from 'jsonschema';
 import stringSimilarity from 'string-similarity';
+import cliProgress from 'cli-progress';
 
 // Utility for getting the directory of the current file
 import { fileURLToPath } from 'url';
@@ -58,7 +59,7 @@ await main();
 async function main() {
 	// Fetch Steam games from API
 	const steamApps = await fetchSteamApps();
-	console.log(`Found ${steamApps.length} games in Steam's database.\n`);
+	console.log(`Found ${steamApps.length} games in Steam's database.`);
 
 	// Import the game names from the input file
 	const gameNames = await importGameNames();
@@ -68,7 +69,7 @@ async function main() {
 	const steamIDsFullMatch = await findSteamAppIdsFullMatch(gameNames, steamApps);
 
 	// Save the full matches to a .json file
-	console.log("Writing game names and Steam App ID's for full matches to \"./output/steamAppIds_fullMatch.json\"...\n");
+	console.log(`Writing game names and Steam App ID's for full matches to \"${__dirname}\\output\\steamAppIds_fullMatch.json\"...\n`);
 	fs.writeFileSync('./output/steamAppIds_fullMatch.json', JSON.stringify(steamIDsFullMatch, null, 2));
 
 	if (!CONFIG.onlyFullMatches) {
@@ -76,7 +77,7 @@ async function main() {
 		const steamIDsBestMatch = await findSteamAppIdsBestMatch(gameNames, steamApps);
 
 		// Save the best matches to a .json file
-		console.log("Writing game names and Steam App ID's for partial matches to \"./output/steamAppIds_bestMatch.json\"...\n");
+		console.log(`Writing game names and Steam App ID's for partial matches to \"${__dirname}\\output\\steamAppIds_bestMatch.json\"...\n`);
 		fs.writeFileSync('./output/steamAppIds_bestMatch.json', JSON.stringify(steamIDsBestMatch, null, 2));
 	}
 }
@@ -123,7 +124,14 @@ async function findSteamAppIdsFullMatch(gameNames, steamApps) {
 
 
 async function findSteamAppIdsBestMatch(gameNames, steamApps) {
-	console.log("Searching for best matches using string similarity...");
+	console.log(`Searching for partial matches for the remaining ${Object.keys(gameNames).length} games...`);
+
+	const progressBar = new cliProgress.SingleBar({
+		hideCursor: true,
+		format: '|{bar}| {percentage}% | {eta}s left | {value}/{total} games matched'
+	}, cliProgress.Presets.legacy);
+
+	progressBar.start(Object.keys(gameNames).length, 0);
 
 	// For all games we couldn't get a full match, find the most similar title
 	// Some manual cleanup may be necessary
@@ -135,9 +143,10 @@ async function findSteamAppIdsBestMatch(gameNames, steamApps) {
 			"similarity": bestMatch.bestMatch.rating,
 			"steamName": steamApps[bestMatch.bestMatchIndex].name
 		}
+		progressBar.increment();
 	}
 
-	console.log(`Found a partial match for the remaining ${Object.keys(steamIDsBestMatch).length} games.`);
+	progressBar.stop();
 
 	return steamIDsBestMatch;
 }
