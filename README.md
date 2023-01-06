@@ -1,6 +1,6 @@
 # Steam App ID Finder
 
-![Steam Banner](./images/SteamAppIDFinderBanner.png)
+![Steam Banner](./images/SteamAppIdFinderBanner.png)
 
 Do you have a list of game names and want to know which Steam App ID's they correspond to?
 This utility is able to find the Steam App ID's for any number of provided game names, even if the provided name is not an exact match to the game in the Steam database.
