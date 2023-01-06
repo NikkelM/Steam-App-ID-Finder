@@ -1,8 +1,15 @@
-# Game Name to Steam App ID
+# Steam App ID Finder
 
-![Steam Banner](./images/GameNameToSteamAppIdBanner.png)
+![Steam Banner](./images/SteamAppIDFinderBanner.png)
 
-Do you have a list of game names and want to know which Steam App ID's they correspond to? Then this is the utility for you!
+Do you have a list of game names and want to know which Steam App ID's they correspond to?
+This utility is able to find the Steam App ID's for any number of provided game names, even if the provided name is not an exact match to the game in the Steam database.
+
+## Related projects
+
+Wondering what to do with the Steam App ID's you just found? You could try organizing all of your Steam games in Notion using the [Notion Steam API integration](https://github.com/NikkelM/Notion-Steam-API-Integration).
+
+Would you like to know what games are currently available on Game Pass for your platform? Check out the [Game Pass API](https://github.com/NikkelM/Game-Pass-API) project.
 
 ## Setup
 
@@ -67,7 +74,7 @@ The project provides a JSON validation schema for the required configuration fil
 The schema can be found in the `config.schema.json` file and used within your `config.json` by adding the following property:
 
 ```json
-"$schema": "./config.schema.json"
+"$schema": "config.schema.json"
 ```
 
 *NOTE: The script will test your provided `config.json` against this schema, so make sure your configuration is valid.*

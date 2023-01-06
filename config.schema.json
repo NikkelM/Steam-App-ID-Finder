@@ -1,7 +1,7 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": "Steam App Id from game names configuration schema",
-	"description": "Validates configuration input for the Steam App ID from game names script.",
+	"title": "\"Steam App ID Finder\" configuration schema.",
+	"description": "Validates configuration input for the \"Steam App ID Finder\" script.",
 	"type": "object",
 	"properties": {
 		"$schema": {
