@@ -62,23 +62,36 @@ async function main() {
 	console.log(`Found ${steamApps.length} games in Steam's database.`);
 
 	// Import the game names from the input file
-	const gameNames = await importGameNames();
-	console.log(`The input file contained ${Object.keys(gameNames).length} game names.\n`);
+	let gameNames = await importGameNames();
+	console.log(`The input file (${__dirname}\\${CONFIG.inputFile.fileName}.${CONFIG.inputFile.fileType}) contained ${Object.keys(gameNames).length} game names.\n`);
 
 	// Find Steam App ID's for full matches
-	const steamIDsFullMatch = await findSteamAppIdsFullMatch(gameNames, steamApps);
+	const { steamIDsSingleFullMatch, steamIDsMultipleFullMatches, remainingGameNames } = await findSteamAppIdsFullMatch(gameNames, steamApps);
+	gameNames = remainingGameNames;
 
-	// Save the full matches to a .json file
-	console.log(`Writing game names and Steam App ID's for full matches to \"${__dirname}\\output\\steamAppIds_fullMatch.json\"...\n`);
-	fs.writeFileSync('./output/steamAppIds_fullMatch.json', JSON.stringify(steamIDsFullMatch, null, 2));
+	// Save the full matches to .json files
+	if (Object.keys(steamIDsSingleFullMatch).length > 0) {
+		console.log(`Writing game names and Steam App ID's for games with one full match to \"${__dirname}\\output\\steamAppIds_fullMatches.json\"...`);
+		fs.writeFileSync('./output/steamAppIds_fullMatches.json', JSON.stringify(steamIDsSingleFullMatch, null, 2));
+	}
+	if (Object.keys(steamIDsMultipleFullMatches).length > 0) {
+		console.log(`Writing game names and Steam App ID's for games with multiple full matches to \"${__dirname}\\output\\steamAppIds_multipleFullMatches.json\"...`);
+		fs.writeFileSync('./output/steamAppIds_multipleFullMatches.json', JSON.stringify(steamIDsMultipleFullMatches, null, 2));
+	}
+	console.log();
 
 	if (!CONFIG.onlyFullMatches) {
 		// Find Steam App ID's for best matches
-		const steamIDsBestMatch = await findSteamAppIdsBestMatch(gameNames, steamApps);
+		const { steamIDsBestMatch, steamIDsNoMatch } = await findSteamAppIdsBestMatch(gameNames, steamApps);
 
 		// Save the best matches to a .json file
-		console.log(`Writing game names and Steam App ID's for partial matches to \"${__dirname}\\output\\steamAppIds_bestMatch.json\"...\n`);
+		console.log(`\nWriting game names and Steam App ID's for partial matches to \"${__dirname}\\output\\steamAppIds_bestMatch.json\"...`);
 		fs.writeFileSync('./output/steamAppIds_bestMatch.json', JSON.stringify(steamIDsBestMatch, null, 2));
+
+		if (Object.keys(steamIDsNoMatch).length > 0) {
+			console.log(`Writing the names of the remaining ${Object.keys(steamIDsNoMatch).length} games for which no satisfying match was found to \"${__dirname}\\output\\steamAppIds_noMatch.json\"...`);
+			fs.writeFileSync('./output/steamAppIds_noMatch.json', JSON.stringify(steamIDsNoMatch, null, 2));
+		}
 	}
 }
 
@@ -89,64 +102,94 @@ async function fetchSteamApps() {
 }
 
 async function importGameNames() {
-	let gameNames = fs.readFileSync(`${CONFIG.inputFile.fileName}.${CONFIG.inputFile.fileType}`, 'utf8');
-
-	// If the input file indicates that game names are separated by a delimiter, split the read game names by that delimiter
-	if (["csv", "txt"].includes(CONFIG.inputFile.fileType)) {
-		gameNames = Object.assign({}, ...gameNames.split(CONFIG.inputFile.delimiter).map((game) => ({ [game]: -1 })));
-	} else {
-		// Currently, no other file types are supported
-		console.log("Error: Input file type not supported.");
+	if (!["csv", "txt"].includes(CONFIG.inputFile.fileType)) {
+		console.error(`Error: Input file type not supported: ${CONFIG.inputFile.fileType}.`);
 		process.exit(1);
 	}
 
-	return gameNames;
+	try {
+		var gameNames = fs.readFileSync(`${CONFIG.inputFile.fileName}.${CONFIG.inputFile.fileType}`, 'utf8');
+	} catch (error) {
+		console.error("Error: Could not read input file.");
+		console.error(error);
+		process.exit(1);
+	}
+
+	return gameNames.split(CONFIG.inputFile.delimiter);
 }
 
 async function findSteamAppIdsFullMatch(gameNames, steamApps) {
 	console.log("Searching for full matches...");
 
-	// Get all games where the name is a full match
-	let steamIDsFullMatch = {};
-	for (const game in gameNames) {
-		const fullMatch = steamApps.find((app) => app.name === game);
-		if (fullMatch) {
-			steamIDsFullMatch[game] = fullMatch.appid;
-			// Remove the found game from gameNames to not be searched again in the next step
-			delete gameNames[game];
+	let steamIDsSingleFullMatch = {};
+	let steamIDsMultipleFullMatches = {};
+	let remainingGameNames = [];
+
+	for (const game of gameNames) {
+		const fullMatches = Object.values(steamApps).filter((app) => (app.name === game));
+
+		if (fullMatches.length === 1) {
+			steamIDsSingleFullMatch[game] = fullMatches[0].appid;
+		} else if (fullMatches.length > 1) {
+			// More than one match for this game was found, save all matches
+			steamIDsMultipleFullMatches[game] = fullMatches.map((app) => app.appid);
+		} else {
+			// No full match was found for this game
+			remainingGameNames.push(game);
 		}
 	}
 
-	console.log(`Found full matches for ${Object.keys(steamIDsFullMatch).length} games.`);
+	console.log(`Found full matches for ${Object.keys(steamIDsSingleFullMatch).length + Object.keys(steamIDsMultipleFullMatches).length} games${Object.keys(steamIDsMultipleFullMatches).length > 1 ? `, of which ${Object.keys(steamIDsMultipleFullMatches).length} games had more than one match.` : "."}\n`);
 
-	return steamIDsFullMatch;
+	return { steamIDsSingleFullMatch, steamIDsMultipleFullMatches, remainingGameNames };
 }
 
 
 async function findSteamAppIdsBestMatch(gameNames, steamApps) {
-	console.log(`Searching for partial matches for the remaining ${Object.keys(gameNames).length} games...`);
+	let partialMatchThreshold = 0;
+	if (CONFIG.partialMatchThreshold) {
+		partialMatchThreshold = CONFIG.partialMatchThreshold;
+	}
+
+	console.log(`Searching for partial matches with a similarity score >=${partialMatchThreshold} for the remaining ${gameNames.length} games...`);
+
+	// Convert to lowercase to make matches case insensitive and thereby more accurate
+	const steamAppsLowercase = steamApps.map((app) => app.name.toLowerCase());
+	const gameNamesLowercase = gameNames.map((game) => game.toLowerCase());
+
+	// For all games we couldn't get a full match, find the most similar title
+	let steamIDsBestMatch = {};
+	let steamIDsNoMatch = [];
 
 	const progressBar = new cliProgress.SingleBar({
 		hideCursor: true,
-		format: '|{bar}| {percentage}% | {eta}s left | {value}/{total} games matched'
+		format: '|{bar}| {percentage}% | {eta}s left | {value}/{total} games processed'
 	}, cliProgress.Presets.legacy);
 
-	progressBar.start(Object.keys(gameNames).length, 0);
+	progressBar.start(gameNames.length, 0);
 
-	// For all games we couldn't get a full match, find the most similar title
-	// Some manual cleanup may be necessary
-	let steamIDsBestMatch = {};
-	for (const game in gameNames) {
-		const bestMatch = stringSimilarity.findBestMatch(game.toLowerCase(), steamApps.map((app) => app.name.toLowerCase()));
-		steamIDsBestMatch[game] = {
-			"appId": steamApps[bestMatch.bestMatchIndex].appid,
-			"similarity": bestMatch.bestMatch.rating,
-			"steamName": steamApps[bestMatch.bestMatchIndex].name
+	for (let i = 0; i < gameNamesLowercase.length; i++) {
+		const bestMatch = stringSimilarity.findBestMatch(gameNamesLowercase[i], steamAppsLowercase);
+		if (bestMatch.bestMatch.rating >= partialMatchThreshold) {
+			steamIDsBestMatch[gameNames[i]] = {
+				"appId": steamApps[bestMatch.bestMatchIndex].appid,
+				"similarity": bestMatch.bestMatch.rating,
+				"steamName": steamApps[bestMatch.bestMatchIndex].name
+			}
+		} else {
+			// The similarity score is too low
+			steamIDsNoMatch.push(gameNames[i]);
 		}
+
 		progressBar.increment();
 	}
 
 	progressBar.stop();
 
-	return steamIDsBestMatch;
+	// Sort the matches by similarity score
+	steamIDsBestMatch = Object.fromEntries(Object.entries(steamIDsBestMatch).sort(([, a], [, b]) => b.similarity - a.similarity));
+
+	console.log(`Found partial matches with a similarity score >=${partialMatchThreshold} for ${Object.keys(steamIDsBestMatch).length} games.`);
+
+	return { steamIDsBestMatch, steamIDsNoMatch };
 }
