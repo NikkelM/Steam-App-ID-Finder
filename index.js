@@ -5,6 +5,7 @@ process.removeAllListeners('warning');
 
 import { CONFIG } from './js/utils.js';
 import { steamAppIDsFromGameNames } from './js/gameNames.js';
+import { steamAppIDsFromSteamAccount } from './js/steamGames.js';
 
 // ---------- Main ----------
 
@@ -15,6 +16,9 @@ async function main() {
 	switch (CONFIG.mode) {
 		case 'gameNames':
 			await steamAppIDsFromGameNames();
+			break;
+		case 'steamAccount':
+			await steamAppIDsFromSteamAccount();
 			break;
 		default:
 			console.error(`Error: No mode provided in the configuration file, or mode not supported: ${CONFIG.mode}.`);
