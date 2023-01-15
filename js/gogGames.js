@@ -24,7 +24,7 @@ export async function steamAppIDsFromGOGAccount() {
 	// Get the game names for the corresponding game IDs
 	const gogGameNames = await getGogGameNames(gogAppIds, accessToken);
 
-	console.log(`\nWriting game names to "output/${CONFIG.mode}/gogGameNames.csv"`);
+	console.log(`Writing game names to "output/${CONFIG.mode}/gogGameNames.csv"`);
 	fs.writeFileSync(`output/${CONFIG.mode}/gogGameNames.txt`, gogGameNames.join('\n'), 'utf8');
 }
 
@@ -72,7 +72,7 @@ async function getGogGameNames(gogGameIds, accessToken) {
 
 	progressBar.stop();
 
-	console.log(`\nFound ${gameNames.length} named games. ${numUndefined} apps had no game associated with them. These are likely DLC and are not included.\n`);
+	console.log(`\nFound ${gameNames.length} named games. ${numUndefined} apps had no game associated with them. These are likely DLC and are not included.`);
 
 	return gameNames;
 }
