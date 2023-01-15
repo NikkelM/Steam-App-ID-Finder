@@ -21,6 +21,10 @@
 				{
 					"const": "steamAccount",
 					"title": "In this mode, the script gets the Steam App IDs for all apps owned on a Steam account with a publicly accessible app library."
+				},
+				{
+					"const": "gogAccount",
+					"title": "In this mode, the script gets game names, and optionally Steam App IDs, for all games owned on a GOG account. Due to GOG account privacy settings, you will need to log in into your account your browser and provide the script with an access token."
 				}
 			]
 		}
@@ -58,6 +62,24 @@
 			"dependentSchemas": {
 				"mode": {
 					"$ref": "schema.steamAccount.json"
+				}
+			}
+		},
+		"else": {
+			"if": {
+				"properties": {
+					"mode": {
+						"enum": [
+							"gogAccount"
+						]
+					}
+				}
+			},
+			"then": {
+				"dependentSchemas": {
+					"mode": {
+						"$ref": "schema.gogAccount.json"
+					}
 				}
 			}
 		}
