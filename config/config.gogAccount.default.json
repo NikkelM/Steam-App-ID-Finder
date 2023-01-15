@@ -1,0 +1,6 @@
+{
+	"$schema": "config.schema.json",
+	"mode": "gogAccount",
+	"gogLoginCode": "GOG login code here if available. Do not provide it if you want to use the refresh token.",
+	"refreshToken": "GOG refresh token here if available. You can get it by running the script once using a login code."
+}

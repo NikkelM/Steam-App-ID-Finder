@@ -1,15 +1,15 @@
 {
 	"properties": {
 		"gogLoginCode": {
-			"description": "The code you received after logging in (consult the README.md for more information). Be fast, this code is only valid for one minute. If you don't start the script within that time, it will not be able to generate an access token from it.",
+			"description": "The code you received after logging in (consult the README.md for more information). Be fast, this code is only valid for one minute. If you don't start the script within that time, it will not be able to generate an access token from it. If a refresh token is also provided, this option is ignored.",
 			"type": "string",
-			"default": "",
+			"default": "gogLoginCodeHereIfAvailable",
 			"minLength": 1
 		},
 		"refreshToken": {
-			"description": "If you have used the script within the last hour, enter the generated refreshToken here to avoid having to log in again. Refresh tokens are valid for 60 minutes. After this, you will have to log in again.",
+			"description": "If you have used the script before and have a refresh token, enter it here to avoid having to log in again. After running the script, the refresh token will be saved to \"output/gogAccount/gogRefreshToken.txt\". You can then use it here to avoid having to log in again.",
 			"type": "string",
-			"default": "",
+			"default": "refreshTokenHereIfAvailable",
 			"minLength": 1
 		}
 	},
