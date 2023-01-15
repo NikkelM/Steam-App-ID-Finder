@@ -10,7 +10,7 @@ Choose from one of the `modes` described in the [section below](#modes) to find 
 
 Run `npm install` to install the required dependencies first.
 
-Following this, create a `config.json` file in the root directory of the project and fill it with your desired [configuration](#configuration).
+Following this, create a `config.json` file in the `config` directory of the project and fill it with your desired [configuration](#configuration).
 Use the default configuration file (`config.<mode>.default.json`) for the mode in which you wish to run the utility as a template if you wish.
 
 ## Usage
@@ -42,7 +42,7 @@ The schemata can be found in the `config.<mode>.schema.json` files and used with
 "$schema": "config.<mode>.schema.json"
 ```
 
-*NOTE: The script will test your provided `config.json` against the respective schema, so make sure your configuration is valid.*
+*NOTE: The script will always test your provided `config.json` against the respective schema, so make sure your configuration is valid.*
 
 ### Properties
 
@@ -140,7 +140,7 @@ The configuration schema for this mode can be found in the `config.gameNames.sch
 "$schema": "config.gameNames.schema.json"
 ```
 
-*NOTE: The script will test your provided `config.json` against this schema, so make sure your configuration is valid.*
+*NOTE: The script will always test your provided `config.json` against this schema, so make sure your configuration is valid.*
 
 #### Properties
 

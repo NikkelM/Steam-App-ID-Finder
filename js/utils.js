@@ -16,9 +16,9 @@ function loadConfig() {
 		if (fs.existsSync('config.json')) {
 			console.log("Loading configuration file \"config.json\"...");
 			configFileName = 'config.json';
-		} else if (fs.existsSync('/config.default.json')) {
-			console.log("!!! No custom configuration file found! Loading default configuration file \"config.default.json\"...");
-			configFileName = 'config.default.json';
+		} else if (fs.existsSync(`config/config.json`)) {
+			console.log("Loading configuration file \"config/config.json\"...");
+			configFileName = 'config/config.json';
 		}
 		CONFIG = JSON.parse(fs.readFileSync(configFileName));
 	} catch (error) {
@@ -30,8 +30,10 @@ function loadConfig() {
 	let schemaFileName;
 	switch (CONFIG.mode) {
 		case 'gameNames':
-			schemaFileName = 'config.gameNames.schema.json';
+			schemaFileName = 'config/config.gameNames.schema.json';
 			break;
+		case 'steamAccount':
+			schemaFileName = 'config/config.steamAccount.schema.json';
 		default:
 			console.error(`Error: No mode provided in the configuration file, or mode not supported: ${CONFIG.mode}.`);
 			process.exit(1);
