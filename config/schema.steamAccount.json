@@ -1,7 +1,7 @@
 {
 	"properties": {
 		"steamAccountName": {
-			"description": "The name of the Steam account for which the App IDs should be fetched. Note: This is not the username you log in with, but the one that can be seen e.g. on your profile page. Your profile's game details must be set to public for the script to work. Check via this link: https://steamcommunity.com/id/accountName/games while not logged in.",
+			"description": "The name of the Steam account for which the App IDs should be fetched. Your account's game library must be set to public for the script to work. Check via this link: https://steamcommunity.com/id/accountName/games while not logged in.",
 			"type": "string",
 			"default": "accountName"
 		},
@@ -16,6 +16,7 @@
 				"statsLink": false,
 				"globalStatsLink": false
 			},
+			"minProperties": 1,
 			"properties": {
 				"appID": {
 					"description": "The App ID of the game.",
@@ -43,7 +44,7 @@
 					"default": false
 				},
 				"globalStatsLink": {
-					"description": "The URL to the game's global stats page.",
+					"description": "The URL to the global stats page for this game.",
 					"type": "boolean",
 					"default": false
 				}

@@ -29,7 +29,7 @@ You can find additional information about the output of each mode in the respect
 ## Configuration
 
 The different modes have different requirements when it comes to the kind of input they require, and each mode gives you different options to configure the script's behaviour.
-For each `mode`, a default configuration file is provided in the `config.<mode>.default.json` file, which you can use as a template for your own configuration file.
+For each `mode`, a default configuration is provided in the `config.<mode>.default.json` file, which you can use as a template for your own configuration file.
 
 ### Schema validation
 
@@ -42,12 +42,13 @@ The schema can be found in the `config.schema.json` file and used within your `c
 ```
 
 *NOTE: The script will always test your provided `config.json` against this schema, so make sure your configuration is valid.*
+*By adding the schema to your `config.json`, you will receive information about mistakes in the configuration.*
 
 ### Properties
 
 The following is a list of all configuration items that are required no matter which `mode` you choose.
 
-If a given property is not present in the configuration file, it will automatically be assumed to have a value of `false` (or equivalent, depending on the property type).
+If any given property is not present in the configuration file, it will automatically be assumed to have a value of `false` (or equivalent, depending on the property type).
 
 <details>
 <summary><code>mode</code></summary>
@@ -56,7 +57,7 @@ The mode in which the script should run. Choose from any of the supported modes 
 
 | Type | Default value | Possible values | Required |
 | --- | --- | --- | --- |
-| `string` | `gameNames` | `gameNames` | Yes |
+| `string` | `gameNames` | `gameNames`, `steamAccount` | Yes |
 </details>
 
 # Modes
@@ -65,6 +66,8 @@ You can choose from any of the following modes when running the script:
 
 - [`gameNames`](#mode-gamenames): Do you have a list of game names and want to know which Steam App IDs they correspond to?
 This mode is able to find the Steam App IDs for any number of provided game names, even if the provided name is not an exact match to the game in the Steam database.
+- [`steamAccount`](#mode-steamaccount): This mode will fetch all apps (this includes games, but also e.g. soundtracks or movies) from a given Steam account and save them to a file.
+Make sure that the account's game library is public, otherwise the script will not be able to access it.
 
 ## Mode: `gameNames`
 
@@ -206,6 +209,122 @@ If the value is omitted, a match will be found for every game.
 | Type | Default value | Possible values | Required |
 | --- | --- | --- | --- |
 | `number` | `0.8` | Number between `0` and `1` | No |
+</details>
+
+## Mode: `steamAccount`
+
+This mode will fetch all apps (this includes games, but also e.g. soundtracks or movies) from a given Steam account and save them to a file.
+Make sure that the account's game library is public, otherwise the script will not be able to access it.
+
+You can check if the game library for a given `accountName` is public by logging out of Steam (or opening a private browsing session) and visiting this link: [https://steamcommunity.com/id/accountName/games](https://steamcommunity.com/id/accountName/games)
+
+To set your game library to public, visit this link while logged in: [https://steamcommunity.com/my/edit/settings](https://steamcommunity.com/my/edit/settings)
+
+### Output
+
+You will find the resulting data in the created `output/gameNames` folder in a file named after your Steam account name.
+
+### Configuration: `steamAccount`
+
+#### Properties
+
+The following is a list of all configuration items, their defaults and the values they can take.
+
+<details>
+<summary><code>steamAccountName</code></summary>
+
+The name of the Steam account for which the App IDs should be fetched.
+Your account's game library must be set to public for the script to work.
+Check via this link: https://steamcommunity.com/id/accountName/games while not logged in.
+
+| Type | Default value | Possible values | Required |
+| --- | --- | --- | --- |
+| `string` | `accountName` | Any valid Steam account name | Yes |
+</details>
+
+<details>
+<summary><code>outputProperties</code></summary>
+
+Which of the properties provided by the Steam API should be included in the resulting JSON object. Properties that are not available for an app will be omitted in the output.
+
+| Type | Default value | Possible values | Required |
+| --- | --- | --- | --- |
+| `object` | See item below | See sections below | Yes, and at least one property defined |
+
+```json
+{
+	"appId": true,
+	"name": true,
+	"logo": false,
+	"storeLink": false,
+	"statsLink": false,
+	"globalStatsLink": false
+}
+```
+</details>
+
+#### outputProperties
+
+You can choose any combination (at least one) of the following properties to be included in the output file:
+
+<details>
+<summary><code>appID</code></summary>
+
+The App ID of the game.
+
+| Type | Default value | Possible values | Required |
+| --- | --- | --- | --- |
+| `boolean` | `true` | `true`, `false` | No |
+</details>
+
+<details>
+<summary><code>name</code></summary>
+
+The name of the game.
+
+| Type | Default value | Possible values | Required |
+| --- | --- | --- | --- |
+| `boolean` | `true` | `true`, `false` | No |
+</details>
+
+<details>
+<summary><code>logo</code></summary>
+
+The URL to the game's logo.
+
+| Type | Default value | Possible values | Required |
+| --- | --- | --- | --- |
+| `boolean` | `false` | `true`, `false` | No |
+</details>
+
+<details>
+<summary><code>storeLink</code></summary>
+
+The URL to the game's store page.
+
+| Type | Default value | Possible values | Required |
+| --- | --- | --- | --- |
+| `boolean` | `false` | `true`, `false` | No |
+</details>
+
+<details>
+<summary><code>statsLink</code></summary>
+
+The URL to this users stats page for this game.
+
+| Type | Default value | Possible values | Required |
+| --- | --- | --- | --- |
+| `boolean` | `false` | `true`, `false` | No |
+</details>
+
+<details>
+<summary><code>globalStatsLink</code></summary>
+
+The URL to the global stats page for this game.
+
+| Type | Default value | Possible values | Required |
+| --- | --- | --- | --- |
+| `boolean` | `false` | `true`, `false` | No |
 </details>
 
 ## Related projects
