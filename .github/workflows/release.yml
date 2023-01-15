@@ -48,8 +48,8 @@ jobs:
           mkdir release_files
           cp ./LICENSE ./release_files/LICENSE
           cp ./README.md ./release_files/README.md
-          cp ./config.default.json ./release_files/config.default.json
-          cp ./config.schema.json ./release_files/config.schema.json
+          cp -r ./js ./release_files/js
+          cp -r ./config ./release_files/config
           cp ./index.js ./release_files/index.js
           cp ./package-lock.json ./release_files/package-lock.json
           cp ./package.json ./release_files/package.json
