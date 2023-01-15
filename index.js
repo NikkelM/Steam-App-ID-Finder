@@ -10,10 +10,13 @@ import { CONFIG } from './js/utils.js';
 await main();
 
 async function main() {
-	// Depending on the chosen "utility" in the config file, run the corresponding function
-	switch (CONFIG.utility) {
+	// Depending on the chosen "mode" in the config file, run the corresponding function
+	switch (CONFIG.mode) {
 		case 'gameNames':
 			await steamAppIDsFromGameNames();
 			break;
+		default:
+			console.error(`Error: No mode provided in the configuration file, or mode not supported: ${CONFIG.mode}.`);
+			process.exit(1);
 	}
 }
