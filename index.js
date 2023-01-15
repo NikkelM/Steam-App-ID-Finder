@@ -6,51 +6,10 @@ process.removeAllListeners('warning');
 
 // Utility libraries
 import fs from 'fs';
-import jsonschema from 'jsonschema';
 import stringSimilarity from 'string-similarity';
 import cliProgress from 'cli-progress';
 
-// Utility for getting the directory of the current file
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// ---------- Setup ----------
-
-// ----- Config -----
-
-try {
-	let configFileName;
-	if (fs.existsSync(__dirname + '/config.json')) {
-		console.log("Loading configuration file \"config.json\"...");
-		configFileName = 'config.json';
-	} else if (fs.existsSync(__dirname + '/config.default.json')) {
-		console.log("!!! No custom configuration file found! Loading default configuration file \"config.default.json\"...");
-		configFileName = 'config.default.json';
-	}
-	var CONFIG = JSON.parse(fs.readFileSync(__dirname + '/' + configFileName));
-} catch (error) {
-	console.error("Error loading configuration file: " + error);
-	process.exit(1);
-}
-
-// Validate the config file against the schema
-console.log("Validating configuration file...\n");
-try {
-	const validator = new jsonschema.Validator();
-	validator.validate(CONFIG, JSON.parse(fs.readFileSync(__dirname + '/config.schema.json')), { throwError: true });
-} catch (error) {
-	console.error("Error validating configuration file: " + error);
-	process.exit(1);
-}
-
-// ----- Output -----
-
-// Create the output directory if it doesn't exist
-if (!fs.existsSync(__dirname + '/output')) {
-	fs.mkdirSync(__dirname + '/output');
-}
+import { CONFIG } from './js/utils.js';
 
 // ---------- Main ----------
 
@@ -63,7 +22,7 @@ async function main() {
 
 	// Import the game names from the input file
 	let gameNames = await importGameNames();
-	console.log(`The input file (${__dirname}\\${CONFIG.inputFile.fileName}.${CONFIG.inputFile.fileType}) contained ${Object.keys(gameNames).length} game names.\n`);
+	console.log(`The input file (${CONFIG.inputFile.fileName}.${CONFIG.inputFile.fileType}) contained ${Object.keys(gameNames).length} game names.\n`);
 
 	// Find Steam App ID's for full matches
 	const { steamIDsSingleFullMatch, steamIDsMultipleFullMatches, remainingGameNames } = await findSteamAppIdsFullMatch(gameNames, steamApps);
@@ -71,11 +30,11 @@ async function main() {
 
 	// Save the full matches to .json files
 	if (Object.keys(steamIDsSingleFullMatch).length > 0) {
-		console.log(`Writing game names and Steam App ID's for games with one full match to \"${__dirname}\\output\\steamAppIds_fullMatches.json\"...`);
+		console.log(`Writing game names and Steam App ID's for games with one full match to \"output/steamAppIds_fullMatches.json\"...`);
 		fs.writeFileSync('./output/steamAppIds_fullMatches.json', JSON.stringify(steamIDsSingleFullMatch, null, 2));
 	}
 	if (Object.keys(steamIDsMultipleFullMatches).length > 0) {
-		console.log(`Writing game names and Steam App ID's for games with multiple full matches to \"${__dirname}\\output\\steamAppIds_multipleFullMatches.json\"...`);
+		console.log(`Writing game names and Steam App ID's for games with multiple full matches to \"output/steamAppIds_multipleFullMatches.json\"...`);
 		fs.writeFileSync('./output/steamAppIds_multipleFullMatches.json', JSON.stringify(steamIDsMultipleFullMatches, null, 2));
 	}
 	console.log();
@@ -85,11 +44,11 @@ async function main() {
 		const { steamIDsBestMatch, steamIDsNoMatch } = await findSteamAppIdsBestMatch(gameNames, steamApps);
 
 		// Save the best matches to a .json file
-		console.log(`\nWriting game names and Steam App ID's for partial matches to \"${__dirname}\\output\\steamAppIds_bestMatch.json\"...`);
+		console.log(`\nWriting game names and Steam App ID's for partial matches to \"output/steamAppIds_bestMatch.json\"...`);
 		fs.writeFileSync('./output/steamAppIds_bestMatch.json', JSON.stringify(steamIDsBestMatch, null, 2));
 
 		if (Object.keys(steamIDsNoMatch).length > 0) {
-			console.log(`Writing the names of the remaining ${Object.keys(steamIDsNoMatch).length} games for which no satisfying match was found to \"${__dirname}\\output\\steamAppIds_noMatch.json\"...`);
+			console.log(`Writing the names of the remaining ${Object.keys(steamIDsNoMatch).length} games for which no satisfying match was found to \"output/steamAppIds_noMatch.json\"...`);
 			fs.writeFileSync('./output/steamAppIds_noMatch.json', JSON.stringify(steamIDsNoMatch, null, 2));
 		}
 	}
