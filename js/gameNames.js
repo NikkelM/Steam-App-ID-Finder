@@ -4,13 +4,9 @@ import fs from 'fs';
 import stringSimilarity from 'string-similarity';
 import cliProgress from 'cli-progress';
 
-import { CONFIG } from './js/utils.js';
+import { CONFIG } from './utils.js';
 
-// ---------- Setup ----------
-
-export const inputGameNames = loadInputGameNames();
-
-// ----- Input file -----
+// ----- Input -----
 
 async function loadInputGameNames() {
 	if (!["csv", "txt"].includes(CONFIG.inputFile.fileType)) {
@@ -29,16 +25,23 @@ async function loadInputGameNames() {
 	return gameNames.split(CONFIG.inputFile.delimiter);
 }
 
+async function fetchSteamApps() {
+	return await fetch("https://api.steampowered.com/ISteamApps/GetAppList/v2/")
+		.then((response) => response.json())
+		.then((data) => data.applist.apps);
+}
 
-await main();
+// ----------- Main -----------
 
-async function main() {
+export async function steamAppIDsFromGameNames() {
+	console.log("Running the script in \"gameNames\" mode.\n");
+
 	// Fetch Steam games from API
 	const steamApps = await fetchSteamApps();
 	console.log(`Found ${steamApps.length} games in Steam's database.`);
 
 	// Import the game names from the input file
-	let gameNames = await importGameNames();
+	let gameNames = await loadInputGameNames();
 	console.log(`The input file (${CONFIG.inputFile.fileName}.${CONFIG.inputFile.fileType}) contained ${Object.keys(gameNames).length} game names.\n`);
 
 	// Find Steam App ID's for full matches
@@ -47,12 +50,12 @@ async function main() {
 
 	// Save the full matches to .json files
 	if (Object.keys(steamIDsSingleFullMatch).length > 0) {
-		console.log(`Writing game names and Steam App ID's for games with one full match to \"output/steamAppIds_fullMatches.json\"...`);
-		fs.writeFileSync('./output/steamAppIds_fullMatches.json', JSON.stringify(steamIDsSingleFullMatch, null, 2));
+		console.log(`Writing game names and Steam App ID's for games with one full match to \"output/gameNames/steamAppIds_fullMatches.json\"...`);
+		fs.writeFileSync('./output/gameNames/steamAppIds_fullMatches.json', JSON.stringify(steamIDsSingleFullMatch, null, 2));
 	}
 	if (Object.keys(steamIDsMultipleFullMatches).length > 0) {
-		console.log(`Writing game names and Steam App ID's for games with multiple full matches to \"output/steamAppIds_multipleFullMatches.json\"...`);
-		fs.writeFileSync('./output/steamAppIds_multipleFullMatches.json', JSON.stringify(steamIDsMultipleFullMatches, null, 2));
+		console.log(`Writing game names and Steam App ID's for games with multiple full matches to \"output/gameNames/steamAppIds_multipleFullMatches.json\"...`);
+		fs.writeFileSync('./output/gameNames/steamAppIds_multipleFullMatches.json', JSON.stringify(steamIDsMultipleFullMatches, null, 2));
 	}
 	console.log();
 
@@ -61,21 +64,17 @@ async function main() {
 		const { steamIDsBestMatch, steamIDsNoMatch } = await findSteamAppIdsBestMatch(gameNames, steamApps);
 
 		// Save the best matches to a .json file
-		console.log(`\nWriting game names and Steam App ID's for partial matches to \"output/steamAppIds_bestMatch.json\"...`);
-		fs.writeFileSync('./output/steamAppIds_bestMatch.json', JSON.stringify(steamIDsBestMatch, null, 2));
+		console.log(`\nWriting game names and Steam App ID's for partial matches to \"output/gameNames/steamAppIds_bestMatch.json\"...`);
+		fs.writeFileSync('./output/gameNames/steamAppIds_bestMatch.json', JSON.stringify(steamIDsBestMatch, null, 2));
 
 		if (Object.keys(steamIDsNoMatch).length > 0) {
-			console.log(`Writing the names of the remaining ${Object.keys(steamIDsNoMatch).length} games for which no satisfying match was found to \"output/steamAppIds_noMatch.json\"...`);
-			fs.writeFileSync('./output/steamAppIds_noMatch.json', JSON.stringify(steamIDsNoMatch, null, 2));
+			console.log(`Writing the names of the remaining ${Object.keys(steamIDsNoMatch).length} games for which no satisfying match was found to \"output/gameNames/steamAppIds_noMatch.json\"...`);
+			fs.writeFileSync('./output/gameNames/steamAppIds_noMatch.json', JSON.stringify(steamIDsNoMatch, null, 2));
 		}
 	}
 }
 
-async function fetchSteamApps() {
-	return await fetch("https://api.steampowered.com/ISteamApps/GetAppList/v2/")
-		.then((response) => response.json())
-		.then((data) => data.applist.apps);
-}
+// ---------- ID matching ----------
 
 async function findSteamAppIdsFullMatch(gameNames, steamApps) {
 	console.log("Searching for full matches...");

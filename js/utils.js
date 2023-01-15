@@ -4,8 +4,8 @@ import fs from 'fs';
 
 // ---------- Setup ----------
 
-setupOutput();
 export const CONFIG = loadConfig();
+setupOutput(CONFIG.mode);
 
 // ----- Config -----
 
@@ -27,10 +27,20 @@ function loadConfig() {
 	}
 
 	// Validate the config file against the schema
+	let schemaFileName;
+	switch (CONFIG.mode) {
+		case 'gameNames':
+			schemaFileName = 'config.gameNames.schema.json';
+			break;
+		default:
+			console.error(`Error: No mode provided in the configuration file, or mode not supported: ${CONFIG.mode}.`);
+			process.exit(1);
+	}
+
 	console.log("Validating configuration file...\n");
 	try {
 		const validator = new jsonschema.Validator();
-		validator.validate(CONFIG, JSON.parse(fs.readFileSync('config.schema.json')), { throwError: true });
+		validator.validate(CONFIG, JSON.parse(fs.readFileSync(schemaFileName)), { throwError: true });
 	} catch (error) {
 		console.error("Error validating configuration file: " + error);
 		process.exit(1);
@@ -41,9 +51,9 @@ function loadConfig() {
 
 // ----- Output -----
 
-function setupOutput() {
+function setupOutput(mode) {
 	// Create the output directory if it doesn't exist
-	if (!fs.existsSync('output')) {
-		fs.mkdirSync('output');
+	if (!fs.existsSync('output/' + mode)) {
+		fs.mkdirSync('output/' + mode, { recursive: true });
 	}
 }

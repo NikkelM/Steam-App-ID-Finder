@@ -4,6 +4,7 @@
 process.removeAllListeners('warning');
 
 import { CONFIG } from './js/utils.js';
+import { steamAppIDsFromGameNames } from './js/gameNames.js';
 
 // ---------- Main ----------
 
