@@ -1,5 +1,5 @@
 {
-	"$schema": "config.schema.json",
+	"$schema": "config.gameNames.schema.json",
 	"inputFile": {
 		"fileName": "gameNames",
 		"fileType": "txt",
