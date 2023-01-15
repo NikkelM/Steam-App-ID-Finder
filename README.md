@@ -120,6 +120,8 @@ In this case, the matched game was correct, but this is not always the case:
 
 Such a mismatch can have a number of reasons, in the case of `DEATH STRANDING` it is that Steam only has the `DEATH STRANDING DIRECTOR'S CUT` in its database, but not the original game, which leads to `Witch Strandings` being the closest match.
 
+These examples also show well how s higher similarity score does not necessarily mean a better match.
+
 #### Matches with a similarity score of 1
 
 It is possible for a game to have a partial match with a similarity score of 1.
