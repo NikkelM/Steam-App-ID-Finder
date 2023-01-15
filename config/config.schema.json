@@ -24,7 +24,11 @@
 				},
 				{
 					"const": "gogAccount",
-					"title": "In this mode, the script gets game names, and optionally Steam App IDs, for all games owned on a GOG account. Due to GOG account privacy settings, you will need to log in into your account your browser and provide the script with an access token."
+					"title": "In this mode, the script gets game names, and optionally Steam App IDs, for all games owned on a GOG account. Due to GOG account privacy settings, you will need to log in into your account your browser and provide the script with an access token. See the README.md for more information."
+				},
+				{
+					"const": "epicGamesAccount",
+					"title": "In this mode, the script gets the game names for all games owned (in this case, purchased, including weekly free games) by your Epic Games account. Due to Epic Games not providing a public API, some workarounds need to be taken. See the README.md for more information."
 				}
 			]
 		}
@@ -79,6 +83,24 @@
 				"dependentSchemas": {
 					"mode": {
 						"$ref": "schema.gogAccount.json"
+					}
+				}
+			},
+			"else": {
+				"if": {
+					"properties": {
+						"mode": {
+							"enum": [
+								"epicGamesAccount"
+							]
+						}
+					}
+				},
+				"then": {
+					"dependentSchemas": {
+						"mode": {
+							"$ref": "schema.epicGamesAccount.json"
+						}
 					}
 				}
 			}

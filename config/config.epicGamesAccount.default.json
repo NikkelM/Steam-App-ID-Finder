@@ -1,0 +1,5 @@
+{
+	"$schema": "config.schema.json",
+	"mode": "epicGamesAccount",
+	"epicGamesCookie": "EPIC_CLIENT_SESSION=..."
+}

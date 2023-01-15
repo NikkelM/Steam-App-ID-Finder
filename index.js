@@ -7,6 +7,7 @@ import { CONFIG } from './js/utils.js';
 import { steamAppIDsFromGameNames } from './js/gameNames.js';
 import { steamAppIDsFromSteamAccount } from './js/steamGames.js';
 import { steamAppIDsFromGOGAccount } from './js/gogGames.js';
+import { getEpicGamesGames } from './js/epicGames.js';
 
 // ---------- Main ----------
 
@@ -23,6 +24,9 @@ async function main() {
 			break;
 		case 'gogAccount':
 			await steamAppIDsFromGOGAccount();
+			break;
+		case 'epicGamesAccount':
+			await getEpicGamesGames();
 			break;
 		default:
 			console.error(`Error: No mode provided in the configuration file, or mode not supported: ${CONFIG.mode}.`);

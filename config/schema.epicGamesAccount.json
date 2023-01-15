@@ -1,0 +1,13 @@
+{
+	"properties": {
+		"epicGamesCookie": {
+			"description": "The cookie you extracted from the initial request required to get this mode to work. You can find more information in the README.md.",
+			"type": "string",
+			"default": "EPIC_CLIENT_SESSION=...",
+			"minLength": 1
+		}
+	},
+	"required": [
+		"epicGamesCookie"
+	]
+}
