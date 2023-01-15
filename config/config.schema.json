@@ -1,0 +1,66 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Configuration schema for the \"Steam App ID Finder\" utility collection.",
+	"description": "Validates configuration input for the \"Steam App ID Finder\" script.",
+	"type": "object",
+	"properties": {
+		"$schema": {
+			"description": "The JSON schema to use for the configuration file.",
+			"type": "string",
+			"default": "config.schema.json"
+		},
+		"mode": {
+			"description": "The mode in which the script should run. Choose from any of the supported modes listed.",
+			"type": "string",
+			"default": "gameNames",
+			"oneOf": [
+				{
+					"const": "gameNames",
+					"title": "In this mode, the script takes a list of game names as input and tries to match them to the correct Steam App IDs. This is done by first searching for complete matches, and then using string similarity for the remaining games."
+				},
+				{
+					"const": "steamAccount",
+					"title": "In this mode, the script gets the Steam App IDs for all apps owned on a Steam account with a publicly accessible app library."
+				}
+			]
+		}
+	},
+	"required": [
+		"mode"
+	],
+	"if": {
+		"properties": {
+			"mode": {
+				"enum": [
+					"gameNames"
+				]
+			}
+		}
+	},
+	"then": {
+		"dependentSchemas": {
+			"mode": {
+				"$ref": "schema.gameNames.json"
+			}
+		}
+	},
+	"else": {
+		"if": {
+			"properties": {
+				"mode": {
+					"enum": [
+						"steamAccount"
+					]
+				}
+			}
+		},
+		"then": {
+			"dependentSchemas": {
+				"mode": {
+					"$ref": "schema.steamAccount.json"
+				}
+			}
+		}
+	}
+	
+}

@@ -1,0 +1,13 @@
+{
+	"$schema": "config.schema.json",
+	"mode": "steamAccount",
+	"steamAccountName": "accountName",
+	"outputProperties": {
+		"appID": true,
+		"name": true,
+		"logo": false,
+		"storeLink": false,
+		"statsLink": false,
+		"globalStatsLink": false
+	}
+}
