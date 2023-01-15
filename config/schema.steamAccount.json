@@ -1,0 +1,58 @@
+{
+	"properties": {
+		"steamAccountName": {
+			"description": "The name of the Steam account for which the App IDs should be fetched. Note: This is not the username you log in with, but the one that can be seen e.g. on your profile page. Your profile's game details must be set to public for the script to work. Check via this link: https://steamcommunity.com/id/accountName/games while not logged in.",
+			"type": "string",
+			"default": "accountName"
+		},
+		"outputProperties": {
+			"description": "Which of the properties provided by the Steam API should be included in the resulting JSON object. Properties that are not available for an app will be omitted in the output.",
+			"type": "object",
+			"default": {
+				"appId": true,
+				"name": true,
+				"logo": false,
+				"storeLink": false,
+				"statsLink": false,
+				"globalStatsLink": false
+			},
+			"properties": {
+				"appID": {
+					"description": "The App ID of the game.",
+					"type": "boolean",
+					"default": true
+				},
+				"name": {
+					"description": "The name of the game.",
+					"type": "boolean",
+					"default": true
+				},
+				"logo": {
+					"description": "The URL to the game's logo.",
+					"type": "boolean",
+					"default": false
+				},
+				"storeLink": {
+					"description": "The URL to the game's store page.",
+					"type": "boolean",
+					"default": false
+				},
+				"statsLink": {
+					"description": "The URL to this users stats page for this game.",
+					"type": "boolean",
+					"default": false
+				},
+				"globalStatsLink": {
+					"description": "The URL to the game's global stats page.",
+					"type": "boolean",
+					"default": false
+				}
+			},
+			"additionalProperties": false
+		}
+	},
+	"required": [
+		"steamAccountName",
+		"outputProperties"
+	]
+}

@@ -43,5 +43,24 @@
 				"$ref": "schema.gameNames.json"
 			}
 		}
+	},
+	"else": {
+		"if": {
+			"properties": {
+				"mode": {
+					"enum": [
+						"steamAccount"
+					]
+				}
+			}
+		},
+		"then": {
+			"dependentSchemas": {
+				"mode": {
+					"$ref": "schema.steamAccount.json"
+				}
+			}
+		}
 	}
+	
 }
