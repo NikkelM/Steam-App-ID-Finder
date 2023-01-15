@@ -6,9 +6,6 @@ import cliProgress from 'cli-progress';
 import { CONFIG } from './utils.js';
 
 export async function steamAppIDsFromGOGAccount() {
-	// Log in to GOG, visit:
-	// auth.gog.com/auth?client_id=46899977096215655&redirect_uri=https%3A%2F%2Fembed.gog.com%2Fon_login_success%3Forigin%3Dclient&response_type=code&layout=client2
-	// take the "code" from the response url and set it as CONFIG.gogLoginCode
 	if (CONFIG.refreshToken) {
 		var { accessToken, refreshToken } = await getGogAccessToken(null, CONFIG.refreshToken);
 	} else if (CONFIG.gogLoginCode) {

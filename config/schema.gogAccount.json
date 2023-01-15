@@ -7,7 +7,7 @@
 			"minLength": 1
 		},
 		"refreshToken": {
-			"description": "If you have used the script before and have a refresh token, enter it here to avoid having to log in again. After running the script, the refresh token will be saved to \"output/gogAccount/gogRefreshToken.txt\". You can then use it here to avoid having to log in again.",
+			"description": "If you have used the script before and have a refresh token, enter it here to avoid having to log in again to generate a login code. After running the script, the refresh token will be saved to \"output/gogAccount/gogRefreshToken.txt\". You can then use it here to avoid having to log in again.",
 			"type": "string",
 			"default": "refreshTokenHereIfAvailable",
 			"minLength": 1

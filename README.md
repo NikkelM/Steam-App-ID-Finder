@@ -68,6 +68,7 @@ You can choose from any of the following modes when running the script:
 This mode is able to find the Steam App IDs for any number of provided game names, even if the provided name is not an exact match to the game in the Steam database.
 - [`steamAccount`](#mode-steamaccount): This mode will fetch all apps (this includes games, but also e.g. soundtracks or movies) from a given Steam account and save them to a file.
 Make sure that the account's game library is public, otherwise the script will not be able to access it.
+- [`gogAccount`](#mode-gogaccount): With this mode, you can get the names for all games in your GOG account. You can then use this output as input for the [`gameNames`](#mode-gamenames) mode to find the Steam App IDs for the games.
 
 ## Mode: `gameNames`
 
@@ -325,6 +326,83 @@ The URL to the global stats page for this game.
 | Type | Default value | Possible values | Required |
 | --- | --- | --- | --- |
 | `boolean` | `false` | `true`, `false` | No |
+</details>
+
+## Mode: `gogAccount`
+
+With this mode, you can get the names for all games in your GOG account. You can then use this output as input for the [`gameNames`](#mode-gamenames) mode to find the Steam App IDs for the games.
+
+Unfortunately, due to limitations of the GOG API, setup for this mode is a bit more complicated than for the other modes:
+
+### Setup
+
+Start setting up as usual by creating a `config.json` file in the `config` folder with the `mode` set to `gogAccount`.
+
+If you are using this mode for the first time, you will need to log in to your GOG account using the following link: [https://auth.gog.com/auth?client_id=46899977096215655&redirect_uri=https%3A%2F%2Fembed.gog.com%2Fon_login_success%3Forigin%3Dclient&response_type=code&layout=client2](https://auth.gog.com/auth?client_id=46899977096215655&redirect_uri=https%3A%2F%2Fembed.gog.com%2Fon_login_success%3Forigin%3Dclient&response_type=code&layout=client2).
+This is the official login page for GOG, so you do not need to set your credentials in the `config.json` file.
+
+After logging in, you will be redirected to a blank page with a URL that looks something like this: 
+
+```text
+https://embed.gog.com/on_login_success?origin=client&code=1234567890abcdef
+```
+
+Copy the value of the `code` parameter from this URL and set it as the value of the `gogLoginCode` property in the `config.json` file.
+This allows the script to generate an access token for your GOG account, which authenticates you for the GOG API.
+
+After setting the `gogLoginCode` property, run the script immediately - the login code is only valid for 60 seconds, after which it will expire and you would need to log in again.
+
+After running the script once, you will find a file named `gogRefreshToken.json` in the `output/gogAccount` folder.
+This file contains the refresh token for your GOG account, which allows the script to generate a new access token when the current one expires.
+To run the script with this refresh token in use, set it as the value of the `gogRefreshToken` property in the `config.json` file.
+You can then remove the `gogLoginCode` property from the `config.json` file.
+
+### Output
+
+You will find the list of games in your GOG account in the `output/gogAccount` folder as a `.txt` file named `gogGameNames.txt`.
+You can use this file as input for the [`gameNames`](#mode-gamenames) mode to find the Steam App IDs for the games.
+To do this, simply set the following as the value of the `inputFile` property in the `config.json` file, along with the other configuration options:
+
+```json
+"inputFile": {
+	"fileName": "output/gogAccount/gogGameNames.txt",
+	"fileType": "txt",
+	"delimiter": "\n"
+}
+```
+
+The script will also save the current refresh token to the `gogRefreshToken.json` file in the `output/gogAccount` folder.
+You can use this token to avoid needing to log in again when using the script in the (near) future.
+
+### Configuration: `gogAccount`
+
+#### Properties
+
+The following is a list of all configuration items, their defaults and the values they can take.
+
+<details>
+<summary><code>gogLoginCode</code></summary>
+
+The code you received after logging in (consult the README.md for more information).
+Be fast, this code is only valid for one minute.
+If you don't start the script within that time, it will not be able to generate an access token from it.
+If a refresh token is also provided, this option is ignored.
+
+| Type | Default value | Possible values | Required |
+| --- | --- | --- | --- |
+| `string` | `"gogLoginCodeHereIfAvailable"` | A valid login code for your account | Yes, if no `gogRefreshToken` is provided |
+</details>
+
+<details>
+<summary><code>gogRefreshToken</code></summary>
+
+If you have used the script before and have a refresh token, enter it here to avoid having to log in again to generate a login code.
+After running the script, the refresh token will be saved to "output/gogAccount/gogRefreshToken.txt".
+You can then use it here to avoid having to log in again.
+
+| Type | Default value | Possible values | Required |
+| --- | --- | --- | --- |
+| `string` | `"gogRefreshTokenHereIfAvailable"` | A valid refresh token for your account | Yes, if no `gogLoginCode` is provided |
 </details>
 
 ## Related projects
