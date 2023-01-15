@@ -4,7 +4,20 @@
 
 This project is a collection of utilities that can be used to find Steam App IDs from a variety of sources.
 
-Choose from one of the `modes` described in the [section below](#modes) to find the Steam App IDs from the source you are interested in.
+Choose from one of the `modes` described in [this section](#modes) to find the Steam App IDs from the source you are interested in.
+
+## Table of contents
+
+- [Setup](#setup)
+- [Usage](#usage)
+- [Output](#output)
+- [Configuration](#configuration)
+- [Modes](#modes)
+	- [Mode: `gameNames`](#mode-gamenames)
+	- [Mode: `steamAccount`](#mode-steamaccount)
+	- [Mode: `gogAccount`](#mode-gogaccount)
+- [Related projects](#related-projects)
+- [Feedback](#feedback)
 
 ## Setup
 
