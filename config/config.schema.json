@@ -1,7 +1,7 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": "Configuration schema for the utility finding Steam App IDs from game names of the \"Steam App ID Finder\".",
-	"description": "Validates configuration input for \"gameNames\" mode of the \"Steam App ID Finder\" script.",
+	"title": "Configuration schema for the \"Steam App ID Finder\" utility collection.",
+	"description": "Validates configuration input for the \"Steam App ID Finder\" script.",
 	"type": "object",
 	"properties": {
 		"$schema": {
@@ -20,7 +20,7 @@
 				},
 				{
 					"const": "steamAccount",
-					"title": "In this mode, the script gets the Steam App IDs for all games owned on a Steam account with a publicly accessible game library."
+					"title": "In this mode, the script gets the Steam App IDs for all apps owned on a Steam account with a publicly accessible app library."
 				}
 			]
 		}

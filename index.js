@@ -1,4 +1,4 @@
-// Description: Matches game names to their Steam App ID's. Games whose names do not have an exact match in Steam's database are matched using string similarity.
+// Description: This project is a collection of utilities that can be used to find Steam App IDs from a variety of sources.
 
 // Suppresses the warning about the fetch API being unstable
 process.removeAllListeners('warning');

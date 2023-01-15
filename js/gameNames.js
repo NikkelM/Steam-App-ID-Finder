@@ -1,4 +1,4 @@
-// Description: Utility to find Steam App IDs for game names.
+// Description: Utility to find Steam App IDs from a list of game names.
 
 import fs from 'fs';
 import stringSimilarity from 'string-similarity';
