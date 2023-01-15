@@ -71,7 +71,7 @@
 			"additionalProperties": false
 		},
 		"onlyFullMatches": {
-			"description": "Whether to only get Steam App ID's for full matches or also for partial matches. If set to false, partial matches will be saved to a different output file.",
+			"description": "Whether to only get Steam App IDs for full matches or also for partial matches. If set to false, partial matches will be saved to a different output file.",
 			"type": "boolean",
 			"default": false
 		},
