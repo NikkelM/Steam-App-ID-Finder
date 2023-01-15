@@ -33,16 +33,15 @@ For each `mode`, a default configuration file is provided in the `config.<mode>.
 
 ### Schema validation
 
-The project provides a JSON validation schema for each mode.
-These schemata can help you with formatting your input and give you an idea of the options you have.
+The project provides an extensive JSON validation schema, which can help you with formatting your input and give you an idea of the options you have.
 
-The schemata can be found in the `config.<mode>.schema.json` files and used within your `config.json` by adding the following property:
+The schema can be found in the `config.schema.json` file and used within your `config.json` by adding the following property:
 
 ```json
-"$schema": "config.<mode>.schema.json"
+"$schema": "config.schema.json"
 ```
 
-*NOTE: The script will always test your provided `config.json` against the respective schema, so make sure your configuration is valid.*
+*NOTE: The script will always test your provided `config.json` against this schema, so make sure your configuration is valid.*
 
 ### Properties
 
@@ -131,16 +130,6 @@ This can happen as the search for full matches is case sensitive, but the search
 - `My Time At Portia`
 
 ### Configuration: `gameNames`
-
-#### Schema validation
-
-The configuration schema for this mode can be found in the `config.gameNames.schema.json` file and should be included in your `config.json` file as follows:
-
-```json
-"$schema": "config.gameNames.schema.json"
-```
-
-*NOTE: The script will always test your provided `config.json` against this schema, so make sure your configuration is valid.*
 
 #### Properties
 

@@ -20,13 +20,28 @@
 				},
 				{
 					"const": "steamAccount",
-					"title": "In this mode, the script will get the Steam App IDs for games owned on a publicly accessible Steam account."
+					"title": "In this mode, the script gets the Steam App IDs for all games owned on a Steam account with a publicly accessible game library."
 				}
 			]
 		}
 	},
-	"additionalProperties": false,
 	"required": [
 		"mode"
-	]
+	],
+	"if": {
+		"properties": {
+			"mode": {
+				"enum": [
+					"gameNames"
+				]
+			}
+		}
+	},
+	"then": {
+		"dependentSchemas": {
+			"mode": {
+				"$ref": "schema.gameNames.json"
+			}
+		}
+	}
 }
