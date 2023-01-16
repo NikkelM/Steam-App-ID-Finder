@@ -16,6 +16,7 @@ Choose from one of the `modes` described in [this section](#modes) to find the S
 	- [Mode: `gameNames`](#mode-gamenames)
 	- [Mode: `steamAccount`](#mode-steamaccount)
 	- [Mode: `gogAccount`](#mode-gogaccount)
+	- [Mode: `epicGamesAccount`](#mode-epicgamesaccount)
 - [Related projects](#related-projects)
 - [Feedback](#feedback)
 
