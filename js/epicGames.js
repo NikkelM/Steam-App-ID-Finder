@@ -44,6 +44,7 @@ export async function getEpicGamesGames() {
 		}
 
 		for (const game of page.orders) {
+			if(game.items[0].status !== "REFUNDED")
 			games.push(game.items[0].description);
 		}
 
@@ -55,8 +56,8 @@ export async function getEpicGamesGames() {
 	progressBar.stop();
 
 	// Write the game names to a file
-	console.log(`\nWriting game names to "output/${CONFIG.mode}/epicGamesGames.txt"`)
-	fs.writeFileSync(`output/${CONFIG.mode}/epicGamesGames.txt`, games.join('\n'));
+	console.log(`\nWriting game names to "output/${CONFIG.mode}/epicGamesGameNames.txt"`)
+	fs.writeFileSync(`output/${CONFIG.mode}/epicGamesGameNames.txt`, games.join('\n'));
 }
 
 async function getPage(pageNumber, lastCreatedAt) {
