@@ -16,7 +16,7 @@ export async function getEpicGamesGames() {
 	try {
 		var firstPage = await getFirstPage();
 	} catch (error) {
-		console.error("\nError fetching games from Epic Games account. Please check the \"epicGamesCookie\" in the configuration file and try again.");
+		console.error("\nError fetching games from Epic Games account. Please check/refresh the \"epicGamesCookie\" in the configuration file and try again.");
 		console.log(error);
 		process.exit(1);
 	}
