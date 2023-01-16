@@ -13,7 +13,7 @@
 			"minLength": 1
 		}
 	},
-	"oneOf": [
+	"anyOf": [
 		{
 			"required": [
 				"gogLoginCode"
@@ -24,8 +24,5 @@
 				"refreshToken"
 			]
 		}
-	],
-	"required": [
-		
 	]
 }

@@ -81,7 +81,10 @@ You can choose from any of the following modes when running the script:
 This mode is able to find the Steam App IDs for any number of provided game names, even if the provided name is not an exact match to the game in the Steam database.
 - [`steamAccount`](#mode-steamaccount): This mode will fetch all apps (this includes games, but also e.g. soundtracks or movies) from a given Steam account and save them to a file.
 Make sure that the account's game library is public, otherwise the script will not be able to access it.
-- [`gogAccount`](#mode-gogaccount): With this mode, you can get the names for all games in your GOG account. You can then use this output as input for the [`gameNames`](#mode-gamenames) mode to find the Steam App IDs for the games.
+- [`gogAccount`](#mode-gogaccount): With this mode, you can get the names for all games in your GOG account.
+You can then use this output as input for the [`gameNames`](#mode-gamenames) mode to find the Steam App IDs for the games.
+- [`epicGamesAccount`](#mode-epicgamesaccount): This mode enables you to get a list of all games you have ever purchased (excluding those that are refunded) on the Epic Games Store - including the weekly free game giveaways.
+You can then use this output as input for the [`gameNames`](#mode-gamenames) mode to find the Steam App IDs for the games.
 
 ## Mode: `gameNames`
 
@@ -416,6 +419,65 @@ You can then use it here to avoid having to log in again.
 | Type | Default value | Possible values | Required |
 | --- | --- | --- | --- |
 | `string` | `"gogRefreshTokenHereIfAvailable"` | A valid refresh token for your account | Yes, if no `gogLoginCode` is provided |
+</details>
+
+## Mode: `epicGamesAccount`
+
+This mode enables you to get a list of all games you have ever purchased (excluding those that are refunded) on the Epic Games Store - including the weekly free game giveaways.
+You can then use this output as input for the [`gameNames`](#mode-gamenames) mode to find the Steam App IDs for the games.
+
+Unfortunately, due to Epic Games not providing a dedicated public API for this, the setup for this mode is a bit more complicated than for the other modes:
+
+### Setup
+
+Start setting up as usual by creating a `config.json` file in the `config` folder with the `mode` set to `epicGamesAccount`.
+
+You will see that you only need to provide one additional configuration item: `epicGamesCookie`.
+As mentioned before, Epic Games does not provide a public API for getting a list of games owned by a user (as e.g. Steam does), so we need to use a workaround to get this information.
+
+To allow the script to access your account's purchase history, you need to provide it with a cookie (`EPIC_BEARER_TOKEN`) that allows temporary access to your account purchase history.
+You can get this cookie by following the steps below:
+
+1. Open the following page in your browser: [https://www.epicgames.com/account/transactions](https://www.epicgames.com/account/transactions), logging in if necessary.
+2. Open the cookie-popup of the page, in browsers such as Google Chrome or Microsoft Edge this can be done by clicking the lock icon in the address bar.
+3. Find the following cookie (under `epicgames.com`->`Cookies`): `EPIC_BEARER_TOKEN`. This token will be valid for 8 hours, after which you will need to repeat the steps above to get a new cookie.
+4. Copy the value (`Content`) of this cookie and set the following as the value of the `epicGamesCookie` property in the `config.json` file:
+
+```json
+"epicGamesCookie": "EPIC_BEARER_TOKEN=<yourCookieContent>"
+```
+
+You can now run the script as usual to get a list of all games that are present in the Epic Games pruchase history of your account.
+It is possible that the number of game names you get from this utility is shorter than the amount of games you see in your library, as items such as beta branches and DLCs are sometimes not included in the purchase history.
+
+### Output
+
+You will find the list of games in your Epic Games purchase history in the `output/epicGamesAccount` folder as a `.txt` file named `epicGamesGameNames.txt`.
+You can use this file as input for the [`gameNames`](#mode-gamenames) mode to find the Steam App IDs for the games.
+To do this, simply set the following as the value of the `inputFile` property in the `config.json` file, along with the other configuration options:
+
+```json
+"inputFile": {
+	"fileName": "output/epicGamesAccount/epicGamesGameNames.txt",
+	"fileType": "txt",
+	"delimiter": "\n"
+}
+```
+
+### Configuration: `epicGamesAccount`
+
+#### Properties
+
+The following is a list of all configuration items, their defaults and the values they can take.
+
+<details>
+<summary><code>epicGamesCookie</code></summary>
+
+The cookie you extracted from the initial request required to get this mode to work. You can find more information in the setup section above.
+
+| Type | Default value | Possible values | Required |
+| --- | --- | --- | --- |
+| `string` | `"EPIC_BEARER_TOKEN=1234567890abcdef"` | A valid `EPIC_BEARER_TOKEN` cookie | Yes |
 </details>
 
 ## Related projects

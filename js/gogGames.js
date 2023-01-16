@@ -1,4 +1,4 @@
-// Description: Utility to find game names, and by extension Steam App IDs, for games owned on GOG.
+// Description: Utility to find the names of games owned on GOG.
 
 import fs from 'fs';
 import cliProgress from 'cli-progress';
@@ -21,7 +21,7 @@ export async function steamAppIDsFromGOGAccount() {
 	// Get the game names for the corresponding game IDs
 	const gogGameNames = await getGogGameNames(gogAppIds, accessToken);
 
-	console.log(`Writing game names to "output/${CONFIG.mode}/gogGameNames.csv"`);
+	console.log(`Writing game names to "output/${CONFIG.mode}/gogGameNames.txt"`);
 	fs.writeFileSync(`output/${CONFIG.mode}/gogGameNames.txt`, gogGameNames.join('\n'), 'utf8');
 }
 
