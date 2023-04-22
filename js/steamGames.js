@@ -31,7 +31,7 @@ export async function steamAppIDsFromSteamAccount() {
 }
 
 async function getGameList() {
-	return await fetch(`https://steamcommunity.com/id/${CONFIG.steamAccountName}/games?xml=1`)
+	return await fetch(`https://steamcommunity.com/profiles/${CONFIG.steamAccountName}/games?xml=1`)
 		.then(response => response.text());
 }
 
@@ -43,7 +43,7 @@ async function parseAppList(gameList) {
 		console.error("Error: XML document does not contain an app list. Most likely, the account is private. Make sure the game library for this account is publicly accessible and try again.");
 		console.log("The XML document returned by Steam was:");
 		console.log(xmlDoc);
-		console.log(`Game information must be accessible via this link: https://steamcommunity.com/id/${CONFIG.steamAccountName}/games`);
+		console.log(`Game information must be accessible via this link: https://steamcommunity.com/profiles/${CONFIG.steamAccountName}/games`);
 		process.exit(1);
 	}
 
