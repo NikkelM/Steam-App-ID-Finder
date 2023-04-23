@@ -249,7 +249,7 @@ You will find the resulting data in the created `output/gameNames` folder in a f
 The following is a list of all configuration items, their defaults and the values they can take.
 
 <details>
-<summary><code>steamAccountName</code></summary>
+<summary><code>steamAccount</code></summary>
 
 The name or ID of the Steam account for which the App IDs should be fetched.
 Your account's game library must be set to public for the script to work.

@@ -1,7 +1,7 @@
 {
 	"$schema": "config.schema.json",
 	"mode": "steamAccount",
-	"steamAccountName": "accountName",
+	"steamAccount": "accountNameOrID",
 	"outputProperties": {
 		"appID": true,
 		"name": true,

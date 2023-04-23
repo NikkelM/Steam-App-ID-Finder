@@ -1,6 +1,6 @@
 {
 	"properties": {
-		"steamAccountName": {
+		"steamAccount": {
 			"description": "The name or ID of the Steam account for which the App IDs should be fetched. Your account's game library must be set to public for the script to work. Check via this link: https://steamcommunity.com/id/accountName/games or this link: https://steamcommunity.com/profiles/accountName/games while not logged in.",
 			"type": "string",
 			"default": "accountName"
@@ -53,7 +53,7 @@
 		}
 	},
 	"required": [
-		"steamAccountName",
+		"steamAccount",
 		"outputProperties"
 	]
 }

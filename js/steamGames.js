@@ -7,7 +7,7 @@ import { CONFIG } from './utils.js';
 
 export async function steamAppIDsFromSteamAccount() {
 	console.log("Running in \"steamAccount\" mode.\n");
-	console.log(`Getting information for apps owned by Steam account "${CONFIG.steamAccountName}"...`);
+	console.log(`Getting information for apps owned by Steam account "${CONFIG.steamAccount}"...`);
 
 	const parsedGameList = await getGameList();
 
@@ -25,8 +25,8 @@ export async function steamAppIDsFromSteamAccount() {
 		output.push(formatPropertiesForApp(game, requestedProperties));
 	}
 
-	console.log(`\nWriting app information to "output/${CONFIG.mode}/${CONFIG.steamAccountName}.json"...`);
-	fs.writeFileSync(`./output/${CONFIG.mode}/${CONFIG.steamAccountName}.json`, JSON.stringify(output, null, 2));
+	console.log(`\nWriting app information to "output/${CONFIG.mode}/${CONFIG.steamAccount}.json"...`);
+	fs.writeFileSync(`./output/${CONFIG.mode}/${CONFIG.steamAccount}.json`, JSON.stringify(output, null, 2));
 }
 
 async function getGameList() {
@@ -36,20 +36,20 @@ async function getGameList() {
 
 	// Depending on whether or not a Steam account name or ID is used, the URL format is different.
 	// We first try the URL format that expects a Steam account name.
-	gameList = await fetch(`https://steamcommunity.com/id/${CONFIG.steamAccountName}/games?xml=1`)
+	gameList = await fetch(`https://steamcommunity.com/id/${CONFIG.steamAccount}/games?xml=1`)
 		.then(response => response.text());
 	parsedXmlDoc = parser.parse(gameList);
 
 	// If the previous request failed to return a valid response, we try the URL format that expects a Steam account ID.
 	if (!parsedXmlDoc.gamesList?.games?.game) {
-		gameList = await fetch(`https://steamcommunity.com/profiles/${CONFIG.steamAccountName}/games?xml=1`)
+		gameList = await fetch(`https://steamcommunity.com/profiles/${CONFIG.steamAccount}/games?xml=1`)
 			.then(response => response.text());
 			parsedXmlDoc = parser.parse(gameList);
 	}
 
 	if (!parsedXmlDoc.gamesList?.games?.game) {
 		console.error("\nERROR: XML document does not contain an app list. Most likely, the account's app library is private. Make sure the game library for this account is publicly accessible and try again.");
-		console.error(`App information must be accessible via this link: https://steamcommunity.com/id/${CONFIG.steamAccountName}/games or this link: https://steamcommunity.com/profiles/${CONFIG.steamAccountName}/games\n`);
+		console.error(`App information must be accessible via this link: https://steamcommunity.com/id/${CONFIG.steamAccount}/games or this link: https://steamcommunity.com/profiles/${CONFIG.steamAccount}/games\n`);
 		console.error("The XML document returned by Steam was:");
 		console.error(parsedXmlDoc);
 		process.exit(1);
