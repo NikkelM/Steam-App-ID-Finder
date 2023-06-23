@@ -92,7 +92,7 @@ You can then use this output as input for the [`gameNames`](#mode-gamenames) mod
 Do you have a list of game names and want to know which Steam App IDs they correspond to?
 This mode is able to find the Steam App IDs for any number of provided game names, even if the provided name is not an exact match to the game in the Steam database.
 
-When running the scipt in the `gameNames` mode, it will find the Steam App IDs for all game names provided in the specified input file, starting with those that have an exact match in the Steam database.
+When running the script in the `gameNames` mode, it will find the Steam App IDs for all game names provided in the specified input file, starting with those that have an exact match in the Steam database.
 If no exact match is found, the script will match the resulting game names to the Steam App ID of the game with the highest similarity score.
 
 Note that the script will *always* find a match, even if the provided game name is not on Steam.
@@ -140,12 +140,12 @@ In this case, the matched game was correct, but this is not always the case:
 
 Such a mismatch can have a number of reasons, in the case of `DEATH STRANDING` it is that Steam only has the `DEATH STRANDING DIRECTOR'S CUT` in its database, but not the original game, which leads to `Witch Strandings` being the closest match.
 
-These examples also show well how s higher similarity score does not necessarily mean a better match.
+These examples also show well how a higher similarity score does not necessarily mean a better match.
 
 #### Matches with a similarity score of 1
 
 It is possible for a game to have a partial match with a similarity score of 1.
-This can happen as the search for full matches is case sensitive, but the search for partial matches is not, meaning that the following two game names would not be considered a full match, but their similarity score would be 1:
+This can happen as the search for full matches is case-sensitive, but the search for partial matches is not, meaning that the following two game names would not be considered a full match, but their similarity score would be 1:
 
 - `My Time at Portia`
 - `My Time At Portia`
