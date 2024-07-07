@@ -1,4 +1,3 @@
-
 import jsonschema from 'jsonschema';
 import fs from 'fs';
 

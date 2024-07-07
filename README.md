@@ -47,7 +47,7 @@ For each `mode`, a default configuration is provided in the `config.<mode>.defau
 
 ### Schema validation
 
-The project provides an extensive JSON validation schema, which can help you with formatting your input and give you an idea of the options you have.
+The project provides an extensive `JSON` validation schema, which can help you with formatting your input and give you an idea of the options you have.
 
 The schema can be found in the `config.schema.json` file and used within your `config.json` by adding the following property:
 
@@ -138,14 +138,14 @@ In this case, the matched game was correct, but this is not always the case:
 }
 ```
 
-Such a mismatch can have a number of reasons, in the case of `DEATH STRANDING` it is that Steam only has the `DEATH STRANDING DIRECTOR'S CUT` in its database, but not the original game, which leads to `Witch Strandings` being the closest match.
+Such a mismatch can have a number of reasons, in the case of `DEATH STRANDING` it is that Steam only has `DEATH STRANDING DIRECTOR'S CUT` in its database, but not the original game, which leads to `Witch Strandings` being the closest match.
 
 These examples also show well how a higher similarity score does not necessarily mean a better match.
 
 #### Matches with a similarity score of 1
 
 It is possible for a game to have a partial match with a similarity score of 1.
-This can happen as the search for full matches is case-sensitive, but the search for partial matches is not, meaning that the following two game names would not be considered a full match, but their similarity score would be 1:
+This can happen as the search for full matches is case-sensitive, but the search for partial matches is not, meaning that the following two game names would *not* be considered a full match, but their similarity score would be 1:
 
 - `My Time at Portia`
 - `My Time At Portia`
@@ -200,7 +200,7 @@ The delimiter to use when parsing the input file.
 
 | Type | Default value | Possible values | Required |
 | --- | --- | --- | --- |
-| `string` | `,` | Any valid delimiter | Yes, if the file type requires it. (true for all currently supported file types) |
+| `string` | `,` | Any valid delimiter | Yes, if the file type requires it (`txt`, `csv`) |
 </details>
 
 
@@ -220,8 +220,8 @@ If set to `false`, partial matches will be saved to a different output file.
 
 The threshold for partial matches.
 This means that the most similar game name must have a similarity score of at least this threshold to be added to the output.
-The threshold must be between 0 and 1.
-Use 0 to get a match for every game and 1 to only get full matches.
+The threshold must be between `0` and `1`.
+Use `0` to get a match for every game and `1` to only get full matches.
 If the value is omitted, a match will be found for every game.
 
 | Type | Default value | Possible values | Required |
@@ -253,7 +253,7 @@ The following is a list of all configuration items, their defaults and the value
 
 The name or ID of the Steam account for which the App IDs should be fetched.
 Your account's game library must be set to public for the script to work.
-Check via this link: https://steamcommunity.com/id/accountName/games or this link: https://steamcommunity.com/profiles/accountName/games while not logged in.
+Check via this link: [https://steamcommunity.com/id/accountName/games](https://steamcommunity.com/id/accountName/games) or this link: [https://steamcommunity.com/profiles/accountName/games](https://steamcommunity.com/profiles/accountName/games) while *not* logged in.
 
 | Type | Default value | Possible values | Required |
 | --- | --- | --- | --- |
@@ -263,7 +263,7 @@ Check via this link: https://steamcommunity.com/id/accountName/games or this lin
 <details>
 <summary><code>outputProperties</code></summary>
 
-Which of the properties provided by the Steam API should be included in the resulting JSON object. Properties that are not available for an app will be omitted in the output.
+Which of the properties provided by the Steam API should be included in the resulting `JSON` object. Properties that are not available for an app will be omitted in the output.
 
 | Type | Default value | Possible values | Required |
 | --- | --- | --- | --- |
@@ -355,8 +355,7 @@ Unfortunately, due to limitations of the GOG API, setup for this mode is a bit m
 
 Start setting up as usual by creating a `config.json` file in the `config` folder with the `mode` set to `gogAccount`.
 
-If you are using this mode for the first time, you will need to log in to your GOG account using the following link: [https://auth.gog.com/auth?client_id=46899977096215655&redirect_uri=https%3A%2F%2Fembed.gog.com%2Fon_login_success%3Forigin%3Dclient&response_type=code&layout=client2](https://auth.gog.com/auth?client_id=46899977096215655&redirect_uri=https%3A%2F%2Fembed.gog.com%2Fon_login_success%3Forigin%3Dclient&response_type=code&layout=client2).
-This is the official login page for GOG, so you do not need to set your credentials in the `config.json` file.
+If you are using this mode for the first time, you will need to log in to your GOG account using this link to the official [GOG login page](https://auth.gog.com/auth?client_id=46899977096215655&redirect_uri=https%3A%2F%2Fembed.gog.com%2Fon_login_success%3Forigin%3Dclient&response_type=code&layout=client2), with a custom response type.
 
 After logging in, you will be redirected to a blank page with a URL that looks something like this: 
 
@@ -400,7 +399,7 @@ The following is a list of all configuration items, their defaults and the value
 <details>
 <summary><code>gogLoginCode</code></summary>
 
-The code you received after logging in (consult the README.md for more information).
+The code you received after logging in.
 Be fast, this code is only valid for one minute.
 If you don't start the script within that time, it will not be able to generate an access token from it.
 If a refresh token is also provided, this option is ignored.
@@ -414,7 +413,7 @@ If a refresh token is also provided, this option is ignored.
 <summary><code>gogRefreshToken</code></summary>
 
 If you have used the script before and have a refresh token, enter it here to avoid having to log in again to generate a login code.
-After running the script, the refresh token will be saved to "output/gogAccount/gogRefreshToken.txt".
+After running the script, the refresh token will be saved to `output/gogAccount/gogRefreshToken.txt`.
 You can then use it here to avoid having to log in again.
 
 | Type | Default value | Possible values | Required |
@@ -445,10 +444,10 @@ You can get this cookie by following the steps below:
 4. Copy the value (`Content`) of this cookie and set the following as the value of the `epicGamesCookie` property in the `config.json` file:
 
 ```json
-"epicGamesCookie": "EPIC_BEARER_TOKEN=<yourCookieContent>"
+"epicGamesCookie": "EPIC_BEARER_TOKEN=<yourCopiedCookieContent>"
 ```
 
-You can now run the script as usual to get a list of all games that are present in the Epic Games pruchase history of your account.
+You can now run the script as usual to get a list of all games that are present in the Epic Games purchase history of your account.
 It is possible that the number of game names you get from this utility is shorter than the amount of games you see in your library, as items such as beta branches and DLCs are sometimes not included in the purchase history.
 
 ### Output
