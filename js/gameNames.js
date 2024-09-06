@@ -84,7 +84,8 @@ async function findSteamAppIdsFullMatch(gameNames, steamApps) {
 	let remainingGameNames = [];
 
 	for (const game of gameNames) {
-		const fullMatches = Object.values(steamApps).filter((app) => (app.name === game));
+		// Get and de-duplicate matches. One game can be in the database multiple times with the same appid
+		const fullMatches = [...new Set(Object.values(steamApps).filter(app => app.name === game).map(app => app.appid))];
 
 		if (fullMatches.length === 1) {
 			steamIDsSingleFullMatch[game] = fullMatches[0].appid;
