@@ -44,8 +44,8 @@ export async function getEpicGamesGames() {
 		}
 
 		for (const game of page.orders) {
-			if(game.items[0].status !== "REFUNDED")
-			games.push(game.items[0].description);
+			if (game.items[0].status !== "REFUNDED")
+				games.push(game.items[0].description);
 		}
 
 		lastCreatedAt = new Date(page.orders.slice(-1)[0].createdAtMillis).toISOString();
@@ -72,7 +72,6 @@ async function getPage(pageNumber, lastCreatedAt) {
 			return data;
 		});
 
-	// console.log(response);
 	return response;
 }
 
@@ -88,6 +87,5 @@ async function getFirstPage() {
 			return data;
 		});
 
-	// console.log(response);
 	return response;
 }
