@@ -423,6 +423,9 @@ You can then use it here to avoid having to log in again.
 
 ## Mode: `epicGamesAccount`
 
+> It is possible that running the tool in this mode will not work due to Epic Games running an additional security check (captcha) when trying to access the purchase history.
+> If you encounter this issue, please use the [workaround](#workaround-if-the-tool-throws-an-error) provided below. 
+
 This mode enables you to get a list of all games you have ever purchased (excluding those that are refunded) on the Epic Games Store - including the weekly free game giveaways.
 You can then use this output as input for the [`gameNames`](#mode-gamenames) mode to find the Steam App IDs for the games.
 
@@ -463,6 +466,36 @@ To do this, simply set the following as the value of the `inputFile` property in
 	"delimiter": "\n"
 }
 ```
+
+### Workaround if the tool throws an error
+
+If the tool throws an error when trying to fetch games from your Epic Games account, it is possible that the tool's access to your account is being blocked by an additional security check run by Epic Games.
+As a workaround, please follow the following steps to manually fetch a list of games from the browser:
+
+1. Log in to your account and go to [https://www.epicgames.com/account/transactions](https://www.epicgames.com/account/transactions).
+2. Open the developer console of your browser (usually by pressing `F12` or `Ctrl+Shift+I`).
+3. Go to the `Console` tab of the console. This is usually the default tab when opening the developer view.
+4. Paste the following code snippet into the console and press `Enter`. This will fetch the list of purchased games from your account using the same method as the tool would.
+
+```javascript
+const fetchGamesList = async (pageToken = '', existingList = []) => { 
+  const data = await (await fetch(`https://www.epicgames.com/account/v2/payment/ajaxGetOrderHistory?sortDir=DESC&sortBy=DATE&nextPageToken=${pageToken}&locale=en-US`)).json(); 
+  const gamesList = data.orders.reduce((acc, value) => [...acc, ...value.items.map(v => v.description)], []);
+  console.log(`Games on this page: ${gamesList.length}, Next page starts from date: ${data.nextPageToken}`);
+  const newList = [...existingList, ...gamesList];
+  if (!data.nextPageToken) return newList; 
+  return await fetchGamesList(data.nextPageToken, newList);
+}
+fetchGamesList().then(console.log);
+```
+
+5. The console will output the list of games you have purchased on the Epic Games Store.
+6. Right-click on the output (the list of game names) and select `Copy object`.
+7. Create a new text (`.txt`) file (e.g. through Notepad), paste the copied object into the file and save it.
+
+Optionally, you can now use the saved file as input for the [`gameNames`](#mode-gamenames) mode to find the Steam App IDs for the games.
+Note that due to the formatting of the output you get from the workaround, you will need to set the following as the `delimiter` option in your configuration file to get the best results: `\",\r\n    \"`
+For best results, also remove the leading `[` and trailing `]` from the file.
 
 ### Configuration: `epicGamesAccount`
 
