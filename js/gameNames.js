@@ -50,11 +50,11 @@ export async function steamAppIDsFromGameNames() {
 
 	// Save the full matches to .json files
 	if (Object.keys(steamIDsSingleFullMatch).length > 0) {
-		console.log(`Writing game names and Steam App ID's for games with one full match to "output/${CONFIG.mode}/steamAppIds_fullMatches.json"...`);
+		console.log(`Writing game names and Steam App ID's for games with one full match (total of ${Object.keys(steamIDsSingleFullMatch).length}) to "output/${CONFIG.mode}/steamAppIds_fullMatches.json"...`);
 		fs.writeFileSync(`./output/${CONFIG.mode}/steamAppIds_fullMatches.json`, JSON.stringify(steamIDsSingleFullMatch, null, 2));
 	}
 	if (Object.keys(steamIDsMultipleFullMatches).length > 0) {
-		console.log(`Writing game names and Steam App ID's for games with multiple full matches to "output/${CONFIG.mode}/steamAppIds_multipleFullMatches.json"...`);
+		console.log(`Writing game names and Steam App ID's for games with multiple full matches (total of ${Object.keys(steamIDsMultipleFullMatches).length}) to "output/${CONFIG.mode}/steamAppIds_multipleFullMatches.json"...`);
 		fs.writeFileSync(`./output/${CONFIG.mode}/steamAppIds_multipleFullMatches.json`, JSON.stringify(steamIDsMultipleFullMatches, null, 2));
 	}
 	console.log();
@@ -88,10 +88,10 @@ async function findSteamAppIdsFullMatch(gameNames, steamApps) {
 		const fullMatches = [...new Set(Object.values(steamApps).filter(app => app.name === game).map(app => app.appid))];
 
 		if (fullMatches.length === 1) {
-			steamIDsSingleFullMatch[game] = fullMatches[0].appid;
+			steamIDsSingleFullMatch[game] = fullMatches[0];
 		} else if (fullMatches.length > 1) {
 			// More than one match for this game was found, save all matches
-			steamIDsMultipleFullMatches[game] = fullMatches.map((app) => app.appid);
+			steamIDsMultipleFullMatches[game] = fullMatches;
 		} else {
 			// No full match was found for this game
 			remainingGameNames.push(game);
