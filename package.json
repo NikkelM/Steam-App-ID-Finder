@@ -6,7 +6,7 @@
 	"main": "index.js",
 	"dependencies": {
 		"cli-progress": "^3.11.2",
-		"fast-xml-parser": "^4.4.1",
+		"fast-xml-parser": "^5.3.4",
 		"jsonschema": "^1.4.1",
 		"string-similarity": "^4.0.4"
 	}
