@@ -1,12 +1,11 @@
 {
 	"name": "steam-app-id-finder",
 	"type": "module",
-	"version": "1.6.1",
+	"version": "1.7.0",
 	"description": "This project is a collection of utilities that can be used to find Steam App IDs for games from a variety of sources.",
 	"main": "index.js",
 	"dependencies": {
 		"cli-progress": "^3.11.2",
-		"fast-xml-parser": "^5.3.4",
 		"jsonschema": "^1.4.1",
 		"string-similarity": "^4.0.4"
 	}
