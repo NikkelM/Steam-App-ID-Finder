@@ -1,17 +1,17 @@
 // Description: Utility to find Steam App IDs for games owned on Steam.
 
 import fs from 'fs';
-import { XMLParser } from 'fast-xml-parser';
 
 import { CONFIG } from './utils.js';
 
 export async function steamAppIDsFromSteamAccount() {
 	console.log("Running in \"steamAccount\" mode.\n");
-	console.log(`Getting information for apps owned by Steam account "${CONFIG.steamAccount}"...`);
+	console.log(`Getting information for apps owned by Steam account ID "${CONFIG.steamId}"...`);
 
-	const parsedGameList = await getGameList();
+	const rawGameList = await getGameList();
+	const normalizedGameList = rawGameList.map(normalizeGame);
 
-	console.log(`Found ${parsedGameList.length} apps.`);
+	console.log(`Found ${normalizedGameList.length} apps.`);
 
 	const requestedProperties = [];
 	for (const requestedProperty in CONFIG.outputProperties) {
@@ -21,41 +21,71 @@ export async function steamAppIDsFromSteamAccount() {
 	}
 
 	let output = [];
-	for (const game of parsedGameList) {
+	for (const game of normalizedGameList) {
 		output.push(formatPropertiesForApp(game, requestedProperties));
 	}
 
-	console.log(`\nWriting app information to "output/${CONFIG.mode}/${CONFIG.steamAccount}.json"...`);
-	fs.writeFileSync(`./output/${CONFIG.mode}/${CONFIG.steamAccount}.json`, JSON.stringify(output, null, 2));
+	console.log(`\nWriting app information to "output/${CONFIG.mode}/${CONFIG.steamId}.json"...`);
+	fs.writeFileSync(`./output/${CONFIG.mode}/${CONFIG.steamId}.json`, JSON.stringify(output, null, 2));
 }
 
 async function getGameList() {
-	let gameList = null;
-	const parser = new XMLParser();
-	let parsedXmlDoc = null;
+	const url = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${CONFIG.steamAPIKey}&steamid=${CONFIG.steamId}&include_appinfo=1&include_played_free_games=1&format=json`;
+	let json = null;
 
-	// Depending on whether or not a Steam account name or ID is used, the URL format is different.
-	// We first try the URL format that expects a Steam account name.
-	gameList = await fetch(`https://steamcommunity.com/id/${CONFIG.steamAccount}/games?xml=1`)
-		.then(response => response.text());
-	parsedXmlDoc = parser.parse(gameList);
-
-	// If the previous request failed to return a valid response, we try the URL format that expects a Steam account ID.
-	if (!parsedXmlDoc.gamesList?.games?.game) {
-		gameList = await fetch(`https://steamcommunity.com/profiles/${CONFIG.steamAccount}/games?xml=1`)
-			.then(response => response.text());
-			parsedXmlDoc = parser.parse(gameList);
-	}
-
-	if (!parsedXmlDoc.gamesList?.games?.game) {
-		console.error("\nERROR: XML document does not contain an app list. Most likely, the account's app library is private. Make sure the game library for this account is publicly accessible and try again.");
-		console.error(`App information must be accessible via this link: https://steamcommunity.com/id/${CONFIG.steamAccount}/games or this link: https://steamcommunity.com/profiles/${CONFIG.steamAccount}/games\n`);
-		console.error("The XML document returned by Steam was:");
-		console.error(parsedXmlDoc);
+	try {
+		const response = await fetch(url);
+		if (!response.ok) {
+			const body = await response.text().catch(() => '');
+			console.error(`Steam Web API responded with status ${response.status}${response.statusText ? ' ' + response.statusText : ''}`);
+			if (body) console.error('Response body:', body);
+			throw new Error(`Steam Web API responded with status ${response.status}`);
+		}
+		json = await response.json();
+	} catch (error) {
+		console.error("\nERROR: Failed to fetch owned games from Steam Web API. See response body above.");
+		console.error(error);
 		process.exit(1);
 	}
 
-	return parsedXmlDoc.gamesList.games.game;
+	const games = json?.response?.games;
+	if (!games) {
+		console.error("\nERROR: Steam Web API response does not contain a games list. The profile may be private or the API key/steamId is incorrect.");
+		console.error("The response returned by Steam was:");
+		console.error(JSON.stringify(json, null, 2));
+		process.exit(1);
+	}
+
+	return games;
+}
+
+function normalizeGame(game) {
+	const appid = game.appid;
+	return {
+		appID: appid,
+		name: game.name,
+		logo: buildLogoUrl(appid, game.img_logo_url || game.img_icon_url),
+		storeLink: buildStoreLink(appid),
+		statsLink: buildStatsLink(CONFIG.steamId, appid),
+		globalStatsLink: buildGlobalStatsLink(appid)
+	};
+}
+
+function buildLogoUrl(appid, hash) {
+	if (!appid || !hash) return undefined;
+	return `https://media.steampowered.com/steamcommunity/public/images/apps/${appid}/${hash}.jpg`;
+}
+
+function buildStoreLink(appid) {
+	return appid ? `https://store.steampowered.com/app/${appid}` : undefined;
+}
+
+function buildStatsLink(steamId, appid) {
+	return steamId && appid ? `https://steamcommunity.com/profiles/${steamId}/stats/${appid}` : undefined;
+}
+
+function buildGlobalStatsLink(appid) {
+	return appid ? `https://steamcommunity.com/stats/${appid}/achievements` : undefined;
 }
 
 function formatPropertiesForApp(game, requestedProperties) {

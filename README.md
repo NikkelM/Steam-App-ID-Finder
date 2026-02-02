@@ -231,12 +231,14 @@ If the value is omitted, a match will be found for every game.
 
 ## Mode: `steamAccount`
 
+> You will need to provide a Steam Web API key for this mode to work. You can get one for free here: [https://steamcommunity.com/dev/apikey](https://steamcommunity.com/dev/apikey). This app runs locally and does not send your API key to any third party. Keep this API Key secret.
+
+> You will additionally need to provide the account's `SteamID64`, which is a 17-digit number that uniquely identifies a Steam account. See the `steamId` category in the [configuration section](#configuration-steamaccount) for more information on how to find this ID.
+
 This mode will fetch all apps (this includes games, but also e.g. soundtracks or movies) from a given Steam account and save them to a file.
-Make sure that the account's game library is public, otherwise the script will not be able to access it.
+Make sure that the account's game library is public if it is not your own, otherwise the script will not be able to access it.
 
-You can check if the game library for a given `accountName` is public by logging out of Steam (or opening a private browsing session) and visiting this link: [https://steamcommunity.com/id/accountName/games](https://steamcommunity.com/id/accountName/games)
-
-To set your game library to public, visit this link while logged in: [https://steamcommunity.com/my/edit/settings](https://steamcommunity.com/my/edit/settings)
+You can check if the game library for a given `accountName` is public by logging out of Steam (or opening a private browsing session) and visiting this link: [https://steamcommunity.com/id/<accountName>/games](https://steamcommunity.com/id/accountName/games).
 
 ### Output
 
@@ -249,15 +251,28 @@ You will find the resulting data in the created `output/gameNames` folder in a f
 The following is a list of all configuration items, their defaults and the values they can take.
 
 <details>
-<summary><code>steamAccount</code></summary>
+<summary><code>steamId</code></summary>
 
-The name or ID of the Steam account for which the App IDs should be fetched.
-Your account's game library must be set to public for the script to work.
-Check via this link: [https://steamcommunity.com/id/accountName/games](https://steamcommunity.com/id/accountName/games) or this link: [https://steamcommunity.com/profiles/accountName/games](https://steamcommunity.com/profiles/accountName/games) while *not* logged in.
+The Steam ID of the Steam account for which the App IDs should be fetched.
+The Steam ID is a 17-digit number that uniquely identifies a Steam account.
+It is located under your account name on the top left of [https://store.steampowered.com/account/](https://store.steampowered.com/account/).
+The Steam ID can also be found in the URL when viewing a profile, the URL will look similar to https://steamcommunity.com/profiles/00000000000000000/.
+Alternatively, use sites such as [https://steamid.io](https://steamid.io) to get the `SteamID64` value for a given account name.
 
 | Type | Default value | Possible values | Required |
 | --- | --- | --- | --- |
-| `string` | `accountName` | A valid Steam account name or ID | Yes |
+| `string` | `steamId` | A valid 17-digit SteamID64 value | Yes |
+</details>
+
+<details>
+<summary><code>steamAPIKey</code></summary>
+
+Your Steam Web API key.
+You can get one for free here: [https://steamcommunity.com/dev/apikey](https://steamcommunity.com/dev/apikey).
+
+| Type | Default value | Possible values | Required |
+| --- | --- | --- | --- |
+| `string` | `steamAPIKey` | A valid Steam Web API key | Yes |
 </details>
 
 <details>

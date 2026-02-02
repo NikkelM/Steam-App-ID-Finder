@@ -1,9 +1,14 @@
 {
 	"properties": {
-		"steamAccount": {
-			"description": "The name or ID of the Steam account for which the App IDs should be fetched. Your account's game library must be set to public for the script to work. Check via this link: https://steamcommunity.com/id/accountName/games or this link: https://steamcommunity.com/profiles/accountName/games while not logged in.",
+		"steamId": {
+			"description": "The Steam ID of the Steam account for which the App IDs should be fetched. The Steam ID is a 17-digit number that uniquely identifies a Steam account. It is located under your account name on the top left of https://store.steampowered.com/account/. The Steam ID can also be found in the URL when viewing a profile, the URL will look similar to https://steamcommunity.com/profiles/00000000000000000/. Alternatively, use sites such as https://steamid.io to get the SteamID64 value for a given account name.",
 			"type": "string",
-			"default": "accountName"
+			"default": "00000000000000000"
+		},
+		"steamAPIKey": {
+			"description": "Your Steam Web API key. You can get one for free here: https://steamcommunity.com/dev/apikey",
+			"type": "string",
+			"default": ""
 		},
 		"outputProperties": {
 			"description": "Which of the properties provided by the Steam API should be included in the resulting JSON object. Properties that are not available for an app will be omitted in the output.",
@@ -53,7 +58,8 @@
 		}
 	},
 	"required": [
-		"steamAccount",
+		"steamId",
+		"steamAPIKey",
 		"outputProperties"
 	]
 }
