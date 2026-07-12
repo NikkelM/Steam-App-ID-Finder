@@ -14,7 +14,7 @@
 			"description": "Which of the properties provided by the Steam API should be included in the resulting JSON object. Properties that are not available for an app will be omitted in the output.",
 			"type": "object",
 			"default": {
-				"appId": true,
+				"appID": true,
 				"name": true,
 				"logo": false,
 				"storeLink": false,
