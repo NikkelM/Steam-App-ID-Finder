@@ -56,7 +56,14 @@ async function fetchSteamApps() {
 			url.searchParams.set("last_appid", String(lastAppId));
 		}
 
-		const response = await fetch(url);
+		let response;
+		try {
+			response = await fetch(url);
+		} catch (error) {
+			console.error("\nERROR: Network error while fetching the Steam app list (IStoreService/GetAppList).");
+			console.error(error.message ?? error);
+			process.exit(1);
+		}
 		if (!response.ok) {
 			const body = await response.text().catch(() => "");
 			console.error(`\nERROR: Steam's IStoreService/GetAppList responded with status ${response.status}${response.statusText ? ` ${response.statusText}` : ""}.`);
@@ -65,7 +72,14 @@ async function fetchSteamApps() {
 			process.exit(1);
 		}
 
-		const data = await response.json();
+		let data;
+		try {
+			data = await response.json();
+		} catch (error) {
+			console.error("\nERROR: Could not parse the IStoreService/GetAppList response as JSON.");
+			console.error(error.message ?? error);
+			process.exit(1);
+		}
 		const page = data?.response?.apps ?? [];
 		apps = apps.concat(page);
 
@@ -152,10 +166,7 @@ async function findSteamAppIdsFullMatch(gameNames, steamApps) {
 }
 
 async function findSteamAppIdsBestMatch(gameNames, steamApps) {
-	let partialMatchThreshold = 0;
-	if (CONFIG.partialMatchThreshold) {
-		partialMatchThreshold = CONFIG.partialMatchThreshold;
-	}
+	const partialMatchThreshold = CONFIG.partialMatchThreshold ?? 0.65;
 
 	console.log(`Searching for partial matches with a similarity score >=${partialMatchThreshold} for the remaining ${gameNames.length} games...`);
 
