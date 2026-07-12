@@ -49,7 +49,9 @@ jobs:
           cp ./LICENSE ./release_files/LICENSE
           cp ./README.md ./release_files/README.md
           cp -r ./js ./release_files/js
-          cp -r ./config ./release_files/config
+          mkdir release_files/config
+          cp ./config/*.json ./release_files/config/
+          rm -f ./release_files/config/config.json
           cp ./index.js ./release_files/index.js
           cp ./package-lock.json ./release_files/package-lock.json
           cp ./package.json ./release_files/package.json
