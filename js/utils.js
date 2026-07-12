@@ -29,7 +29,7 @@ function loadConfig() {
 	console.log("Validating configuration file...");
 	try {
 		const validator = new jsonschema.Validator();
-		// Register the per-mode sub-schemas so the "$ref"s in config.schema.json resolve and the mode-specific "required" constraints are actually enforced.
+		// Register the per-mode sub-schemas referenced by config.schema.json.
 		for (const subSchema of ['schema.gameNames.json', 'schema.steamAccount.json', 'schema.gogAccount.json', 'schema.epicGamesAccount.json']) {
 			validator.addSchema(JSON.parse(fs.readFileSync(`config/${subSchema}`)), `/${subSchema}`);
 		}

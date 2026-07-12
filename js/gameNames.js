@@ -32,7 +32,6 @@ async function loadInputGameNames() {
 async function fetchSteamApps() {
 	const apiKey = (CONFIG.steamAPIKey ?? "").trim();
 
-	// Steam retired the keyless "ISteamApps/GetAppList/v2" endpoint, so the list is now fetched through "IStoreService/GetAppList/v1", which requires an API key.
 	if (!apiKey) {
 		console.error("\nERROR: A Steam Web API key is required to fetch the list of Steam apps.");
 		console.error("Steam retired the keyless \"ISteamApps/GetAppList\" endpoint; this mode now uses \"IStoreService/GetAppList\", which needs an API key.");
@@ -40,7 +39,7 @@ async function fetchSteamApps() {
 		process.exit(1);
 	}
 
-	// The endpoint returns at most 50,000 apps per request, so we page through the results using the "last_appid"/"have_more_results" cursor until we have them all.
+	// Page through the results (max 50,000 per request).
 	let apps = [];
 	let lastAppId = 0;
 	while (true) {

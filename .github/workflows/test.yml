@@ -1,0 +1,36 @@
+name: Tests
+
+# Endpoint checks run without credentials; the per-mode live tests run only when their
+# secret/variable is set (Settings -> Secrets and variables -> Actions), otherwise they skip.
+#   Secrets:   STEAM_API_KEY (optionally GOG_REFRESH_TOKEN, EPIC_COOKIE)
+#   Variables: STEAM_TEST_STEAMID (a public SteamID64 with a public library)
+
+on:
+  schedule:
+    # every Monday at 06:00 UTC
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+        env:
+          STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
+          STEAM_TEST_STEAMID: ${{ vars.STEAM_TEST_STEAMID }}
+          GOG_REFRESH_TOKEN: ${{ secrets.GOG_REFRESH_TOKEN }}
+          EPIC_COOKIE: ${{ secrets.EPIC_COOKIE }}

@@ -1,7 +1,7 @@
 {
 	"name": "steam-app-id-finder",
 	"type": "module",
-	"version": "1.7.0",
+	"version": "1.8.0",
 	"description": "This project is a collection of utilities that can be used to find Steam App IDs for games from a variety of sources.",
 	"author": "NikkelM (https://github.com/NikkelM)",
 	"license": "GPL-3.0-or-later",
@@ -18,7 +18,8 @@
 		"node": ">=18"
 	},
 	"scripts": {
-		"start": "node index.js"
+		"start": "node index.js",
+		"test": "node --test"
 	},
 	"funding": [
 		"https://github.com/sponsors/NikkelM",
