@@ -12,8 +12,7 @@ export async function getEpicGamesGames() {
 	let nextPageToken = null;
 	let pageNumber = 0;
 
-	// The order history is paginated via a "nextPageToken" (an ISO timestamp) returned with each page
-	// Keep requesting pages until no token is returned. There is no total count available.
+	// Paginate via the nextPageToken returned with each page.
 	try {
 		do {
 			const page = await getOrderHistoryPage(nextPageToken);
@@ -34,7 +33,7 @@ export async function getEpicGamesGames() {
 
 function addGamesFromOrders(orders, games) {
 	for (const order of orders) {
-		// An order can contain more than one item (e.g. bundles), so include all of them.
+		// An order can contain multiple items (bundles).
 		for (const item of order.items ?? []) {
 			if (item.status !== "REFUNDED" && item.description !== undefined) {
 				games.push(item.description);
@@ -57,7 +56,7 @@ async function epicFetchJson(url) {
 		throw new Error(`Network error while contacting Epic Games: ${error.message ?? error}`);
 	}
 
-	// The endpoint responds with a redirect (302 to a logout URL) when the cookie is missing or expired.
+	// A 3xx redirect means the cookie is missing or expired.
 	if (response.status >= 300 && response.status < 400) {
 		throw new Error("Epic Games redirected the request - the \"epicGamesCookie\" is likely missing or expired.");
 	}

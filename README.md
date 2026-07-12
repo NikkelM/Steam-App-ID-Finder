@@ -469,10 +469,10 @@ As mentioned before, Epic Games does not provide a public API for getting a list
 To allow the script to access your account's purchase history, you need to provide it with a cookie (`EPIC_BEARER_TOKEN`) that allows temporary access to your account purchase history.
 You can get this cookie by following the steps below:
 
-1. Open the following page in your browser: [https://www.epicgames.com/account/transactions](https://www.epicgames.com/account/transactions), logging in if necessary.
-2. Open the cookie-popup of the page, in browsers such as Google Chrome or Microsoft Edge this can be done by clicking the lock icon in the address bar.
-3. Find the following cookie (under `epicgames.com`->`Cookies`): `EPIC_BEARER_TOKEN`. This token will be valid for 8 hours, after which you will need to repeat the steps above to get a new cookie.
-4. Copy the value (`Content`) of this cookie and set the following as the value of the `epicGamesCookie` property in the `config.json` file:
+1. Open the following page in your browser: [https://accounts.epicgames.com/account/transactions/purchases](https://accounts.epicgames.com/account/transactions/purchases), logging in if necessary.
+2. Open your browser's developer tools (usually `F12` or `Ctrl+Shift+I`) and go to the `Application` tab (in Google Chrome/Microsoft Edge) or the `Storage` tab (in Firefox).
+3. In the sidebar, expand `Cookies` and select the `https://accounts.epicgames.com` entry, then find the `EPIC_BEARER_TOKEN` cookie. This token will be valid for 8 hours, after which you will need to repeat the steps above to get a new cookie.
+4. Copy the `Value` of this cookie and set the following as the value of the `epicGamesCookie` property in the `config.json` file. This app runs locally and does not send your cookie to any third party. Keep this cookie secret.
 
 ```json
 "epicGamesCookie": "EPIC_BEARER_TOKEN=<yourCopiedCookieContent>"
@@ -500,7 +500,7 @@ To do this, simply set the following as the value of the `inputFile` property in
 If the tool throws an error when trying to fetch games from your Epic Games account, it is possible that the tool's access to your account is being blocked by an additional security check run by Epic Games.
 As a workaround, please follow the following steps to manually fetch a list of games from the browser:
 
-1. Log in to your account and go to [https://www.epicgames.com/account/transactions](https://www.epicgames.com/account/transactions).
+1. Log in to your account and go to [https://accounts.epicgames.com/account/transactions/purchases](https://accounts.epicgames.com/account/transactions/purchases).
 2. Open the developer console of your browser (usually by pressing `F12` or `Ctrl+Shift+I`).
 3. Go to the `Console` tab of the console. This is usually the default tab when opening the developer view.
 4. Paste the following code snippet into the console and press `Enter`. This will fetch the list of purchased games from your account using the same method as the tool would.
