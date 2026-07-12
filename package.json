@@ -3,7 +3,34 @@
 	"type": "module",
 	"version": "1.7.0",
 	"description": "This project is a collection of utilities that can be used to find Steam App IDs for games from a variety of sources.",
+	"author": "NikkelM (https://github.com/NikkelM)",
+	"license": "GPL-3.0-or-later",
+	"homepage": "https://github.com/NikkelM/Steam-App-ID-Finder#readme",
 	"main": "index.js",
+	"files": [
+		"index.js",
+		"js/",
+		"config/config.schema.json",
+		"config/schema.*.json",
+		"config/*.default.json"
+	],
+	"engines": {
+		"node": ">=18"
+	},
+	"scripts": {
+		"start": "node index.js"
+	},
+	"funding": [
+		"https://github.com/sponsors/NikkelM",
+		"https://ko-fi.com/nikkelm"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/NikkelM/Steam-App-ID-Finder.git"
+	},
+	"bugs": {
+		"url": "https://github.com/NikkelM/Steam-App-ID-Finder/issues"
+	},
 	"dependencies": {
 		"cli-progress": "^3.11.2",
 		"jsonschema": "^1.4.1",

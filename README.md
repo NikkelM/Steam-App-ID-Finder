@@ -71,7 +71,7 @@ The mode in which the script should run. Choose from any of the supported modes 
 
 | Type | Default value | Possible values | Required |
 | --- | --- | --- | --- |
-| `string` | `gameNames` | `gameNames`, `steamAccount` | Yes |
+| `string` | `gameNames` | `gameNames`, `steamAccount`, `gogAccount`, `epicGamesAccount` | Yes |
 </details>
 
 # Modes
@@ -110,7 +110,7 @@ For games with a single full match, the results will be saved in a file called `
 For games with multiple full matches, the results will be saved in a file called `steamAppIds_multipleFullMatches.json`, with the games' names as keys and an array of the corresponding Steam App IDs as values.
 You can use tools such as [steamDB](https://steamdb.info/) to find out which of the found Steam App IDs is the correct one for your game.
 
-For partial matches, the results will be saved in a file called `steamAppIds_bestMatches.json`, with the games' names as keys and the name and Steam App ID of the most similar game name as well as the similarity score as the value.
+For partial matches, the results will be saved in a file called `steamAppIds_bestMatch.json`, with the games' names as keys and the name and Steam App ID of the most similar game name as well as the similarity score as the value.
 
 Games for which no satisfying match was found (due to the similarity score being below the `partialMatchThreshold`) will be saved in a file called `steamAppIds_noMatch.json`.
 
@@ -132,15 +132,15 @@ In this case, the matched game was correct, but this is not always the case:
 
 ```json
 {
-  "DEATH STRANDING": {
-    "appId": 1507790,
-    "similarity": 0.6666666666666666,
-    "steamName": "Witch Strandings"
+  "Control": {
+    "appId": 508460,
+    "similarity": 0.8,
+    "steamName": "MAXCONTROL"
   },
 }
 ```
 
-Such a mismatch can have a number of reasons, in the case of `DEATH STRANDING` it is that Steam only has `DEATH STRANDING DIRECTOR'S CUT` in its database, but not the original game, which leads to `Witch Strandings` being the closest match.
+Such a mismatch can have a number of reasons, in the case of `Control` it is that Steam does not list the base `Control` game (only `Control Ultimate Edition`), so no full match is found. The short search term then ends up more similar to unrelated games such as `MAXCONTROL` (similarity `0.8`) than to the actual `Control Ultimate Edition` (which only scores `0.44`), leading to the wrong game being matched.
 
 These examples also show well how a higher similarity score does not necessarily mean a better match.
 
@@ -240,7 +240,7 @@ If the value is omitted, a match will be found for every game.
 
 | Type | Default value | Possible values | Required |
 | --- | --- | --- | --- |
-| `number` | `0.8` | Number between `0` and `1` | No |
+| `number` | `0.65` | Number between `0` and `1` | No |
 </details>
 
 ## Mode: `steamAccount`
@@ -256,7 +256,7 @@ You can check if the game library for a given `accountName` is public by logging
 
 ### Output
 
-You will find the resulting data in the created `output/gameNames` folder in a file named after your Steam account name.
+You will find the resulting data in the created `output/steamAccount` folder in a file named after the account's Steam ID.
 
 ### Configuration: `steamAccount`
 
@@ -300,7 +300,7 @@ Which of the properties provided by the Steam API should be included in the resu
 
 ```json
 {
-	"appId": true,
+	"appID": true,
 	"name": true,
 	"logo": false,
 	"storeLink": false,
@@ -397,9 +397,9 @@ This allows the script to generate an access token for your GOG account, which a
 
 After setting the `gogLoginCode` property, run the script immediately - the login code is only valid for 60 seconds, after which it will expire and you would need to log in again.
 
-After running the script once, you will find a file named `gogRefreshToken.json` in the `output/gogAccount` folder.
+After running the script once, you will find a file named `gogRefreshToken.txt` in the `output/gogAccount` folder.
 This file contains the refresh token for your GOG account, which allows the script to generate a new access token when the current one expires.
-To run the script with this refresh token in use, set it as the value of the `gogRefreshToken` property in the `config.json` file.
+To run the script with this refresh token in use, set it as the value of the `refreshToken` property in the `config.json` file.
 You can then remove the `gogLoginCode` property from the `config.json` file.
 
 ### Output
@@ -410,13 +410,13 @@ To do this, simply set the following as the value of the `inputFile` property in
 
 ```json
 "inputFile": {
-	"fileName": "output/gogAccount/gogGameNames.txt",
+	"fileName": "output/gogAccount/gogGameNames",
 	"fileType": "txt",
 	"delimiter": "\n"
 }
 ```
 
-The script will also save the current refresh token to the `gogRefreshToken.json` file in the `output/gogAccount` folder.
+The script will also save the current refresh token to the `gogRefreshToken.txt` file in the `output/gogAccount` folder.
 You can use this token to avoid needing to log in again when using the script in the (near) future.
 
 ### Configuration: `gogAccount`
@@ -435,11 +435,11 @@ If a refresh token is also provided, this option is ignored.
 
 | Type | Default value | Possible values | Required |
 | --- | --- | --- | --- |
-| `string` | `"gogLoginCodeHereIfAvailable"` | A valid login code for your account | Yes, if no `gogRefreshToken` is provided |
+| `string` | `"gogLoginCodeHereIfAvailable"` | A valid login code for your account | Yes, if no `refreshToken` is provided |
 </details>
 
 <details>
-<summary><code>gogRefreshToken</code></summary>
+<summary><code>refreshToken</code></summary>
 
 If you have used the script before and have a refresh token, enter it here to avoid having to log in again to generate a login code.
 After running the script, the refresh token will be saved to `output/gogAccount/gogRefreshToken.txt`.
@@ -447,7 +447,7 @@ You can then use it here to avoid having to log in again.
 
 | Type | Default value | Possible values | Required |
 | --- | --- | --- | --- |
-| `string` | `"gogRefreshTokenHereIfAvailable"` | A valid refresh token for your account | Yes, if no `gogLoginCode` is provided |
+| `string` | `"refreshTokenHereIfAvailable"` | A valid refresh token for your account | Yes, if no `gogLoginCode` is provided |
 </details>
 
 ## Mode: `epicGamesAccount`
@@ -490,7 +490,7 @@ To do this, simply set the following as the value of the `inputFile` property in
 
 ```json
 "inputFile": {
-	"fileName": "output/epicGamesAccount/epicGamesGameNames.txt",
+	"fileName": "output/epicGamesAccount/epicGamesGameNames",
 	"fileType": "txt",
 	"delimiter": "\n"
 }
