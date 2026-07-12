@@ -6,6 +6,7 @@
 		"fileType": "txt",
 		"delimiter": ","
 	},
+	"steamAPIKey": "",
 	"onlyFullMatches": false,
 	"partialMatchThreshold": 0.65
 }

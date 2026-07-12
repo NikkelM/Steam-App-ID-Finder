@@ -89,6 +89,8 @@ You can then use this output as input for the [`gameNames`](#mode-gamenames) mod
 
 ## Mode: `gameNames`
 
+> Since Steam retired the keyless `ISteamApps/GetAppList` endpoint, this mode now requires a Steam Web API key. You can get one for free here: [https://steamcommunity.com/dev/apikey](https://steamcommunity.com/dev/apikey). This app runs locally and does not send your API key to any third party. Keep this API key secret.
+
 Do you have a list of game names and want to know which Steam App IDs they correspond to?
 This mode is able to find the Steam App IDs for any number of provided game names, even if the provided name is not an exact match to the game in the Steam database.
 
@@ -108,9 +110,9 @@ For games with a single full match, the results will be saved in a file called `
 For games with multiple full matches, the results will be saved in a file called `steamAppIds_multipleFullMatches.json`, with the games' names as keys and an array of the corresponding Steam App IDs as values.
 You can use tools such as [steamDB](https://steamdb.info/) to find out which of the found Steam App IDs is the correct one for your game.
 
-For partial matches, the results will be saved in a file called `steamAppIds_partialMatches.json`, with the games' names as keys and the name and Steam App ID of the most similar game name as well as the similarity score as value.
+For partial matches, the results will be saved in a file called `steamAppIds_bestMatches.json`, with the games' names as keys and the name and Steam App ID of the most similar game name as well as the similarity score as the value.
 
-Games for which no satisfying match was found (due to the similarity score being below the `partialMatchThreshold`) will be saved in a file called `steamAppIds_noMatch.json` for your convenience.
+Games for which no satisfying match was found (due to the similarity score being below the `partialMatchThreshold`) will be saved in a file called `steamAppIds_noMatch.json`.
 
 Find some examples of the output format for a partial match below:
 
@@ -205,6 +207,18 @@ The delimiter to use when parsing the input file.
 
 
 <details>
+<summary><code>steamAPIKey</code></summary>
+
+Your Steam Web API key.
+You can get one for free here: [https://steamcommunity.com/dev/apikey](https://steamcommunity.com/dev/apikey).
+Steam retired the keyless `ISteamApps/GetAppList` endpoint, so this mode now fetches the list of Steam apps through `IStoreService/GetAppList`, which requires an API key.
+
+| Type | Default value | Possible values | Required |
+| --- | --- | --- | --- |
+| `string` | `""` | A valid Steam Web API key | Yes |
+</details>
+
+<details>
 <summary><code>onlyFullMatches</code></summary>
 
 Whether to only get Steam App IDs for full matches or also for partial matches.
@@ -221,7 +235,7 @@ If set to `false`, partial matches will be saved to a different output file.
 The threshold for partial matches.
 This means that the most similar game name must have a similarity score of at least this threshold to be added to the output.
 The threshold must be between `0` and `1`.
-Use `0` to get a match for every game and `1` to only get full matches.
+Use `0` to get a match for every game and `1` to only get full matches (case insensitive).
 If the value is omitted, a match will be found for every game.
 
 | Type | Default value | Possible values | Required |

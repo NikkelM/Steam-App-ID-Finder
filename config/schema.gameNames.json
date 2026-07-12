@@ -5,7 +5,7 @@
 			"type": "object",
 			"default": {
 				"fileName": "gameNames",
-				"fileEnding": "txt",
+				"fileType": "txt",
 				"delimiter": ","
 			},
 			"properties": {
@@ -55,8 +55,13 @@
 			"type": "boolean",
 			"default": false
 		},
+		"steamAPIKey": {
+			"description": "Your Steam Web API key. You can get one for free here: https://steamcommunity.com/dev/apikey. Required because Steam retired the keyless \"ISteamApps/GetAppList\" endpoint; this mode now uses \"IStoreService/GetAppList\", which needs an API key.",
+			"type": "string",
+			"default": ""
+		},
 		"partialMatchThreshold": {
-			"description": "The threshold for partial matches. This means that the most similar game name must have a similarity score of at least this threshold to be added to the output. The threshold must be between 0 and 1. Use 0 to get a match for every game and 1 to only get full matches. If the value is omitted, a match will be found for every game.",
+			"description": "The threshold for partial matches. This means that the most similar game name must have a similarity score of at least this threshold to be added to the output. The threshold must be between 0 and 1. Use 0 to get a match for every game and 1 to only get full matches (case insensitive). If the value is omitted, a match will be found for every game.",
 			"type": "number",
 			"default": 0.65,
 			"minimum": 0,
@@ -64,6 +69,7 @@
 		}
 	},
 	"required": [
-		"inputFile"
+		"inputFile",
+		"steamAPIKey"
 	]
 }
