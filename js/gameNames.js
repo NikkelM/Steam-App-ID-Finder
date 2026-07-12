@@ -22,7 +22,11 @@ async function loadInputGameNames() {
 		process.exit(1);
 	}
 
-	return gameNames.split(CONFIG.inputFile.delimiter);
+	// Split the input by the provided delimiter, then trim any stray characters to ensure optimal full match functionality
+	return gameNames
+		.split(CONFIG.inputFile.delimiter)
+		.map((gameName) => gameName.trim())
+		.filter((gameName) => gameName.length > 0);
 }
 
 async function fetchSteamApps() {
