@@ -82,6 +82,11 @@ function cleanup(dir) {
 	fs.rmSync(dir, { recursive: true, force: true });
 }
 
+// Short-lived GOG/Epic credentials: treat an auth failure as a skip rather than a failure.
+function isExpiredCredentialFailure(output) {
+	return /invalid_grant|missing or expired|redirected the request/i.test(output);
+}
+
 describe('Steam live smoke tests', () => {
 	it('gameNames resolves known game names to their App IDs', { skip: process.env.STEAM_API_KEY ? false : 'STEAM_API_KEY not set' }, () => {
 		const config = {
@@ -118,10 +123,14 @@ describe('Steam live smoke tests', () => {
 });
 
 describe('GOG/Epic live smoke tests', () => {
-	it('gogAccount writes a non-empty list of game names', { skip: process.env.GOG_REFRESH_TOKEN ? false : 'GOG_REFRESH_TOKEN not set' }, () => {
+	it('gogAccount writes a non-empty list of game names', { skip: process.env.GOG_REFRESH_TOKEN ? false : 'GOG_REFRESH_TOKEN not set' }, (t) => {
 		const config = { mode: 'gogAccount', refreshToken: process.env.GOG_REFRESH_TOKEN };
-		const { code, stderr, dir } = runMode(config);
+		const { code, stdout, stderr, dir } = runMode(config);
 		try {
+			if (code !== 0 && isExpiredCredentialFailure(stdout + stderr)) {
+				t.skip('GOG_REFRESH_TOKEN appears expired or invalid');
+				return;
+			}
 			assert.equal(code, 0, `tool exited ${code}: ${stderr.trim().slice(0, 200)}`);
 			const names = fs.readFileSync(path.join(dir, 'output', 'gogAccount', 'gogGameNames.txt'), 'utf8').split('\n').filter(Boolean);
 			assert.ok(names.length > 0, 'no game names were written');
@@ -130,10 +139,14 @@ describe('GOG/Epic live smoke tests', () => {
 		}
 	});
 
-	it('epicGamesAccount writes a non-empty list of game names', { skip: process.env.EPIC_COOKIE ? false : 'EPIC_COOKIE not set' }, () => {
+	it('epicGamesAccount writes a non-empty list of game names', { skip: process.env.EPIC_COOKIE ? false : 'EPIC_COOKIE not set' }, (t) => {
 		const config = { mode: 'epicGamesAccount', epicGamesCookie: process.env.EPIC_COOKIE };
-		const { code, stderr, dir } = runMode(config);
+		const { code, stdout, stderr, dir } = runMode(config);
 		try {
+			if (code !== 0 && isExpiredCredentialFailure(stdout + stderr)) {
+				t.skip('EPIC_COOKIE appears expired or invalid');
+				return;
+			}
 			assert.equal(code, 0, `tool exited ${code}: ${stderr.trim().slice(0, 200)}`);
 			const names = fs.readFileSync(path.join(dir, 'output', 'epicGamesAccount', 'epicGamesGameNames.txt'), 'utf8').split('\n').filter(Boolean);
 			assert.ok(names.length > 0, 'no game names were written');
