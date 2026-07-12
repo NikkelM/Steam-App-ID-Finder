@@ -452,8 +452,7 @@ You can then use it here to avoid having to log in again.
 
 ## Mode: `epicGamesAccount`
 
-> It is possible that running the tool in this mode will not work due to Epic Games running an additional security check (captcha) when trying to access the purchase history.
-> If you encounter this issue, please use the [workaround](#workaround-if-the-tool-throws-an-error) provided below. 
+> This mode reads your purchase history from Epic's account API (`accounts.epicgames.com`) using a browser cookie (see the setup steps below). If Epic changes their access protection and the tool can no longer reach your account, use the [workaround](#workaround-if-the-tool-throws-an-error) provided below.
 
 This mode enables you to get a list of all games you have ever purchased (excluding those that are refunded) on the Epic Games Store - including the weekly free game giveaways.
 You can then use this output as input for the [`gameNames`](#mode-gamenames) mode to find the Steam App IDs for the games.
@@ -508,7 +507,7 @@ As a workaround, please follow the following steps to manually fetch a list of g
 
 ```javascript
 const fetchGamesList = async (pageToken = '', existingList = []) => { 
-  const data = await (await fetch(`https://www.epicgames.com/account/v2/payment/ajaxGetOrderHistory?sortDir=DESC&sortBy=DATE&nextPageToken=${pageToken}&locale=en-US`)).json(); 
+  const data = await (await fetch(`https://accounts.epicgames.com/account/v2/payment/ajaxGetOrderHistory?sortDir=DESC&sortBy=DATE&nextPageToken=${pageToken}&locale=en-US`)).json(); 
   const gamesList = data.orders.reduce((acc, value) => [...acc, ...value.items.map(v => v.description)], []);
   console.log(`Games on this page: ${gamesList.length}, Next page starts from date: ${data.nextPageToken}`);
   const newList = [...existingList, ...gamesList];

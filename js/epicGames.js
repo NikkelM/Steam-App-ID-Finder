@@ -1,91 +1,83 @@
 // Description: Utility to find the names of games owned on Epic Games.
 
 import fs from 'fs';
-import cliProgress from 'cli-progress';
 
 import { CONFIG } from './utils.js';
 
 export async function getEpicGamesGames() {
 	console.log("Running in \"epicGamesAccount\" mode.\n");
-
-	let pageNumber = 1;
-	let games = [];
-
 	console.log("Fetching games from Epic Games account...");
 
+	let games = [];
+	let nextPageToken = null;
+	let pageNumber = 0;
+
+	// The order history is paginated via a "nextPageToken" (an ISO timestamp) returned with each page
+	// Keep requesting pages until no token is returned. There is no total count available.
 	try {
-		var firstPage = await getFirstPage();
+		do {
+			const page = await getOrderHistoryPage(nextPageToken);
+			pageNumber++;
+			addGamesFromOrders(page?.orders ?? [], games);
+			nextPageToken = page?.nextPageToken ?? null;
+			console.log(`  Page ${pageNumber} fetched - ${games.length} games so far.`);
+		} while (nextPageToken);
 	} catch (error) {
 		console.error("\nError fetching games from Epic Games account. Please check/refresh the \"epicGamesCookie\" in the configuration file and try again.");
-		console.log(error);
+		console.error(error.message ?? error);
 		process.exit(1);
 	}
 
-	for (const game of firstPage.orders) {
-		games.push(game.items[0].description);
-	}
-
-	let lastCreatedAt = new Date(firstPage.orders.slice(-1)[0].createdAtMillis).toISOString();
-	const totalItemsApproximation = firstPage.total;
-
-	const progressBar = new cliProgress.SingleBar({
-		hideCursor: true,
-		format: '|{bar}| {percentage}% | {eta}s left | {value}/{total} games processed'
-	}, cliProgress.Presets.legacy);
-
-	progressBar.start(totalItemsApproximation, 0);
-
-	while (true) {
-		const page = await getPage(pageNumber, lastCreatedAt);
-
-		// No more games
-		if (page.orders.length === 0) {
-			break;
-		}
-
-		for (const game of page.orders) {
-			if (game.items[0].status !== "REFUNDED")
-				games.push(game.items[0].description);
-		}
-
-		lastCreatedAt = new Date(page.orders.slice(-1)[0].createdAtMillis).toISOString();
-
-		pageNumber++;
-		progressBar.increment(10);
-	}
-	progressBar.stop();
-
-	// Write the game names to a file
-	console.log(`\nWriting game names to "output/${CONFIG.mode}/epicGamesGameNames.txt"`)
+	console.log(`\nWriting ${games.length} game names to "output/${CONFIG.mode}/epicGamesGameNames.txt"`);
 	fs.writeFileSync(`output/${CONFIG.mode}/epicGamesGameNames.txt`, games.join('\n'));
 }
 
-async function getPage(pageNumber, lastCreatedAt) {
-	const response = await fetch(`https://www.epicgames.com/account/v2/payment/ajaxGetOrderHistory?page=${pageNumber}&lastCreatedAt=${lastCreatedAt}&locale=en-US`, {
-		method: 'GET',
-		headers: {
-			'cookie': CONFIG.epicGamesCookie
+function addGamesFromOrders(orders, games) {
+	for (const order of orders) {
+		// An order can contain more than one item (e.g. bundles), so include all of them.
+		for (const item of order.items ?? []) {
+			if (item.status !== "REFUNDED" && item.description !== undefined) {
+				games.push(item.description);
+			}
 		}
-	})
-		.then(response => response.json())
-		.then(data => {
-			return data;
-		});
-
-	return response;
+	}
 }
 
-async function getFirstPage() {
-	const response = await fetch('https://www.epicgames.com/account/v2/payment/ajaxGetOrderHistory?locale=en-US', {
-		method: 'GET',
-		headers: {
-			'cookie': CONFIG.epicGamesCookie
-		}
-	})
-		.then(response => response.json())
-		.then(data => {
-			return data;
+async function epicFetchJson(url) {
+	let response;
+	try {
+		response = await fetch(url, {
+			method: 'GET',
+			headers: {
+				'cookie': CONFIG.epicGamesCookie
+			},
+			redirect: 'manual'
 		});
+	} catch (error) {
+		throw new Error(`Network error while contacting Epic Games: ${error.message ?? error}`);
+	}
 
-	return response;
+	// The endpoint responds with a redirect (302 to a logout URL) when the cookie is missing or expired.
+	if (response.status >= 300 && response.status < 400) {
+		throw new Error("Epic Games redirected the request - the \"epicGamesCookie\" is likely missing or expired.");
+	}
+
+	if (!response.ok) {
+		const body = await response.text().catch(() => "");
+		throw new Error(`Epic Games responded with status ${response.status}${response.statusText ? ` ${response.statusText}` : ""}${body ? `: ${body.slice(0, 200)}` : ""}`);
+	}
+
+	try {
+		return await response.json();
+	} catch (error) {
+		throw new Error(`Could not parse the Epic Games response as JSON (the cookie may be expired): ${error.message ?? error}`);
+	}
+}
+
+async function getOrderHistoryPage(nextPageToken) {
+	const params = new URLSearchParams({ count: "25", sortDir: "DESC", sortBy: "DATE", locale: "en-US" });
+	if (nextPageToken) {
+		params.set("nextPageToken", nextPageToken);
+	}
+	return await epicFetchJson(`https://accounts.epicgames.com/account/v2/payment/ajaxGetOrderHistory?${params.toString()}`);
 }
