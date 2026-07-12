@@ -6,6 +6,12 @@ name: Tests
 #   Variables: STEAM_TEST_STEAMID (a public SteamID64 with a public library)
 
 on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
   schedule:
     # every Monday at 06:00 UTC
     - cron: "0 6 * * 1"
