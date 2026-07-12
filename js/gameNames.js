@@ -26,9 +26,53 @@ async function loadInputGameNames() {
 }
 
 async function fetchSteamApps() {
-	return await fetch("https://api.steampowered.com/ISteamApps/GetAppList/v2/")
-		.then((response) => response.json())
-		.then((data) => data.applist.apps);
+	const apiKey = (CONFIG.steamAPIKey ?? "").trim();
+
+	// Steam retired the keyless "ISteamApps/GetAppList/v2" endpoint, so the list is now fetched through "IStoreService/GetAppList/v1", which requires an API key.
+	if (!apiKey) {
+		console.error("\nERROR: A Steam Web API key is required to fetch the list of Steam apps.");
+		console.error("Steam retired the keyless \"ISteamApps/GetAppList\" endpoint; this mode now uses \"IStoreService/GetAppList\", which needs an API key.");
+		console.error("Add a free Steam Web API key (https://steamcommunity.com/dev/apikey) as \"steamAPIKey\" in your config.");
+		process.exit(1);
+	}
+
+	// The endpoint returns at most 50,000 apps per request, so we page through the results using the "last_appid"/"have_more_results" cursor until we have them all.
+	let apps = [];
+	let lastAppId = 0;
+	while (true) {
+		const url = new URL("https://api.steampowered.com/IStoreService/GetAppList/v1/");
+		url.searchParams.set("key", apiKey);
+		url.searchParams.set("include_games", "true");
+		url.searchParams.set("include_dlc", "true");
+		url.searchParams.set("include_software", "true");
+		url.searchParams.set("include_videos", "true");
+		url.searchParams.set("include_hardware", "true");
+		url.searchParams.set("max_results", "50000");
+		if (lastAppId) {
+			url.searchParams.set("last_appid", String(lastAppId));
+		}
+
+		const response = await fetch(url);
+		if (!response.ok) {
+			const body = await response.text().catch(() => "");
+			console.error(`\nERROR: Steam's IStoreService/GetAppList responded with status ${response.status}${response.statusText ? ` ${response.statusText}` : ""}.`);
+			if (response.status === 403) console.error("A 403 usually means the \"steamAPIKey\" in your config is missing or invalid.");
+			if (body) console.error(`Response body: ${body.slice(0, 200)}`);
+			process.exit(1);
+		}
+
+		const data = await response.json();
+		const page = data?.response?.apps ?? [];
+		apps = apps.concat(page);
+
+		const nextAppId = data?.response?.last_appid;
+		if (!data?.response?.have_more_results || page.length === 0 || nextAppId === lastAppId) {
+			break;
+		}
+		lastAppId = nextAppId;
+	}
+
+	return apps;
 }
 
 // ----------- Main -----------

@@ -26,7 +26,7 @@ function loadConfig() {
 	}
 
 	// Validate the config file against the schema
-	console.log("Validating configuration file...\n");
+	console.log("Validating configuration file...");
 	try {
 		const validator = new jsonschema.Validator();
 		validator.validate(CONFIG, JSON.parse(fs.readFileSync('config/config.schema.json')), { throwError: true });
@@ -35,6 +35,7 @@ function loadConfig() {
 		process.exit(1);
 	}
 
+	console.log("Configuration file validated successfully!\n");
 	return CONFIG;
 }
 
