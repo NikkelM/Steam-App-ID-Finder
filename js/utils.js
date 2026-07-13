@@ -13,14 +13,14 @@ export function loadConfig(configPath) {
 	let configFileName = configPath;
 	try {
 		if (!configFileName) {
-			if (fs.existsSync('config/config.json')) {
-				configFileName = 'config/config.json';
-			} else if (fs.existsSync('config.json')) {
+			if (fs.existsSync('config.json')) {
 				configFileName = 'config.json';
+			} else if (fs.existsSync('config/config.json')) {
+				configFileName = 'config/config.json';
 			}
 		}
 		if (!configFileName || !fs.existsSync(configFileName)) {
-			console.error("Error loading configuration file: no configuration file found. Provide \"config/config.json\" or \"config.json\".");
+			console.error("Error loading configuration file: no configuration file found. Provide a \"config.json\" (or run a mode directly with flags - see --help).");
 			process.exit(1);
 		}
 		console.log(`Loading configuration file "${configFileName}"...`);

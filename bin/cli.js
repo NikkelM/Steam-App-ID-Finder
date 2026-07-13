@@ -29,7 +29,7 @@ program
 program
 	.command('run')
 	.description('Run using a configuration file (the mode is read from the file)')
-	.option('-c, --config <path>', 'path to a config.json (defaults to ./config/config.json or ./config.json)')
+	.option('-c, --config <path>', 'path to a config.json (defaults to ./config.json, or ./config/config.json)')
 	.action(async (options) => {
 		await runMode(loadConfig(options.config));
 	});

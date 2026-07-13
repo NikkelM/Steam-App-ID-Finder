@@ -38,7 +38,7 @@ async function fetchSteamApps() {
 	if (!apiKey) {
 		console.error("\nERROR: A Steam Web API key is required to fetch the list of Steam apps.");
 		console.error("Steam retired the keyless \"ISteamApps/GetAppList\" endpoint; this mode now uses \"IStoreService/GetAppList\", which needs an API key.");
-		console.error("Add a free Steam Web API key (https://steamcommunity.com/dev/apikey) as \"steamAPIKey\" in your config.");
+		console.error("Provide a free Steam Web API key (https://steamcommunity.com/dev/apikey) via --steam-api-key, the STEAM_API_KEY environment variable, or \"steamAPIKey\" in your config.");
 		process.exit(1);
 	}
 
@@ -69,7 +69,7 @@ async function fetchSteamApps() {
 		if (!response.ok) {
 			const body = await response.text().catch(() => "");
 			console.error(`\nERROR: Steam's IStoreService/GetAppList responded with status ${response.status}${response.statusText ? ` ${response.statusText}` : ""}.`);
-			if (response.status === 403) console.error("A 403 usually means the \"steamAPIKey\" in your config is missing or invalid.");
+			if (response.status === 403) console.error("A 403 usually means your Steam Web API key (--steam-api-key / STEAM_API_KEY / \"steamAPIKey\") is missing or invalid.");
 			if (body) console.error(`Response body: ${body.slice(0, 200)}`);
 			process.exit(1);
 		}

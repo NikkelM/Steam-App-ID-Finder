@@ -11,12 +11,12 @@ export async function steamAppIDsFromGOGAccount() {
 	} else if (CONFIG.gogLoginCode) {
 		var { accessToken, refreshToken } = await getGogAccessToken(CONFIG.gogLoginCode, null);
 	} else {
-		console.error("\nERROR: No GOG credentials provided. Set either \"refreshToken\" or \"gogLoginCode\" in your config.");
+		console.error("\nERROR: No GOG credentials provided. Provide --refresh-token or --gog-login-code (or the GOG_REFRESH_TOKEN environment variable, or \"refreshToken\"/\"gogLoginCode\" in your config).");
 		console.error("See the README (gogAccount mode) for how to obtain a login code.");
 		process.exit(1);
 	}
 
-	console.log(`Writing refresh token to "output/${CONFIG.mode}/gogRefreshToken.txt". Use this token in the config file to avoid having to log in next time you run the script.\n`);
+	console.log(`Writing refresh token to "output/${CONFIG.mode}/gogRefreshToken.txt". Use it via --refresh-token, the GOG_REFRESH_TOKEN environment variable, or "refreshToken" in your config to skip logging in next time.\n`);
 	fs.writeFileSync(`output/${CONFIG.mode}/gogRefreshToken.txt`, refreshToken, 'utf8');
 
 	// Get the list of apps owned on GOG

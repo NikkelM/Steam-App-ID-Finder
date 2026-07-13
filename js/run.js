@@ -24,7 +24,7 @@ export async function runMode(config) {
 			await getEpicGamesGames();
 			break;
 		default:
-			console.error(`Error: No mode provided in the configuration file, or mode not supported: ${config.mode}.`);
+			console.error(`Error: No mode provided, or mode not supported: ${config.mode}.`);
 			process.exit(1);
 	}
 }
