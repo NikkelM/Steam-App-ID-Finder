@@ -16,6 +16,9 @@ export function parseThreshold(value) {
 }
 
 export function buildGameNamesConfig(options, env = process.env) {
+	if (!options.input) {
+		throw new Error('provide -i, --input (the input file name, without extension), or a config.json.');
+	}
 	const inputFile = { fileName: options.input, fileType: options.type };
 	if (options.delimiter !== undefined) {
 		inputFile.delimiter = options.delimiter;
@@ -35,6 +38,9 @@ export function buildGameNamesConfig(options, env = process.env) {
 }
 
 export function buildSteamAccountConfig(options, env = process.env) {
+	if (!options.steamId) {
+		throw new Error('provide -s, --steam-id (a 17-digit SteamID64), or a config.json.');
+	}
 	const requested = String(options.props ?? 'appID,name').split(',').map((value) => value.trim()).filter(Boolean);
 	const invalid = requested.filter((value) => !STEAM_OUTPUT_PROPERTIES.includes(value));
 	if (invalid.length > 0) {
@@ -62,7 +68,7 @@ export function buildGogAccountConfig(options, env = process.env) {
 		config.gogLoginCode = options.gogLoginCode;
 	}
 	if (!config.refreshToken && !config.gogLoginCode) {
-		throw new Error('provide --refresh-token (or the GOG_REFRESH_TOKEN env var) or --gog-login-code.');
+		throw new Error('provide --refresh-token (or the GOG_REFRESH_TOKEN env var) or --gog-login-code, or a config.json.');
 	}
 	return config;
 }
@@ -70,7 +76,7 @@ export function buildGogAccountConfig(options, env = process.env) {
 export function buildEpicGamesConfig(options, env = process.env) {
 	const epicGamesCookie = options.epicCookie ?? env.EPIC_COOKIE;
 	if (!epicGamesCookie) {
-		throw new Error('provide --epic-cookie (or the EPIC_COOKIE env var).');
+		throw new Error('provide --epic-cookie (or the EPIC_COOKIE env var), or a config.json.');
 	}
 	return { mode: 'epicGamesAccount', epicGamesCookie };
 }

@@ -6,6 +6,8 @@
 
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
 import path from 'path';
 import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
@@ -23,8 +25,13 @@ import { validateConfigResult, describeConfigFields } from '../js/utils.js';
 const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const cliJs = path.join(repoRoot, 'bin', 'cli.js');
 
-function runCli(args, env = {}) {
+// Run the CLI from an empty temp directory by default so a config.json in the repo
+// (or the developer's working tree) cannot influence the config-file fallback tests.
+const emptyCwd = fs.mkdtempSync(path.join(os.tmpdir(), 'saif-cli-'));
+
+function runCli(args, env = {}, cwd = emptyCwd) {
 	return spawnSync(process.execPath, [cliJs, ...args], {
+		cwd,
 		encoding: 'utf8',
 		env: { ...process.env, STEAM_API_KEY: '', GOG_REFRESH_TOKEN: '', EPIC_COOKIE: '', ...env }
 	});
@@ -67,6 +74,10 @@ describe('CLI config builders', () => {
 		assert.equal(config.steamAPIKey, 'FROM_ENV');
 	});
 
+	it('gameNames throws when --input is missing', () => {
+		assert.throws(() => buildGameNamesConfig({ type: 'txt' }, {}), /--input/);
+	});
+
 	it('steamAccount maps --props to outputProperties and validates', () => {
 		const config = buildSteamAccountConfig({ steamId: '12345678901234567', steamApiKey: 'K', props: 'appID, logo' }, {});
 		assert.deepEqual(config.outputProperties, { appID: true, logo: true });
@@ -84,6 +95,10 @@ describe('CLI config builders', () => {
 			() => buildSteamAccountConfig({ steamId: '12345678901234567', steamApiKey: 'K', props: 'appID,bogus' }, {}),
 			/invalid --props/
 		);
+	});
+
+	it('steamAccount throws when --steam-id is missing', () => {
+		assert.throws(() => buildSteamAccountConfig({ props: 'appID' }, {}), /--steam-id/);
 	});
 
 	it('every documented steam property is accepted', () => {
@@ -169,10 +184,10 @@ describe('CLI command wrappers', () => {
 		assert.match(result.stdout, /--input/);
 	});
 
-	it('gameNames without --input errors', () => {
-		const result = runCli(['gameNames']);
+	it('gameNames with flags but without --input errors', () => {
+		const result = runCli(['gameNames', '--type', 'csv']);
 		assert.notEqual(result.status, 0);
-		assert.match(result.stderr, /required option|--input/);
+		assert.match(result.stderr, /--input/);
 	});
 
 	it('gameNames rejects an out-of-range --threshold', () => {
@@ -181,10 +196,10 @@ describe('CLI command wrappers', () => {
 		assert.match(result.stderr, /between 0 and 1|invalid/i);
 	});
 
-	it('steamAccount without --steam-id errors', () => {
-		const result = runCli(['steamAccount']);
+	it('steamAccount with flags but without --steam-id errors', () => {
+		const result = runCli(['steamAccount', '--props', 'name']);
 		assert.notEqual(result.status, 0);
-		assert.match(result.stderr, /required option|--steam-id/);
+		assert.match(result.stderr, /--steam-id/);
 	});
 
 	it('steamAccount rejects an invalid --props value', () => {
@@ -193,16 +208,21 @@ describe('CLI command wrappers', () => {
 		assert.match(result.stderr, /invalid --props/);
 	});
 
-	it('gogAccount without credentials errors', () => {
-		const result = runCli(['gogAccount']);
-		assert.notEqual(result.status, 0);
-		assert.match(result.stderr, /refresh-token|login-code/);
-	});
+	// With no flags, a mode command falls back to a config file; with none present it says so.
+	for (const command of ['gameNames', 'steamAccount', 'gogAccount', 'epicGamesAccount']) {
+		it(`${command} with no flags and no config file reports a missing config`, () => {
+			const result = runCli([command]);
+			assert.notEqual(result.status, 0);
+			assert.match(result.stderr, /no configuration file found/i);
+		});
+	}
 
-	it('epicGamesAccount without a cookie errors', () => {
-		const result = runCli(['epicGamesAccount']);
+	it('a mode command falls back to a config file, requiring a matching mode', () => {
+		const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'saif-cli-cfg-'));
+		fs.writeFileSync(path.join(dir, 'config.json'), JSON.stringify({ mode: 'epicGamesAccount', epicGamesCookie: 'x' }));
+		const result = runCli(['gameNames'], {}, dir);
 		assert.notEqual(result.status, 0);
-		assert.match(result.stderr, /epic-cookie/);
+		assert.match(result.stderr, /is for "epicGamesAccount" mode/);
 	});
 
 	it('a mode --help includes the detailed configuration fields', () => {

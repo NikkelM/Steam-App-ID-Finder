@@ -43,7 +43,7 @@ There are three ways to provide a mode's options:
    npx steam-app-id-finder gameNames --input games --steam-api-key <yourKey>
    ```
 2. **The interactive wizard** - `steam-app-id-finder init` asks you a few questions, writes a `config.json`, and offers to run it right away.
-3. **A configuration file** - `steam-app-id-finder run` runs a `config.json` from the current directory (or pass `--config <path>`). This is handy for a setup you reuse often; the wizard can create the file for you, or you can write it by hand.
+3. **A configuration file** - `steam-app-id-finder run` runs a `config.json` from the current directory (or pass `--config <path>`). This is handy for a setup you reuse often; the wizard can create the file for you, or you can write it by hand. Running a mode command with no flags (for example `steam-app-id-finder gameNames`) also falls back to this `config.json`, as long as its `mode` matches the command.
 
 List every command and its flags with:
 
