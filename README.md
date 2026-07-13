@@ -472,10 +472,10 @@ You can get this cookie by following the steps below:
 1. Open the following page in your browser: [https://accounts.epicgames.com/account/transactions/purchases](https://accounts.epicgames.com/account/transactions/purchases), logging in if necessary.
 2. Open your browser's developer tools (usually `F12` or `Ctrl+Shift+I`) and go to the `Application` tab (in Google Chrome/Microsoft Edge) or the `Storage` tab (in Firefox).
 3. In the sidebar, expand `Cookies` and select the `https://accounts.epicgames.com` entry, then find the `EPIC_BEARER_TOKEN` cookie. This token will be valid for 8 hours, after which you will need to repeat the steps above to get a new cookie.
-4. Copy the `Value` of this cookie and set the following as the value of the `epicGamesCookie` property in the `config.json` file. This app runs locally and does not send your cookie to any third party. Keep this cookie secret.
+4. Copy the `Value` of this cookie and set it as the value of the `epicGamesCookie` property in the `config.json` file. This app runs locally and does not send your cookie to any third party. Keep this cookie secret.
 
 ```json
-"epicGamesCookie": "EPIC_BEARER_TOKEN=<yourCopiedCookieContent>"
+"epicGamesCookie": "<yourCopiedCookieValue>"
 ```
 
 You can now run the script as usual to get a list of all games that are present in the Epic Games purchase history of your account.
@@ -534,11 +534,11 @@ The following is a list of all configuration items, their defaults and the value
 <details>
 <summary><code>epicGamesCookie</code></summary>
 
-The cookie you extracted from the initial request required to get this mode to work. You can find more information in the setup section above.
+The value of the EPIC_BEARER_TOKEN cookie for your Epic Games account. You can find more information in the setup section above.
 
 | Type | Default value | Possible values | Required |
 | --- | --- | --- | --- |
-| `string` | `"EPIC_BEARER_TOKEN=1234567890abcdef"` | A valid `EPIC_BEARER_TOKEN` cookie | Yes |
+| `string` | `"1234567890abcdef"` | The value of a valid `EPIC_BEARER_TOKEN` cookie | Yes |
 </details>
 
 ## Related projects

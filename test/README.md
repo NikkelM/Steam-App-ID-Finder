@@ -19,7 +19,7 @@ Set as CI **secrets** (repo -> Settings -> Secrets and variables -> Actions), or
 | --- | --- | --- | --- |
 | `STEAM_API_KEY` | `gameNames`, `steamAccount` | secret | A [Steam Web API key](https://steamcommunity.com/dev/apikey) |
 | `GOG_REFRESH_TOKEN` | `gogAccount` | secret | See below |
-| `EPIC_COOKIE` | `epicGamesAccount` | secret | Format `EPIC_BEARER_TOKEN=<value>`; see below |
+| `EPIC_COOKIE` | `epicGamesAccount` | secret | The `EPIC_BEARER_TOKEN` cookie value (the `EPIC_BEARER_TOKEN=` prefix is optional); see below |
 | `STEAM_TEST_STEAMID` | `steamAccount` | **variable** | A public SteamID64 whose library is public |
 
 ### Local run (PowerShell)
@@ -27,7 +27,7 @@ Set as CI **secrets** (repo -> Settings -> Secrets and variables -> Actions), or
 ```powershell
 $env:STEAM_API_KEY = "..."
 $env:GOG_REFRESH_TOKEN = "..."
-$env:EPIC_COOKIE = "EPIC_BEARER_TOKEN=..."
+$env:EPIC_COOKIE = "..."
 $env:STEAM_TEST_STEAMID = "7656119..."
 npm test
 ```
@@ -56,6 +56,6 @@ Alternatively, run the tool once with `gogLoginCode` set - it writes the token t
 
 1. Open the [Epic order history](https://accounts.epicgames.com/account/transactions/purchases) page and log in.
 2. Open DevTools (F12) -> **Application** -> **Cookies** -> `https://accounts.epicgames.com` -> copy the `EPIC_BEARER_TOKEN` value.
-3. Set the secret to `EPIC_BEARER_TOKEN=<value>`. The cookie is valid for ~**8 hours**, after which you repeat these steps.
+3. Set the secret to that value (the tool adds the `EPIC_BEARER_TOKEN=` prefix; including it yourself also works). The cookie is valid for ~**8 hours**, after which you repeat these steps.
 
 > A cookie minted in your browser may be rejected from a CI runner's IP (the test then skips as expired). It is most reliable for local runs.
