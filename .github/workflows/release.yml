@@ -49,6 +49,7 @@ jobs:
           cp ./LICENSE ./release_files/LICENSE
           cp ./README.md ./release_files/README.md
           cp -r ./js ./release_files/js
+          cp -r ./bin ./release_files/bin
           mkdir release_files/config
           cp ./config/*.json ./release_files/config/
           rm -f ./release_files/config/config.json
@@ -78,3 +79,32 @@ jobs:
           name: v${{ needs.CheckVersion.outputs.newVersion }}
           files: Steam.App.ID.Finder.zip
           body_path: CHANGELOG.md
+
+  PublishNpm:
+    needs: CheckVersion
+    if: needs.CheckVersion.outputs.versionChanged == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Required for npm Trusted Publishing (OIDC)
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v7
+
+      - name: Set up node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+
+      # Trusted Publishing (token-free OIDC) needs a recent npm; the bundled one may be too old.
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: npm ci
+
+      # No NPM_TOKEN needed: authentication and provenance are handled automatically via
+      # OIDC Trusted Publishing, configured for this repo on npmjs.com.
+      - name: Publish to npm
+        run: npm publish
