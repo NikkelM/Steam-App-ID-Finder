@@ -2,7 +2,7 @@
 
 ![Steam Banner](./images/SteamAppIdFinderBanner.png)
 
-This project is a collection of utilities that can be used to find Steam App IDs from a variety of sources.
+Find Steam App IDs from game names or a Steam account, and export owned-game lists from GOG and Epic Games accounts.
 
 Choose from one of the `modes` described in [this section](#modes) to find the Steam App IDs from the source you are interested in.
 
