@@ -44,7 +44,7 @@ async function getGameList() {
 		json = await response.json();
 	} catch (error) {
 		console.error("\nERROR: Failed to fetch owned games from Steam Web API. See response body above.");
-		console.error(error);
+		console.error(error.message ?? error);
 		process.exit(1);
 	}
 

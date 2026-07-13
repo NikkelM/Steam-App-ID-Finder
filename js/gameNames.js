@@ -14,11 +14,19 @@ async function loadInputGameNames() {
 		process.exit(1);
 	}
 
+	// Tolerate the extension being included in the file name (it is expected without one).
+	const inputPath = CONFIG.inputFile.fileName.endsWith(`.${CONFIG.inputFile.fileType}`)
+		? CONFIG.inputFile.fileName
+		: `${CONFIG.inputFile.fileName}.${CONFIG.inputFile.fileType}`;
+
+	let fileContents;
 	try {
-		var gameNames = fs.readFileSync(`${CONFIG.inputFile.fileName}.${CONFIG.inputFile.fileType}`, 'utf8');
+		fileContents = fs.readFileSync(inputPath, 'utf8');
 	} catch (error) {
-		console.error("Error: Could not read input file.");
-		console.error(error);
+		console.error(`\nERROR: Could not read the input file "${inputPath}".`);
+		console.error(error.code === 'ENOENT'
+			? "The file does not exist. Check that the path is correct and relative to your current directory."
+			: (error.message ?? error));
 		process.exit(1);
 	}
 
@@ -26,7 +34,7 @@ async function loadInputGameNames() {
 	const delimiter = CONFIG.inputFile.delimiter ?? (CONFIG.inputFile.fileType === "csv" ? "," : "\n");
 
 	// Split the input by the delimiter, then trim any stray characters (e.g. a trailing \r) to ensure optimal full match functionality
-	return gameNames
+	return fileContents
 		.split(delimiter)
 		.map((gameName) => gameName.trim())
 		.filter((gameName) => gameName.length > 0);

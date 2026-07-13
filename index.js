@@ -7,4 +7,9 @@ import { runMode } from './js/run.js';
 
 // Backwards-compatible entry point: load and validate the configuration file, then run the selected mode.
 // The CLI (bin/cli.js) is the primary interface.
-await runMode(loadConfig());
+try {
+	await runMode(loadConfig());
+} catch (error) {
+	console.error("Error: " + (error?.message ?? error));
+	process.exit(1);
+}
