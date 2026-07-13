@@ -40,7 +40,7 @@ program
 	.description('Match a list of game names to Steam App IDs')
 	.requiredOption('-i, --input <name>', 'input file name, without extension')
 	.option('-t, --type <type>', 'input file type: txt or csv', 'txt')
-	.option('-d, --delimiter <char>', 'delimiter between game names', ',')
+	.option('-d, --delimiter <char>', 'delimiter between game names (default: newline for txt, comma for csv)')
 	.option('-k, --steam-api-key <key>', 'Steam Web API key (falls back to the STEAM_API_KEY env var)')
 	.option('--only-full-matches', 'only output full matches')
 	.option('--threshold <number>', 'partial match threshold between 0 and 1', parseThreshold)

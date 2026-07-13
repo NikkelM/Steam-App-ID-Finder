@@ -56,6 +56,12 @@ describe('CLI config builders', () => {
 		assert.ok(isValid(config));
 	});
 
+	it('gameNames omits the delimiter when not provided (the runtime default applies), and still validates', () => {
+		const config = buildGameNamesConfig({ input: 'g', type: 'txt', steamApiKey: 'K' }, {});
+		assert.ok(!('delimiter' in config.inputFile));
+		assert.ok(isValid(config));
+	});
+
 	it('steamAPIKey falls back to the STEAM_API_KEY env var', () => {
 		const config = buildGameNamesConfig({ input: 'g', type: 'txt', delimiter: ',' }, { STEAM_API_KEY: 'FROM_ENV' });
 		assert.equal(config.steamAPIKey, 'FROM_ENV');

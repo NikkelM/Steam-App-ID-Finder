@@ -22,9 +22,12 @@ async function loadInputGameNames() {
 		process.exit(1);
 	}
 
-	// Split the input by the provided delimiter, then trim any stray characters to ensure optimal full match functionality
+	// The delimiter defaults to a newline for txt files and a comma for csv files.
+	const delimiter = CONFIG.inputFile.delimiter ?? (CONFIG.inputFile.fileType === "csv" ? "," : "\n");
+
+	// Split the input by the delimiter, then trim any stray characters (e.g. a trailing \r) to ensure optimal full match functionality
 	return gameNames
-		.split(CONFIG.inputFile.delimiter)
+		.split(delimiter)
 		.map((gameName) => gameName.trim())
 		.filter((gameName) => gameName.length > 0);
 }

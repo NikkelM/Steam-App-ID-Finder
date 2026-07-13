@@ -16,9 +16,13 @@ export function parseThreshold(value) {
 }
 
 export function buildGameNamesConfig(options, env = process.env) {
+	const inputFile = { fileName: options.input, fileType: options.type };
+	if (options.delimiter !== undefined) {
+		inputFile.delimiter = options.delimiter;
+	}
 	const config = {
 		mode: 'gameNames',
-		inputFile: { fileName: options.input, fileType: options.type, delimiter: options.delimiter },
+		inputFile,
 		steamAPIKey: options.steamApiKey ?? env.STEAM_API_KEY ?? ''
 	};
 	if (options.onlyFullMatches) {

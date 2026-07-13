@@ -102,7 +102,7 @@ steam-app-id-finder gameNames --input games --steam-api-key <yourKey> --threshol
 | `-i, --input <name>` | `inputFile.fileName` | Input file name, without the extension. | Yes |
 | `-k, --steam-api-key <key>` | `steamAPIKey` | Your Steam Web API key (or the `STEAM_API_KEY` env var). | Yes |
 | `-t, --type <type>` | `inputFile.fileType` | Input file type: `txt` or `csv`. Default `txt`. | No |
-| `-d, --delimiter <char>` | `inputFile.delimiter` | Delimiter between game names. Default `,`. | No |
+| `-d, --delimiter <char>` | `inputFile.delimiter` | Delimiter between game names. Defaults to a newline for `txt` and a comma for `csv`. | No |
 | `--only-full-matches` | `onlyFullMatches` | Only output full matches; skip partial matches. Default `false`. | No |
 | `--threshold <number>` | `partialMatchThreshold` | Minimum similarity (`0`-`1`) for a partial match. `0` matches everything, `1` only full (case-insensitive) matches. Default `0.65`. | No |
 
@@ -226,14 +226,11 @@ steam-app-id-finder gogAccount --refresh-token <token>
 
 The list of games is written to `output/gogAccount/gogGameNames.txt`, and the current refresh token to `output/gogAccount/gogRefreshToken.txt` for reuse.
 
-The list is newline-separated, so to feed it into the [`gameNames`](#mode-gamenames) mode set the delimiter to a newline.
-In bash:
+The file is newline-separated, which is the default for `txt` input, so you can feed it straight into the [`gameNames`](#mode-gamenames) mode:
 
 ```bash
-steam-app-id-finder gameNames --input output/gogAccount/gogGameNames --delimiter $'\n' --steam-api-key <yourKey>
+steam-app-id-finder gameNames --input output/gogAccount/gogGameNames --steam-api-key <yourKey>
 ```
-
-Alternatively, use a `config.json` (with `run` or the `init` wizard), where a `"\n"` delimiter works directly.
 
 ## Mode: `epicGamesAccount`
 
@@ -271,13 +268,11 @@ The number of games may be shorter than your library, as items such as beta bran
 ### Output
 
 The list of games is written to `output/epicGamesAccount/epicGamesGameNames.txt`.
-It is newline-separated, so to feed it into the [`gameNames`](#mode-gamenames) mode set the delimiter to a newline. In bash:
+It is newline-separated, which is the default for `txt` input, so you can feed it straight into the [`gameNames`](#mode-gamenames) mode:
 
 ```bash
-steam-app-id-finder gameNames --input output/epicGamesAccount/epicGamesGameNames --delimiter $'\n' --steam-api-key <yourKey>
+steam-app-id-finder gameNames --input output/epicGamesAccount/epicGamesGameNames --steam-api-key <yourKey>
 ```
-
-Alternatively, use a `config.json` (with `run` or the `init` wizard), where a `"\n"` delimiter works directly.
 
 ### Workaround if the tool throws an error
 

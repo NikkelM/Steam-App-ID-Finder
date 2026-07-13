@@ -64,7 +64,18 @@ async function gameNamesWizard() {
 		choices: [{ name: 'txt', value: 'txt' }, { name: 'csv', value: 'csv' }],
 		default: 'txt'
 	});
-	const delimiter = await input({ message: 'Delimiter between game names:', default: ',' });
+	let delimiter = await select({
+		message: 'How are the game names separated in the file?',
+		choices: [
+			{ name: 'One per line (newline)', value: '\n' },
+			{ name: 'Comma', value: ',' },
+			{ name: 'Something else', value: 'custom' }
+		],
+		default: fileType === 'csv' ? ',' : '\n'
+	});
+	if (delimiter === 'custom') {
+		delimiter = await input({ message: 'Enter the delimiter:', validate: (value) => value.length > 0 ? true : 'A delimiter is required.' });
+	}
 	const steamAPIKey = await password({
 		message: 'Steam Web API key (get one at https://steamcommunity.com/dev/apikey):',
 		mask: true,
