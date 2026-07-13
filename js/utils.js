@@ -35,17 +35,21 @@ export function loadConfig(configPath) {
 }
 
 // Validate the config file against the schema
+export function validateConfigResult(config) {
+	const validator = new jsonschema.Validator();
+	// Register the per-mode sub-schemas referenced by config.schema.json.
+	for (const subSchema of ['schema.gameNames.json', 'schema.steamAccount.json', 'schema.gogAccount.json', 'schema.epicGamesAccount.json']) {
+		validator.addSchema(JSON.parse(fs.readFileSync(path.join(packageConfigDir, subSchema))), `/${subSchema}`);
+	}
+	return validator.validate(config, JSON.parse(fs.readFileSync(path.join(packageConfigDir, 'config.schema.json'))));
+}
+
+// Validate the config file against the schema, exiting the process on failure
 export function validateConfig(config) {
 	console.log("Validating configuration file...");
-	try {
-		const validator = new jsonschema.Validator();
-		// Register the per-mode sub-schemas referenced by config.schema.json.
-		for (const subSchema of ['schema.gameNames.json', 'schema.steamAccount.json', 'schema.gogAccount.json', 'schema.epicGamesAccount.json']) {
-			validator.addSchema(JSON.parse(fs.readFileSync(path.join(packageConfigDir, subSchema))), `/${subSchema}`);
-		}
-		validator.validate(config, JSON.parse(fs.readFileSync(path.join(packageConfigDir, 'config.schema.json'))), { throwError: true });
-	} catch (error) {
-		console.error("Error validating configuration file: " + error);
+	const result = validateConfigResult(config);
+	if (result.errors.length > 0) {
+		console.error("Error validating configuration file: " + result.errors.map((error) => error.stack).join('; '));
 		process.exit(1);
 	}
 
