@@ -18,7 +18,7 @@ import {
 	buildEpicGamesConfig,
 	STEAM_OUTPUT_PROPERTIES
 } from '../js/cliConfig.js';
-import { validateConfigResult } from '../js/utils.js';
+import { validateConfigResult, describeConfigFields } from '../js/utils.js';
 
 const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const cliJs = path.join(repoRoot, 'bin', 'cli.js');
@@ -118,6 +118,15 @@ describe('CLI config builders', () => {
 		assert.throws(() => parseThreshold('-0.1'));
 		assert.throws(() => parseThreshold('abc'));
 	});
+
+	it('describeConfigFields surfaces schema descriptions, including nested fields', () => {
+		const gameNames = describeConfigFields('gameNames');
+		assert.match(gameNames, /Configuration fields/);
+		assert.match(gameNames, /partialMatchThreshold/);
+		assert.match(gameNames, /similarity score of at least this threshold/);
+		assert.match(gameNames, /inputFile\.delimiter/);
+		assert.match(describeConfigFields('steamAccount'), /outputProperties\.appID/);
+	});
 });
 
 // ---------- CLI binary ----------
@@ -188,6 +197,13 @@ describe('CLI command wrappers', () => {
 		const result = runCli(['epicGamesAccount']);
 		assert.notEqual(result.status, 0);
 		assert.match(result.stderr, /epic-cookie/);
+	});
+
+	it('a mode --help includes the detailed configuration fields', () => {
+		const result = runCli(['gameNames', '--help']);
+		assert.equal(result.status, 0);
+		assert.match(result.stdout, /Configuration fields/);
+		assert.match(result.stdout, /similarity score of at least this threshold/);
 	});
 
 	it('run with a non-existent --config errors before running', () => {

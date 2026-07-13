@@ -56,6 +56,45 @@ export function validateConfig(config) {
 	console.log("Configuration file validated successfully!\n");
 }
 
+// Build a human-readable description of a mode's configuration fields from its JSON schema,
+// used to enrich the CLI's per-mode --help output.
+export function describeConfigFields(mode) {
+	const schema = JSON.parse(fs.readFileSync(path.join(packageConfigDir, `schema.${mode}.json`), 'utf8'));
+	const lines = ['Configuration fields (each maps to an option above and can also be set in a config.json):', ''];
+
+	function wrap(text, indent) {
+		const width = 80 - indent.length;
+		const wrapped = [];
+		let current = '';
+		for (const word of text.split(/\s+/)) {
+			if (current && (current.length + word.length + 1) > width) {
+				wrapped.push(indent + current);
+				current = word;
+			} else {
+				current = current ? `${current} ${word}` : word;
+			}
+		}
+		if (current) wrapped.push(indent + current);
+		return wrapped.join('\n');
+	}
+
+	function addProperties(properties, prefix) {
+		for (const [name, definition] of Object.entries(properties ?? {})) {
+			const key = prefix ? `${prefix}.${name}` : name;
+			if (definition.description) {
+				lines.push(`  ${key}`);
+				lines.push(wrap(definition.description, '      '));
+			}
+			if (definition.type === 'object' && definition.properties) {
+				addProperties(definition.properties, key);
+			}
+		}
+	}
+
+	addProperties(schema.properties, '');
+	return lines.join('\n');
+}
+
 export function initConfig(config) {
 	CONFIG = config;
 	setupOutput(CONFIG.mode);

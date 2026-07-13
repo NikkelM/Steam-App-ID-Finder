@@ -5,7 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { Command } from 'commander';
 
-import { loadConfig, validateConfig } from '../js/utils.js';
+import { loadConfig, validateConfig, describeConfigFields } from '../js/utils.js';
 import { runMode } from '../js/run.js';
 import { runWizard } from '../js/wizard.js';
 import { parseThreshold, buildGameNamesConfig, buildSteamAccountConfig, buildGogAccountConfig, buildEpicGamesConfig } from '../js/cliConfig.js';
@@ -46,7 +46,8 @@ program
 	.option('--threshold <number>', 'partial match threshold between 0 and 1', parseThreshold)
 	.action(async (options) => {
 		await runConfig(buildGameNamesConfig(options));
-	});
+	})
+	.addHelpText('after', () => '\n' + describeConfigFields('gameNames'));
 
 program
 	.command('steamAccount')
@@ -57,7 +58,8 @@ program
 	.option('-p, --props <list>', 'comma-separated output properties (appID,name,logo,storeLink,statsLink,globalStatsLink)', 'appID,name')
 	.action(async (options) => {
 		await runConfig(buildSteamAccountConfig(options));
-	});
+	})
+	.addHelpText('after', () => '\n' + describeConfigFields('steamAccount'));
 
 program
 	.command('gogAccount')
@@ -67,7 +69,8 @@ program
 	.option('-r, --refresh-token <token>', 'GOG refresh token (falls back to the GOG_REFRESH_TOKEN env var)')
 	.action(async (options) => {
 		await runConfig(buildGogAccountConfig(options));
-	});
+	})
+	.addHelpText('after', () => '\n' + describeConfigFields('gogAccount'));
 
 program
 	.command('epicGamesAccount')
@@ -76,7 +79,8 @@ program
 	.option('-e, --epic-cookie <value>', 'EPIC_BEARER_TOKEN cookie value (falls back to the EPIC_COOKIE env var)')
 	.action(async (options) => {
 		await runConfig(buildEpicGamesConfig(options));
-	});
+	})
+	.addHelpText('after', () => '\n' + describeConfigFields('epicGamesAccount'));
 
 program
 	.command('init')
