@@ -8,16 +8,20 @@ import { CONFIG } from './utils.js';
 
 // ----- Input -----
 
+// Resolve the input file path, tolerating the extension already being part of the
+// configured file name (it is expected without one, e.g. "games" -> "games.txt").
+function resolveInputPath() {
+	const { fileName, fileType } = CONFIG.inputFile;
+	return fileName.endsWith(`.${fileType}`) ? fileName : `${fileName}.${fileType}`;
+}
+
 async function loadInputGameNames() {
 	if (!["csv", "txt"].includes(CONFIG.inputFile.fileType)) {
 		console.error(`Error: Input file type not supported: ${CONFIG.inputFile.fileType}.`);
 		process.exit(1);
 	}
 
-	// Tolerate the extension being included in the file name (it is expected without one).
-	const inputPath = CONFIG.inputFile.fileName.endsWith(`.${CONFIG.inputFile.fileType}`)
-		? CONFIG.inputFile.fileName
-		: `${CONFIG.inputFile.fileName}.${CONFIG.inputFile.fileType}`;
+	const inputPath = resolveInputPath();
 
 	let fileContents;
 	try {
@@ -114,7 +118,7 @@ export async function steamAppIDsFromGameNames() {
 
 	// Import the game names from the input file
 	let gameNames = await loadInputGameNames();
-	console.log(`The input file (${CONFIG.inputFile.fileName}.${CONFIG.inputFile.fileType}) contained ${Object.keys(gameNames).length} game names.\n`);
+	console.log(`The input file (${resolveInputPath()}) contained ${gameNames.length} game names.\n`);
 
 	// Find Steam App ID's for full matches
 	const { steamIDsSingleFullMatch, steamIDsMultipleFullMatches, remainingGameNames } = await findSteamAppIdsFullMatch(gameNames, steamApps);
