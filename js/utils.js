@@ -1,46 +1,60 @@
 import jsonschema from 'jsonschema';
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// ---------- Setup ----------
-
-export const CONFIG = loadConfig();
-setupOutput(CONFIG.mode);
+const packageConfigDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'config');
+export let CONFIG;
 
 // ----- Config -----
 
-function loadConfig() {
-	let CONFIG;
+export function loadConfig(configPath) {
+	let config;
+	let configFileName = configPath;
 	try {
-		let configFileName;
-		if (fs.existsSync('config/config.json')) {
-			console.log("Loading configuration file \"config/config.json\"...");
-			configFileName = 'config/config.json';
-		} else if (fs.existsSync('config.json')) {
-			console.log("Loading configuration file \"config.json\"...");
-			configFileName = 'config.json';
+		if (!configFileName) {
+			if (fs.existsSync('config/config.json')) {
+				configFileName = 'config/config.json';
+			} else if (fs.existsSync('config.json')) {
+				configFileName = 'config.json';
+			}
 		}
-		CONFIG = JSON.parse(fs.readFileSync(configFileName));
+		if (!configFileName || !fs.existsSync(configFileName)) {
+			console.error("Error loading configuration file: no configuration file found. Provide \"config/config.json\" or \"config.json\".");
+			process.exit(1);
+		}
+		console.log(`Loading configuration file "${configFileName}"...`);
+		config = JSON.parse(fs.readFileSync(configFileName));
 	} catch (error) {
 		console.error("Error loading configuration file: " + error);
 		process.exit(1);
 	}
 
-	// Validate the config file against the schema
+	validateConfig(config);
+	return config;
+}
+
+// Validate the config file against the schema
+export function validateConfig(config) {
 	console.log("Validating configuration file...");
 	try {
 		const validator = new jsonschema.Validator();
 		// Register the per-mode sub-schemas referenced by config.schema.json.
 		for (const subSchema of ['schema.gameNames.json', 'schema.steamAccount.json', 'schema.gogAccount.json', 'schema.epicGamesAccount.json']) {
-			validator.addSchema(JSON.parse(fs.readFileSync(`config/${subSchema}`)), `/${subSchema}`);
+			validator.addSchema(JSON.parse(fs.readFileSync(path.join(packageConfigDir, subSchema))), `/${subSchema}`);
 		}
-		validator.validate(CONFIG, JSON.parse(fs.readFileSync('config/config.schema.json')), { throwError: true });
+		validator.validate(config, JSON.parse(fs.readFileSync(path.join(packageConfigDir, 'config.schema.json'))), { throwError: true });
 	} catch (error) {
 		console.error("Error validating configuration file: " + error);
 		process.exit(1);
 	}
 
 	console.log("Configuration file validated successfully!\n");
-	return CONFIG;
+}
+
+export function initConfig(config) {
+	CONFIG = config;
+	setupOutput(CONFIG.mode);
 }
 
 // ----- Output -----

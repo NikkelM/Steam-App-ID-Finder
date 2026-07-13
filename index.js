@@ -3,7 +3,7 @@
 // Suppresses the warning about the fetch API being unstable
 process.removeAllListeners('warning');
 
-import { CONFIG } from './js/utils.js';
+import { CONFIG, initConfig, loadConfig } from './js/utils.js';
 import { steamAppIDsFromGameNames } from './js/gameNames.js';
 import { steamAppIDsFromSteamAccount } from './js/steamGames.js';
 import { steamAppIDsFromGOGAccount } from './js/gogGames.js';
@@ -11,6 +11,8 @@ import { getEpicGamesGames } from './js/epicGames.js';
 
 // ---------- Main ----------
 
+// Load and validate the configuration file, then run the selected mode.
+initConfig(loadConfig());
 await main();
 
 async function main() {
