@@ -42,13 +42,21 @@ function addGamesFromOrders(orders, games) {
 	}
 }
 
+// Accept the bare EPIC_BEARER_TOKEN value, an "EPIC_BEARER_TOKEN=<value>" pair, or a full cookie string, and always send just the bearer token cookie.
+function epicBearerCookie() {
+	const raw = (CONFIG.epicGamesCookie ?? "").trim();
+	const match = raw.match(/EPIC_BEARER_TOKEN=([^;]+)/);
+	const token = (match ? match[1] : raw).trim();
+	return `EPIC_BEARER_TOKEN=${token}`;
+}
+
 async function epicFetchJson(url) {
 	let response;
 	try {
 		response = await fetch(url, {
 			method: 'GET',
 			headers: {
-				'cookie': CONFIG.epicGamesCookie
+				'cookie': epicBearerCookie()
 			},
 			redirect: 'manual'
 		});

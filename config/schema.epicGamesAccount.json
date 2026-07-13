@@ -1,9 +1,9 @@
 {
 	"properties": {
 		"epicGamesCookie": {
-			"description": "The cookie you extracted from the initial request required to get this mode to work. You can find more information in the README.md.",
+			"description": "The value of the EPIC_BEARER_TOKEN cookie for your Epic Games account. You can find more information in the README.",
 			"type": "string",
-			"default": "EPIC_BEARER_TOKEN=1234567890abcdef",
+			"default": "1234567890abcdef",
 			"minLength": 1
 		}
 	},
