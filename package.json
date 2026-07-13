@@ -3,6 +3,17 @@
 	"type": "module",
 	"version": "1.8.0",
 	"description": "CLI to find Steam App IDs from game names or a Steam account, and export owned-game lists from GOG and Epic Games accounts.",
+	"keywords": [
+		"steam",
+		"steam-api",
+		"steam-app-id",
+		"app-id",
+		"appid",
+		"gog",
+		"epic-games",
+		"game-library",
+		"game-names"
+	],
 	"author": "NikkelM (https://github.com/NikkelM)",
 	"license": "GPL-3.0-or-later",
 	"homepage": "https://github.com/NikkelM/Steam-App-ID-Finder#readme",
