@@ -22,8 +22,9 @@ export async function getEpicGamesGames() {
 			console.log(`  Page ${pageNumber} fetched - ${games.length} games so far.`);
 		} while (nextPageToken);
 	} catch (error) {
-		console.error("\nError fetching games from Epic Games account. Please check/refresh the \"epicGamesCookie\" in the configuration file and try again.");
+		console.error("\nError fetching games from Epic Games account. Please check/refresh your Epic Games cookie (--epic-cookie, the EPIC_COOKIE environment variable, or \"epicGamesCookie\" in your config) and try again.");
 		console.error(error.message ?? error);
+		console.error("\nIf Epic keeps blocking access, use the manual workaround: https://github.com/NikkelM/Steam-App-ID-Finder#workaround-if-the-tool-throws-an-error");
 		process.exit(1);
 	}
 
