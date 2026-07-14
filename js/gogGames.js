@@ -6,10 +6,11 @@ import cliProgress from 'cli-progress';
 import { CONFIG, outputPath } from './utils.js';
 
 export async function steamAppIDsFromGOGAccount() {
+	let accessToken, refreshToken;
 	if (CONFIG.refreshToken) {
-		var { accessToken, refreshToken } = await getGogAccessToken(null, CONFIG.refreshToken);
+		({ accessToken, refreshToken } = await getGogAccessToken(null, CONFIG.refreshToken));
 	} else if (CONFIG.gogLoginCode) {
-		var { accessToken, refreshToken } = await getGogAccessToken(CONFIG.gogLoginCode, null);
+		({ accessToken, refreshToken } = await getGogAccessToken(CONFIG.gogLoginCode, null));
 	} else {
 		console.error("\nERROR: No GOG credentials provided. Provide --refresh-token or --gog-login-code (or the GOG_REFRESH_TOKEN environment variable, or \"refreshToken\"/\"gogLoginCode\" in your config).");
 		console.error("See the README (gogAccount mode) for how to obtain a login code.");
@@ -76,14 +77,21 @@ async function getGogGameNames(gogGameIds, accessToken) {
 	progressBar.start(gogGameIds.length, 0);
 
 	let gameNames = [];
-	let numUndefined = 0;
+	let numNoGame = 0;
+	let numFailed = 0;
 	for (const gogGameId of gogGameIds) {
-		// Get the game name from GOG
-		const gameName = await getGogGameName(gogGameId, accessToken);
-		if (gameName !== undefined) {
-			gameNames.push(gameName);
+		// Retry once on a transient failure before giving up on this game
+		let result = await getGogGameName(gogGameId, accessToken);
+		if (result.status === "error") {
+			result = await getGogGameName(gogGameId, accessToken);
+		}
+
+		if (result.status === "ok") {
+			gameNames.push(result.title);
+		} else if (result.status === "noGame") {
+			numNoGame++;
 		} else {
-			numUndefined++;
+			numFailed++;
 		}
 
 		progressBar.increment();
@@ -91,7 +99,11 @@ async function getGogGameNames(gogGameIds, accessToken) {
 
 	progressBar.stop();
 
-	console.log(`\nFound ${gameNames.length} named games. ${numUndefined} apps had no game associated with them. These are likely DLC and are not included.`);
+	console.log(`\nFound ${gameNames.length} named games. ${numNoGame} apps had no game details and are likely DLC (not included).`);
+	if (numFailed > 0) {
+		console.error(`\nWARNING: ${numFailed} game(s) could not be fetched due to transient GOG API errors (rate limiting or timeouts) and are missing from the output. Re-run to try again.`);
+		process.exitCode = 1;
+	}
 
 	return gameNames;
 }
@@ -104,14 +116,20 @@ async function getGogGameName(gogGameId, accessToken) {
 		}
 	});
 
+	if (gameResponse.status === 404) {
+		// A 404 means GOG has no game details for this id (typically DLC)
+		return { status: "noGame" };
+	}
 	if (!gameResponse.ok) {
-		return undefined;
+		// A transient failure (rate limit, 5xx, expired token) - not the same as "no game"
+		return { status: "error", code: gameResponse.status };
 	}
 
 	try {
-		return (await gameResponse.json()).title;
+		const title = (await gameResponse.json()).title;
+		return title !== undefined ? { status: "ok", title } : { status: "noGame" };
 	} catch {
-		return undefined;
+		return { status: "error", code: "parse" };
 	}
 }
 

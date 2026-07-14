@@ -45,7 +45,12 @@ export async function steamAppIDsFromSteamAccount() {
 }
 
 async function getGameList() {
-	const url = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${CONFIG.steamAPIKey}&steamid=${CONFIG.steamId}&include_appinfo=1&include_played_free_games=1&format=json`;
+	const url = new URL('https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/');
+	url.searchParams.set('key', CONFIG.steamAPIKey);
+	url.searchParams.set('steamid', CONFIG.steamId);
+	url.searchParams.set('include_appinfo', '1');
+	url.searchParams.set('include_played_free_games', '1');
+	url.searchParams.set('format', 'json');
 	let json = null;
 
 	try {
@@ -58,20 +63,25 @@ async function getGameList() {
 		}
 		json = await response.json();
 	} catch (error) {
-		console.error("\nERROR: Failed to fetch owned games from Steam Web API. See response body above.");
+		console.error("\nERROR: Failed to fetch owned games from Steam Web API.");
 		console.error(error.message ?? error);
 		process.exit(1);
 	}
 
-	const games = json?.response?.games;
-	if (!games) {
-		console.error("\nERROR: Steam Web API response does not contain a games list. The profile may be private or the API key/steamId is incorrect.");
-		console.error("The response returned by Steam was:");
-		console.error(JSON.stringify(json, null, 2));
-		process.exit(1);
+	const response = json?.response;
+	if (Array.isArray(response?.games)) {
+		return response.games;
+	}
+	// A public account with an empty library can come back with game_count 0 and no games array
+	if (response?.game_count === 0) {
+		console.log("This account's library is empty.");
+		return [];
 	}
 
-	return games;
+	console.error("\nERROR: Steam Web API response does not contain a games list. The profile's game details may be private, or the API key/steamId is incorrect.");
+	console.error("The response returned by Steam was:");
+	console.error(JSON.stringify(json, null, 2));
+	process.exit(1);
 }
 
 function normalizeGame(game) {

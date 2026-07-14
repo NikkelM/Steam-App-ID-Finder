@@ -18,8 +18,11 @@ export async function getEpicGamesGames() {
 			const page = await getOrderHistoryPage(nextPageToken);
 			pageNumber++;
 			addGamesFromOrders(page?.orders ?? [], games);
-			nextPageToken = page?.nextPageToken ?? null;
 			console.log(`  Page ${pageNumber} fetched - ${games.length} games so far.`);
+
+			const next = page?.nextPageToken ?? null;
+			// Stop if Epic hands back the same token again, to avoid an infinite loop
+			nextPageToken = next === nextPageToken ? null : next;
 		} while (nextPageToken);
 	} catch (error) {
 		console.error("\nError fetching games from Epic Games account. Please check/refresh your Epic Games cookie (--epic-cookie, the EPIC_COOKIE environment variable, or \"epicGamesCookie\" in your config) and try again.");
@@ -36,7 +39,7 @@ function addGamesFromOrders(orders, games) {
 	for (const order of orders) {
 		// An order can contain multiple items (bundles).
 		for (const item of order.items ?? []) {
-			if (item.status !== "REFUNDED" && item.description !== undefined) {
+			if (item.status !== "REFUNDED" && item.description) {
 				games.push(item.description);
 			}
 		}

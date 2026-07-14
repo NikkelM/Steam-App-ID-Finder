@@ -265,4 +265,31 @@ describe('CLI command wrappers', () => {
 		assert.notEqual(result.status, 0);
 		assert.match(result.stderr, /no configuration file found|configuration file/i);
 	});
+
+	it('rejects a config with an unknown top-level key', () => {
+		const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'saif-unknown-'));
+		fs.writeFileSync(path.join(dir, 'config.json'), JSON.stringify({ mode: 'gameNames', inputFile: { fileName: 'g', fileType: 'txt' }, steamAPIKey: 'K', totallyBogusKey: 1 }));
+		const result = runCli(['run'], {}, dir);
+		assert.notEqual(result.status, 0);
+		assert.match(result.stderr, /unknown top-level key/i);
+	});
+
+	it('parses a config.json that has a UTF-8 BOM (not a load error)', () => {
+		const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'saif-bom-'));
+		// BOM + a config that parses but is missing required fields, so it reaches schema validation
+		fs.writeFileSync(path.join(dir, 'config.json'), '\uFEFF' + JSON.stringify({ mode: 'gameNames' }), 'utf8');
+		const result = runCli(['run'], {}, dir);
+		assert.notEqual(result.status, 0);
+		assert.doesNotMatch(result.stderr, /Error loading configuration file/);
+		assert.match(result.stderr, /Error validating configuration file/i);
+	});
+
+	it('gameNames errors on an empty input file before fetching', () => {
+		const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'saif-empty-'));
+		fs.writeFileSync(path.join(dir, 'games.txt'), '');
+		fs.writeFileSync(path.join(dir, 'config.json'), JSON.stringify({ mode: 'gameNames', inputFile: { fileName: 'games', fileType: 'txt' }, steamAPIKey: 'K' }));
+		const result = runCli(['run'], {}, dir);
+		assert.notEqual(result.status, 0);
+		assert.match(result.stderr, /no game names/i);
+	});
 });

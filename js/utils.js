@@ -20,7 +20,7 @@ export function loadConfig(configPath) {
 			process.exit(1);
 		}
 		console.log(`Loading configuration file "${configFileName}"...`);
-		config = JSON.parse(fs.readFileSync(configFileName));
+		config = JSON.parse(fs.readFileSync(configFileName, 'utf8').replace(/^\uFEFF/, ''));
 	} catch (error) {
 		console.error("Error loading configuration file: " + error);
 		process.exit(1);
@@ -49,7 +49,35 @@ export function validateConfig(config) {
 		process.exit(1);
 	}
 
+	const unknownKeys = unknownTopLevelKeys(config);
+	if (unknownKeys.length > 0) {
+		console.error(`Error validating configuration file: unknown top-level ${unknownKeys.length === 1 ? "key" : "keys"} ${unknownKeys.map((key) => `"${key}"`).join(", ")}. Check for typos, or fields that belong to a different mode.`);
+		process.exit(1);
+	}
+
 	console.log("Configuration file validated successfully!\n");
+}
+
+// The jsonschema validator can't reject unknown top-level keys injected via $ref/if-then, so check them against the schemas ourselves
+function unknownTopLevelKeys(config) {
+	if (!config || typeof config !== "object") return [];
+
+	const root = JSON.parse(fs.readFileSync(path.join(packageConfigDir, "config.schema.json")));
+	const allowed = new Set(Object.keys(root.properties ?? {}));
+
+	const subSchemaByMode = {
+		gameNames: "schema.gameNames.json",
+		steamAccount: "schema.steamAccount.json",
+		gogAccount: "schema.gogAccount.json",
+		epicGamesAccount: "schema.epicGamesAccount.json"
+	};
+	const subSchemaFile = subSchemaByMode[config.mode];
+	if (subSchemaFile) {
+		const sub = JSON.parse(fs.readFileSync(path.join(packageConfigDir, subSchemaFile)));
+		for (const key of Object.keys(sub.properties ?? {})) allowed.add(key);
+	}
+
+	return Object.keys(config).filter((key) => !allowed.has(key));
 }
 
 // Build a human-readable description of a mode's configuration fields from its JSON schema,
