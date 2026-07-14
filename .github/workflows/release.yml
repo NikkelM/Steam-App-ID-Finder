@@ -104,7 +104,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # No NPM_TOKEN needed: authentication and provenance are handled automatically via
-      # OIDC Trusted Publishing, configured for this repo on npmjs.com.
+      # Publishing is idempotent: skip if this version is already on npm
+      - name: Skip if this version is already on npm
+        id: published
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          if [ -n "$(npm view "$NAME@$VERSION" version 2>/dev/null || true)" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Version $VERSION is already on npm - skipping publish."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Authentication and provenance are handled via OIDC Trusted Publishing
       - name: Publish to npm
+        if: steps.published.outputs.exists == 'false'
         run: npm publish
