@@ -2,9 +2,11 @@
 
 ![Steam Banner](./images/SteamAppIdFinderBanner.png)
 
-Find Steam App IDs from game names or a Steam account, and export owned-game lists from GOG and Epic Games accounts.
+[![npm version](https://img.shields.io/npm/v/steam-app-id-finder)](https://www.npmjs.com/package/steam-app-id-finder)
+[![Tests](https://github.com/NikkelM/Steam-App-ID-Finder/actions/workflows/test.yml/badge.svg)](https://github.com/NikkelM/Steam-App-ID-Finder/actions/workflows/test.yml)
+<!-- [![npm downloads](https://img.shields.io/npm/dt/steam-app-id-finder)](https://www.npmjs.com/package/steam-app-id-finder) -->
 
-After installing the tool, choose one of the [`modes`](#modes) below for the source you want to get Steam App IDs from.
+Find Steam App IDs from game names or a Steam account, and export owned-game lists from GOG and Epic Games accounts.
 
 ## Table of contents
 
