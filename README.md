@@ -169,7 +169,7 @@ This can happen because the search for full matches is case-sensitive, while the
 
 This mode fetches all apps (this includes games, but also e.g. soundtracks or movies) from a given Steam account and saves them to a file.
 The account's game library must be public if it is not your own, otherwise the tool cannot access it.
-You can check whether a library is public by opening [https://steamcommunity.com/id/<accountName>/games](https://steamcommunity.com/id/accountName/games) in a private browsing session.
+You can check whether a library is public by opening [https://steamcommunity.com/id/accountName/games](https://steamcommunity.com/id/accountName/games) in a private browsing session.
 
 ### Usage
 
