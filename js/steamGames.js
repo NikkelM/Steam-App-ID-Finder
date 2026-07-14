@@ -2,7 +2,7 @@
 
 import fs from 'fs';
 
-import { CONFIG, outputDir } from './utils.js';
+import { CONFIG, outputPath } from './utils.js';
 
 export async function steamAppIDsFromSteamAccount() {
 	console.log("Running in \"steamAccount\" mode.\n");
@@ -25,8 +25,8 @@ export async function steamAppIDsFromSteamAccount() {
 		output.push(formatPropertiesForApp(game, requestedProperties));
 	}
 
-	console.log(`\nWriting app information to "${outputDir()}/${CONFIG.steamId}.json"...`);
-	fs.writeFileSync(`${outputDir()}/${CONFIG.steamId}.json`, JSON.stringify(output, null, 2));
+	console.log(`\nWriting app information to "${outputPath(`${CONFIG.steamId}.json`)}"...`);
+	fs.writeFileSync(outputPath(`${CONFIG.steamId}.json`), JSON.stringify(output, null, 2));
 }
 
 async function getGameList() {
