@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  test-matrix:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -45,3 +45,19 @@ jobs:
           STEAM_TEST_STEAMID: ${{ vars.STEAM_TEST_STEAMID }}
           GOG_REFRESH_TOKEN: ${{ secrets.GOG_REFRESH_TOKEN }}
           EPIC_COOKIE: ${{ secrets.EPIC_COOKIE }}
+
+  # A single, stable status check for branch protection that is green only when every
+  # matrix job passed. The matrix jobs report as "test-matrix (22)" etc., whose names
+  # change with the matrix, so requiring this job instead keeps the required check stable.
+  test:
+    if: always()
+    needs: test-matrix
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify the test matrix succeeded
+        run: |
+          if [ "${{ needs.test-matrix.result }}" != "success" ]; then
+            echo "The test matrix did not succeed (result: ${{ needs.test-matrix.result }})."
+            exit 1
+          fi
+          echo "All test matrix jobs passed."
