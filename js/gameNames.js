@@ -115,6 +115,10 @@ export async function steamAppIDsFromGameNames() {
 	// Read the input file first, so a missing or empty input path fails fast, before the slow Steam fetch.
 	let gameNames = await loadInputGameNames();
 	console.log(`The input file (${resolveInputPath()}) contained ${gameNames.length} game names.`);
+	if (gameNames.length === 0) {
+		console.error("\nERROR: The input file contained no game names. Add at least one game name and try again.");
+		process.exit(1);
+	}
 
 	// Fetch Steam games from API
 	const steamApps = await fetchSteamApps();
@@ -161,7 +165,7 @@ async function findSteamAppIdsFullMatch(gameNames, steamApps) {
 
 	for (const game of gameNames) {
 		// Get and de-duplicate matches. One game can be in the database multiple times with the same appid
-		const fullMatches = [...new Set(Object.values(steamApps).filter(app => app.name === game).map(app => app.appid))];
+		const fullMatches = [...new Set(steamApps.filter(app => app.name === game).map(app => app.appid))];
 
 		if (fullMatches.length === 1) {
 			steamIDsSingleFullMatch[game] = fullMatches[0];
@@ -174,7 +178,8 @@ async function findSteamAppIdsFullMatch(gameNames, steamApps) {
 		}
 	}
 
-	console.log(`Found full matches for ${Object.keys(steamIDsSingleFullMatch).length + Object.keys(steamIDsMultipleFullMatches).length} games${Object.keys(steamIDsMultipleFullMatches).length > 1 ? `, of which ${Object.keys(steamIDsMultipleFullMatches).length} games had more than one match.` : "."}\n`);
+	const multipleMatchCount = Object.keys(steamIDsMultipleFullMatches).length;
+	console.log(`Found full matches for ${Object.keys(steamIDsSingleFullMatch).length + multipleMatchCount} games${multipleMatchCount > 0 ? `, of which ${multipleMatchCount} game${multipleMatchCount === 1 ? '' : 's'} had more than one match.` : "."}\n`);
 
 	return { steamIDsSingleFullMatch, steamIDsMultipleFullMatches, remainingGameNames };
 }
@@ -185,7 +190,7 @@ async function findSteamAppIdsBestMatch(gameNames, steamApps) {
 	console.log(`Searching for partial matches with a similarity score >=${partialMatchThreshold} for the remaining ${gameNames.length} games...`);
 
 	// Convert to lowercase to make matches case insensitive and thereby more accurate
-	const steamAppsLowercase = steamApps.map((app) => app.name.toLowerCase());
+	const steamAppsLowercase = steamApps.map((app) => (app.name ?? "").toLowerCase());
 	const gameNamesLowercase = gameNames.map((game) => game.toLowerCase());
 
 	// For all games we couldn't get a full match, find the most similar title
