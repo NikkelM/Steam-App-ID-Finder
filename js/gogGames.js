@@ -7,10 +7,12 @@ import { CONFIG, outputPath } from './utils.js';
 
 export async function steamAppIDsFromGOGAccount() {
 	let accessToken, refreshToken;
-	if (CONFIG.refreshToken) {
-		({ accessToken, refreshToken } = await getGogAccessToken(null, CONFIG.refreshToken));
-	} else if (CONFIG.gogLoginCode) {
-		({ accessToken, refreshToken } = await getGogAccessToken(CONFIG.gogLoginCode, null));
+	const inputRefreshToken = String(CONFIG.refreshToken ?? "").trim();
+	const inputLoginCode = String(CONFIG.gogLoginCode ?? "").trim();
+	if (inputRefreshToken) {
+		({ accessToken, refreshToken } = await getGogAccessToken(null, inputRefreshToken));
+	} else if (inputLoginCode) {
+		({ accessToken, refreshToken } = await getGogAccessToken(inputLoginCode, null));
 	} else {
 		console.error("\nERROR: No GOG credentials provided. Provide --refresh-token or --gog-login-code (or the GOG_REFRESH_TOKEN environment variable, or \"refreshToken\"/\"gogLoginCode\" in your config).");
 		console.error("See the README (gogAccount mode) for how to obtain a login code.");
@@ -152,7 +154,13 @@ async function getGogAccessToken(gogLoginCode, gogRefreshToken) {
 		const body = await tokenResponse.text().catch(() => "");
 		console.error(`\nError: The GOG token endpoint responded with status ${tokenResponse.status}${tokenResponse.statusText ? ` ${tokenResponse.statusText}` : ""}.`);
 		if (body) console.error(`Response body: ${body.slice(0, 200)}`);
-		console.log("If this keeps happening, try logging in to GOG again and getting a new login code.");
+		if (tokenResponse.status === 400 || /invalid_grant/i.test(body)) {
+			console.error(gogLoginCode !== null
+				? "The login code is invalid, already used, or expired. GOG login codes are single-use and valid for only about a minute - get a fresh one and run again right away."
+				: "The refresh token is no longer valid. Log in to GOG again to get a new login code.");
+		} else {
+			console.error("If this keeps happening, try logging in to GOG again and getting a new login code.");
+		}
 		process.exit(1);
 	}
 
