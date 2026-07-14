@@ -15,6 +15,15 @@ export function parseThreshold(value) {
 	return number;
 }
 
+// Commander option parser for --cache-hours.
+export function parseCacheHours(value) {
+	const number = Number.parseFloat(value);
+	if (Number.isNaN(number) || number < 0) {
+		throw new InvalidArgumentError('The cache duration must be a number of hours >= 0 (0 disables caching).');
+	}
+	return number;
+}
+
 // Set the output directory on a config when the --out flag was provided.
 function withOutputDirectory(config, options) {
 	if (options.out) {
@@ -41,6 +50,12 @@ export function buildGameNamesConfig(options, env = process.env) {
 	}
 	if (options.threshold !== undefined) {
 		config.partialMatchThreshold = options.threshold;
+	}
+	if (options.refreshCache) {
+		config.refreshCache = true;
+	}
+	if (options.cacheHours !== undefined) {
+		config.appListCacheHours = options.cacheHours;
 	}
 	return withOutputDirectory(config, options);
 }

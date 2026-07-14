@@ -112,6 +112,18 @@ async function gameNamesWizard() {
 		config.partialMatchThreshold = Number.parseFloat(threshold);
 	}
 
+	const cacheHours = await input({
+		message: 'Cache the Steam app list for how many hours? (0 to disable; speeds up repeated runs):',
+		default: '24',
+		validate: (value) => {
+			const number = Number.parseFloat(value);
+			return (!Number.isNaN(number) && number >= 0) ? true : 'Enter a number of hours (0 or more).';
+		}
+	});
+	if (Number.parseFloat(cacheHours) !== 24) {
+		config.appListCacheHours = Number.parseFloat(cacheHours);
+	}
+
 	return config;
 }
 

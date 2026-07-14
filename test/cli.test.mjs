@@ -14,6 +14,7 @@ import { fileURLToPath } from 'url';
 
 import {
 	parseThreshold,
+	parseCacheHours,
 	buildGameNamesConfig,
 	buildSteamAccountConfig,
 	buildGogAccountConfig,
@@ -87,6 +88,21 @@ describe('CLI config builders', () => {
 		assert.ok(!('outputDirectory' in withoutOut));
 	});
 
+	it('gameNames maps --refresh-cache and --cache-hours, and omits them otherwise', () => {
+		const withCache = buildGameNamesConfig({ input: 'g', type: 'txt', steamApiKey: 'K', refreshCache: true, cacheHours: 12 }, {});
+		assert.equal(withCache.refreshCache, true);
+		assert.equal(withCache.appListCacheHours, 12);
+		assert.ok(isValid(withCache));
+
+		const withCacheZero = buildGameNamesConfig({ input: 'g', type: 'txt', steamApiKey: 'K', cacheHours: 0 }, {});
+		assert.equal(withCacheZero.appListCacheHours, 0);
+		assert.ok(isValid(withCacheZero));
+
+		const withoutCache = buildGameNamesConfig({ input: 'g', type: 'txt', steamApiKey: 'K' }, {});
+		assert.ok(!('refreshCache' in withoutCache));
+		assert.ok(!('appListCacheHours' in withoutCache));
+	});
+
 	it('steamAccount maps --props to outputProperties and validates', () => {
 		const config = buildSteamAccountConfig({ steamId: '12345678901234567', steamApiKey: 'K', props: 'appID, logo' }, {});
 		assert.deepEqual(config.outputProperties, { appID: true, logo: true });
@@ -153,6 +169,14 @@ describe('CLI config builders', () => {
 		assert.throws(() => parseThreshold('5'));
 		assert.throws(() => parseThreshold('-0.1'));
 		assert.throws(() => parseThreshold('abc'));
+	});
+
+	it('parseCacheHours accepts values >= 0 and rejects the rest', () => {
+		assert.equal(parseCacheHours('0'), 0);
+		assert.equal(parseCacheHours('24'), 24);
+		assert.equal(parseCacheHours('0.5'), 0.5);
+		assert.throws(() => parseCacheHours('-1'));
+		assert.throws(() => parseCacheHours('abc'));
 	});
 
 	it('describeConfigFields surfaces schema descriptions, including nested fields', () => {

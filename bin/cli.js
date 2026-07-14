@@ -8,7 +8,7 @@ import { Command } from 'commander';
 import { loadConfig, validateConfig, describeConfigFields } from '../js/utils.js';
 import { runMode } from '../js/run.js';
 import { runWizard } from '../js/wizard.js';
-import { parseThreshold, buildGameNamesConfig, buildSteamAccountConfig, buildGogAccountConfig, buildEpicGamesConfig } from '../js/cliConfig.js';
+import { parseThreshold, parseCacheHours, buildGameNamesConfig, buildSteamAccountConfig, buildGogAccountConfig, buildEpicGamesConfig } from '../js/cliConfig.js';
 
 const packageRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const pkg = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'));
@@ -60,6 +60,8 @@ program
 	.option('-k, --steam-api-key <key>', 'Steam Web API key (falls back to the STEAM_API_KEY env var)')
 	.option('--only-full-matches', 'only output full matches')
 	.option('--threshold <number>', 'partial match threshold between 0 and 1', parseThreshold)
+	.option('--refresh-cache', 'refetch the Steam app list even if a fresh cache exists')
+	.option('--cache-hours <number>', 'how long the cached Steam app list stays fresh, in hours (0 disables caching; default 24)', parseCacheHours)
 	.option('-o, --out <dir>', 'directory to write output files to (default: output)')
 	.action(async (options, command) => {
 		if (!usedCliFlags(command)) {
