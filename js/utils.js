@@ -108,7 +108,7 @@ export function initConfig(config) {
 
 // The directory a mode writes its output files to: <outputDirectory>/<mode> (default "output").
 export function outputDir() {
-	return `${CONFIG.outputDirectory ?? 'output'}/${CONFIG.mode}`;
+	return path.join(CONFIG.outputDirectory ?? 'output', CONFIG.mode);
 }
 
 function setupOutput() {
