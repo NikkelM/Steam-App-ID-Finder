@@ -64,11 +64,27 @@ jobs:
 
       - name: Create Release notes
         run: |
-          echo "## What's Changed
-          
-          " > CHANGELOG.md
-          LAST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
-          git log --pretty=format:'* %s' $LAST_TAG..HEAD >> CHANGELOG.md
+          cat > CHANGELOG.md <<'EOF'
+          > **Recommended:** install from npm with `npm install -g steam-app-id-finder` to always get the latest version. See the [README](https://github.com/NikkelM/Steam-App-ID-Finder#readme) for all commands and options.
+
+          ## What's Changed
+
+          EOF
+          LAST_TAG=$(git describe --tags "$(git rev-list --tags --max-count=1)")
+          git log --pretty=format:'* %s' "$LAST_TAG"..HEAD >> CHANGELOG.md
+          cat >> CHANGELOG.md <<'EOF'
+
+          ## Using the release asset
+
+          To run this version offline, download the attached `Steam.App.ID.Finder.zip`, unzip it, and from inside the folder run:
+
+          ```bash
+          npm ci                                # install dependencies from the bundled lockfile
+          node bin/cli.js <command> [options]   # e.g. node bin/cli.js gameNames --input games --steam-api-key <key>
+          ```
+
+          Requires [Node.js](https://nodejs.org) 22.13 or newer. Run `node bin/cli.js --help` to list every command.
+          EOF
 
       - name: Create Release
         uses: softprops/action-gh-release@v3
