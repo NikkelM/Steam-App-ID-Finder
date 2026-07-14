@@ -224,6 +224,18 @@ describe('CLI command wrappers', () => {
 		assert.match(result.stderr, /invalid --props/);
 	});
 
+	it('steamAccount rejects a non-17-digit steam-id before calling the API', () => {
+		const result = runCli(['steamAccount', '--steam-id', 'DEADBEEF', '--steam-api-key', 'K']);
+		assert.notEqual(result.status, 0);
+		assert.match(result.stderr, /not a valid SteamID64/);
+	});
+
+	it('steamAccount requires a Steam Web API key', () => {
+		const result = runCli(['steamAccount', '--steam-id', '12345678901234567']);
+		assert.notEqual(result.status, 0);
+		assert.match(result.stderr, /Steam Web API key is required/);
+	});
+
 	// With no flags, a mode command falls back to a config file; with none present it says so.
 	for (const command of ['gameNames', 'steamAccount', 'gogAccount', 'epicGamesAccount']) {
 		it(`${command} with no flags and no config file reports a missing config`, () => {

@@ -6,6 +6,21 @@ import { CONFIG, outputPath } from './utils.js';
 
 export async function steamAppIDsFromSteamAccount() {
 	console.log("Running in \"steamAccount\" mode.\n");
+
+	const steamId = String(CONFIG.steamId ?? "").trim();
+	if (!/^\d{17}$/.test(steamId)) {
+		console.error(`ERROR: "${CONFIG.steamId}" is not a valid SteamID64.`);
+		console.error("A SteamID64 is a 17-digit number (for example 76561197960287930). Find yours under your account name at https://store.steampowered.com/account/, in a profile URL, or via https://steamid.io.");
+		process.exit(1);
+	}
+
+	const apiKey = (CONFIG.steamAPIKey ?? "").trim();
+	if (!apiKey) {
+		console.error("ERROR: A Steam Web API key is required for this mode.");
+		console.error("Provide a free Steam Web API key (https://steamcommunity.com/dev/apikey) via --steam-api-key, the STEAM_API_KEY environment variable, or \"steamAPIKey\" in your config.");
+		process.exit(1);
+	}
+
 	console.log(`Getting information for apps owned by Steam account ID "${CONFIG.steamId}"...`);
 
 	const rawGameList = await getGameList();
