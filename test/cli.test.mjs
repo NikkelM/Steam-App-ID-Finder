@@ -78,6 +78,15 @@ describe('CLI config builders', () => {
 		assert.throws(() => buildGameNamesConfig({ type: 'txt' }, {}), /--input/);
 	});
 
+	it('--out sets outputDirectory (and it validates), while omitting it leaves the default', () => {
+		const withOut = buildGameNamesConfig({ input: 'g', type: 'txt', steamApiKey: 'K', out: 'custom-out' }, {});
+		assert.equal(withOut.outputDirectory, 'custom-out');
+		assert.ok(isValid(withOut));
+
+		const withoutOut = buildGameNamesConfig({ input: 'g', type: 'txt', steamApiKey: 'K' }, {});
+		assert.ok(!('outputDirectory' in withoutOut));
+	});
+
 	it('steamAccount maps --props to outputProperties and validates', () => {
 		const config = buildSteamAccountConfig({ steamId: '12345678901234567', steamApiKey: 'K', props: 'appID, logo' }, {});
 		assert.deepEqual(config.outputProperties, { appID: true, logo: true });
@@ -88,6 +97,12 @@ describe('CLI config builders', () => {
 		const config = buildSteamAccountConfig({ steamId: '12345678901234567', steamApiKey: 'K' }, {});
 		assert.deepEqual(config.outputProperties, { appID: true, name: true });
 		assert.ok(isValid(config));
+	});
+
+	it('every builder threads --out into outputDirectory', () => {
+		assert.equal(buildSteamAccountConfig({ steamId: '12345678901234567', steamApiKey: 'K', out: 'o' }, {}).outputDirectory, 'o');
+		assert.equal(buildGogAccountConfig({ refreshToken: 'T', out: 'o' }, {}).outputDirectory, 'o');
+		assert.equal(buildEpicGamesConfig({ epicCookie: 'C', out: 'o' }, {}).outputDirectory, 'o');
 	});
 
 	it('steamAccount throws on an invalid prop', () => {
@@ -146,6 +161,7 @@ describe('CLI config builders', () => {
 		assert.match(gameNames, /partialMatchThreshold/);
 		assert.match(gameNames, /similarity score of at least this threshold/);
 		assert.match(gameNames, /inputFile\.delimiter/);
+		assert.match(gameNames, /outputDirectory/);
 		assert.match(describeConfigFields('steamAccount'), /outputProperties\.appID/);
 	});
 });

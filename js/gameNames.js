@@ -4,7 +4,7 @@ import fs from 'fs';
 import stringSimilarity from 'string-similarity';
 import cliProgress from 'cli-progress';
 
-import { CONFIG } from './utils.js';
+import { CONFIG, outputDir } from './utils.js';
 
 // ----- Input -----
 
@@ -112,13 +112,13 @@ async function fetchSteamApps() {
 export async function steamAppIDsFromGameNames() {
 	console.log("Running in \"gameNames\" mode.\n");
 
+	// Read the input file first, so a missing or empty input path fails fast, before the slow Steam fetch.
+	let gameNames = await loadInputGameNames();
+	console.log(`The input file (${resolveInputPath()}) contained ${gameNames.length} game names.`);
+
 	// Fetch Steam games from API
 	const steamApps = await fetchSteamApps();
-	console.log(`Found ${steamApps.length} games in Steam's database.`);
-
-	// Import the game names from the input file
-	let gameNames = await loadInputGameNames();
-	console.log(`The input file (${resolveInputPath()}) contained ${gameNames.length} game names.\n`);
+	console.log(`Found ${steamApps.length} games in Steam's database.\n`);
 
 	// Find Steam App ID's for full matches
 	const { steamIDsSingleFullMatch, steamIDsMultipleFullMatches, remainingGameNames } = await findSteamAppIdsFullMatch(gameNames, steamApps);
@@ -126,12 +126,12 @@ export async function steamAppIDsFromGameNames() {
 
 	// Save the full matches to .json files
 	if (Object.keys(steamIDsSingleFullMatch).length > 0) {
-		console.log(`Writing game names and Steam App ID's for games with one full match (total of ${Object.keys(steamIDsSingleFullMatch).length}) to "output/${CONFIG.mode}/steamAppIds_fullMatches.json"...`);
-		fs.writeFileSync(`./output/${CONFIG.mode}/steamAppIds_fullMatches.json`, JSON.stringify(steamIDsSingleFullMatch, null, 2));
+		console.log(`Writing game names and Steam App ID's for games with one full match (total of ${Object.keys(steamIDsSingleFullMatch).length}) to "${outputDir()}/steamAppIds_fullMatches.json"...`);
+		fs.writeFileSync(`${outputDir()}/steamAppIds_fullMatches.json`, JSON.stringify(steamIDsSingleFullMatch, null, 2));
 	}
 	if (Object.keys(steamIDsMultipleFullMatches).length > 0) {
-		console.log(`Writing game names and Steam App ID's for games with multiple full matches (total of ${Object.keys(steamIDsMultipleFullMatches).length}) to "output/${CONFIG.mode}/steamAppIds_multipleFullMatches.json"...`);
-		fs.writeFileSync(`./output/${CONFIG.mode}/steamAppIds_multipleFullMatches.json`, JSON.stringify(steamIDsMultipleFullMatches, null, 2));
+		console.log(`Writing game names and Steam App ID's for games with multiple full matches (total of ${Object.keys(steamIDsMultipleFullMatches).length}) to "${outputDir()}/steamAppIds_multipleFullMatches.json"...`);
+		fs.writeFileSync(`${outputDir()}/steamAppIds_multipleFullMatches.json`, JSON.stringify(steamIDsMultipleFullMatches, null, 2));
 	}
 	console.log();
 
@@ -140,12 +140,12 @@ export async function steamAppIDsFromGameNames() {
 		const { steamIDsBestMatch, steamIDsNoMatch } = await findSteamAppIdsBestMatch(gameNames, steamApps);
 
 		// Save the best matches to a .json file
-		console.log(`\nWriting game names and Steam App ID's for partial matches to "output/${CONFIG.mode}/steamAppIds_bestMatch.json"...`);
-		fs.writeFileSync(`./output/${CONFIG.mode}/steamAppIds_bestMatch.json`, JSON.stringify(steamIDsBestMatch, null, 2));
+		console.log(`\nWriting game names and Steam App ID's for partial matches to "${outputDir()}/steamAppIds_bestMatch.json"...`);
+		fs.writeFileSync(`${outputDir()}/steamAppIds_bestMatch.json`, JSON.stringify(steamIDsBestMatch, null, 2));
 
 		if (Object.keys(steamIDsNoMatch).length > 0) {
-			console.log(`Writing the names of the remaining ${Object.keys(steamIDsNoMatch).length} games for which no satisfying match was found to "output/${CONFIG.mode}/steamAppIds_noMatch.json"...`);
-			fs.writeFileSync(`./output/${CONFIG.mode}/steamAppIds_noMatch.json`, JSON.stringify(steamIDsNoMatch, null, 2));
+			console.log(`Writing the names of the remaining ${Object.keys(steamIDsNoMatch).length} games for which no satisfying match was found to "${outputDir()}/steamAppIds_noMatch.json"...`);
+			fs.writeFileSync(`${outputDir()}/steamAppIds_noMatch.json`, JSON.stringify(steamIDsNoMatch, null, 2));
 		}
 	}
 }

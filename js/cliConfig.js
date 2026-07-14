@@ -15,6 +15,14 @@ export function parseThreshold(value) {
 	return number;
 }
 
+// Set the output directory on a config when the --out flag was provided.
+function withOutputDirectory(config, options) {
+	if (options.out) {
+		config.outputDirectory = options.out;
+	}
+	return config;
+}
+
 export function buildGameNamesConfig(options, env = process.env) {
 	if (!options.input) {
 		throw new Error('provide -i, --input (the input file name, without extension), or a config.json.');
@@ -34,7 +42,7 @@ export function buildGameNamesConfig(options, env = process.env) {
 	if (options.threshold !== undefined) {
 		config.partialMatchThreshold = options.threshold;
 	}
-	return config;
+	return withOutputDirectory(config, options);
 }
 
 export function buildSteamAccountConfig(options, env = process.env) {
@@ -50,12 +58,12 @@ export function buildSteamAccountConfig(options, env = process.env) {
 	for (const property of requested) {
 		outputProperties[property] = true;
 	}
-	return {
+	return withOutputDirectory({
 		mode: 'steamAccount',
 		steamId: options.steamId,
 		steamAPIKey: options.steamApiKey ?? env.STEAM_API_KEY ?? '',
 		outputProperties
-	};
+	}, options);
 }
 
 export function buildGogAccountConfig(options, env = process.env) {
@@ -70,7 +78,7 @@ export function buildGogAccountConfig(options, env = process.env) {
 	if (!config.refreshToken && !config.gogLoginCode) {
 		throw new Error('provide --refresh-token (or the GOG_REFRESH_TOKEN env var) or --gog-login-code, or a config.json.');
 	}
-	return config;
+	return withOutputDirectory(config, options);
 }
 
 export function buildEpicGamesConfig(options, env = process.env) {
@@ -78,5 +86,5 @@ export function buildEpicGamesConfig(options, env = process.env) {
 	if (!epicGamesCookie) {
 		throw new Error('provide --epic-cookie (or the EPIC_COOKIE env var), or a config.json.');
 	}
-	return { mode: 'epicGamesAccount', epicGamesCookie };
+	return withOutputDirectory({ mode: 'epicGamesAccount', epicGamesCookie }, options);
 }

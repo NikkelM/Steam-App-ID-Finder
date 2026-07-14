@@ -12,12 +12,8 @@ export function loadConfig(configPath) {
 	let config;
 	let configFileName = configPath;
 	try {
-		if (!configFileName) {
-			if (fs.existsSync('config.json')) {
-				configFileName = 'config.json';
-			} else if (fs.existsSync('config/config.json')) {
-				configFileName = 'config/config.json';
-			}
+		if (!configFileName && fs.existsSync('config.json')) {
+			configFileName = 'config.json';
 		}
 		if (!configFileName || !fs.existsSync(configFileName)) {
 			console.error("Error loading configuration file: no configuration file found. Provide a \"config.json\" (or run a mode directly with flags - see --help).");
@@ -92,19 +88,33 @@ export function describeConfigFields(mode) {
 	}
 
 	addProperties(schema.properties, '');
+
+	// Also surface shared, top-level fields (e.g. outputDirectory) that apply to every mode.
+	const rootSchema = JSON.parse(fs.readFileSync(path.join(packageConfigDir, 'config.schema.json'), 'utf8'));
+	const sharedFields = Object.fromEntries(
+		Object.entries(rootSchema.properties ?? {}).filter(([name]) => !['$schema', 'mode'].includes(name))
+	);
+	addProperties(sharedFields, '');
+
 	return lines.join('\n');
 }
 
 export function initConfig(config) {
 	CONFIG = config;
-	setupOutput(CONFIG.mode);
+	setupOutput();
 }
 
 // ----- Output -----
 
-function setupOutput(mode) {
+// The directory a mode writes its output files to: <outputDirectory>/<mode> (default "output").
+export function outputDir() {
+	return `${CONFIG.outputDirectory ?? 'output'}/${CONFIG.mode}`;
+}
+
+function setupOutput() {
 	// Create the output directory if it doesn't exist
-	if (!fs.existsSync('output/' + mode)) {
-		fs.mkdirSync('output/' + mode, { recursive: true });
+	const dir = outputDir();
+	if (!fs.existsSync(dir)) {
+		fs.mkdirSync(dir, { recursive: true });
 	}
 }

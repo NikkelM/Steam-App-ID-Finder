@@ -60,6 +60,7 @@ If you keep a copy of the schema next to your `config.json`, add `"$schema": "co
 ## Output
 
 Every mode writes its results to an `output/<mode>/` folder in the current working directory.
+Use `-o, --out <dir>` (or the `outputDirectory` config key) to write to a different base directory instead of `output`; the `<mode>` subfolder is always created inside it.
 See each mode's section for the exact files it produces.
 
 ## Modes
@@ -105,6 +106,7 @@ steam-app-id-finder gameNames --input games --steam-api-key <yourKey> --threshol
 | `-d, --delimiter <char>` | `inputFile.delimiter` | Delimiter between game names. Defaults to a newline for `txt` and a comma for `csv`. | No |
 | `--only-full-matches` | `onlyFullMatches` | Only output full matches; skip partial matches. Default `false`. | No |
 | `--threshold <number>` | `partialMatchThreshold` | Minimum similarity (`0`-`1`) for a partial match. `0` matches everything, `1` only full (case-insensitive) matches. Default `0.65`. | No |
+| `-o, --out <dir>` | `outputDirectory` | Base directory for output files. Default `output`. | No |
 
 ### Output
 
@@ -180,6 +182,7 @@ steam-app-id-finder steamAccount --steam-id <steamID64> --steam-api-key <yourKey
 | `-s, --steam-id <id>` | `steamId` | The account's SteamID64 (17-digit number). Find it under your account name at [store.steampowered.com/account](https://store.steampowered.com/account/), in a profile URL (`.../profiles/<id>/`), or via [steamid.io](https://steamid.io). | Yes |
 | `-k, --steam-api-key <key>` | `steamAPIKey` | Your Steam Web API key (or the `STEAM_API_KEY` env var). | Yes |
 | `-p, --props <list>` | `outputProperties` | Comma-separated list of properties to include. Default `appID,name`. | No |
+| `-o, --out <dir>` | `outputDirectory` | Base directory for output files. Default `output`. | No |
 
 The available `--props` values are: `appID` (the game's App ID), `name` (its name), `logo` (URL to the logo), `storeLink` (URL to the store page), `statsLink` (URL to this user's stats page for the game), and `globalStatsLink` (URL to the global stats page).
 Properties that are not available for an app are omitted from the output.
@@ -221,6 +224,7 @@ steam-app-id-finder gogAccount --refresh-token <token>
 | --- | --- | --- | --- |
 | `--gog-login-code <code>` | `gogLoginCode` | A fresh GOG login code (valid ~60 seconds). Ignored if a refresh token is given. | One of the two |
 | `-r, --refresh-token <token>` | `refreshToken` | A GOG refresh token from a previous run (or the `GOG_REFRESH_TOKEN` env var). | One of the two |
+| `-o, --out <dir>` | `outputDirectory` | Base directory for output files. Default `output`. | No |
 
 ### Output
 
@@ -264,6 +268,7 @@ The number of games may be shorter than your library, as items such as beta bran
 | Flag | Config key | Description | Required |
 | --- | --- | --- | --- |
 | `-e, --epic-cookie <value>` | `epicGamesCookie` | The value of your `EPIC_BEARER_TOKEN` cookie (or the `EPIC_COOKIE` env var). | Yes |
+| `-o, --out <dir>` | `outputDirectory` | Base directory for output files. Default `output`. | No |
 
 ### Output
 

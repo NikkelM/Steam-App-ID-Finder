@@ -45,7 +45,7 @@ program
 program
 	.command('run')
 	.description('Run using a configuration file (the mode is read from the file)')
-	.option('-c, --config <path>', 'path to a config.json (defaults to ./config.json, or ./config/config.json)')
+	.option('-c, --config <path>', 'path to a config.json (defaults to ./config.json)')
 	.action(async (options) => {
 		await runMode(loadConfig(options.config));
 	});
@@ -60,6 +60,7 @@ program
 	.option('-k, --steam-api-key <key>', 'Steam Web API key (falls back to the STEAM_API_KEY env var)')
 	.option('--only-full-matches', 'only output full matches')
 	.option('--threshold <number>', 'partial match threshold between 0 and 1', parseThreshold)
+	.option('-o, --out <dir>', 'directory to write output files to (default: output)')
 	.action(async (options, command) => {
 		if (!usedCliFlags(command)) {
 			await runConfigFile('gameNames');
@@ -76,6 +77,7 @@ program
 	.option('-s, --steam-id <id>', 'SteamID64 (17-digit number)')
 	.option('-k, --steam-api-key <key>', 'Steam Web API key (falls back to the STEAM_API_KEY env var)')
 	.option('-p, --props <list>', 'comma-separated output properties (appID,name,logo,storeLink,statsLink,globalStatsLink)', 'appID,name')
+	.option('-o, --out <dir>', 'directory to write output files to (default: output)')
 	.action(async (options, command) => {
 		if (!usedCliFlags(command)) {
 			await runConfigFile('steamAccount');
@@ -91,6 +93,7 @@ program
 	.description('Get the names of games owned on a GOG account')
 	.option('--gog-login-code <code>', 'GOG login code (valid for ~60 seconds)')
 	.option('-r, --refresh-token <token>', 'GOG refresh token (falls back to the GOG_REFRESH_TOKEN env var)')
+	.option('-o, --out <dir>', 'directory to write output files to (default: output)')
 	.action(async (options, command) => {
 		if (!usedCliFlags(command)) {
 			await runConfigFile('gogAccount');
@@ -105,6 +108,7 @@ program
 	.alias('epic-games-account')
 	.description('Get the names of games from an Epic Games purchase history')
 	.option('-e, --epic-cookie <value>', 'EPIC_BEARER_TOKEN cookie value (falls back to the EPIC_COOKIE env var)')
+	.option('-o, --out <dir>', 'directory to write output files to (default: output)')
 	.action(async (options, command) => {
 		if (!usedCliFlags(command)) {
 			await runConfigFile('epicGamesAccount');

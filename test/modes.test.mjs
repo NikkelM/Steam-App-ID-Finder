@@ -63,14 +63,8 @@ describe('Endpoint liveness', () => {
 // Run the tool in an isolated temp directory so the repo's own config/output are untouched.
 function runMode(config, extraFiles = {}) {
 	const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'saidf-test-'));
-	fs.mkdirSync(path.join(dir, 'config'), { recursive: true });
-	// The tool loads the schema files relative to the working directory.
-	for (const file of fs.readdirSync(path.join(repoRoot, 'config'))) {
-		if (file.endsWith('.schema.json') || file.startsWith('schema.')) {
-			fs.copyFileSync(path.join(repoRoot, 'config', file), path.join(dir, 'config', file));
-		}
-	}
-	fs.writeFileSync(path.join(dir, 'config', 'config.json'), JSON.stringify(config, null, 2));
+	// index.js discovers ./config.json in the working directory; the schemas load package-relative.
+	fs.writeFileSync(path.join(dir, 'config.json'), JSON.stringify(config, null, 2));
 	for (const [relativePath, content] of Object.entries(extraFiles)) {
 		fs.writeFileSync(path.join(dir, relativePath), content);
 	}

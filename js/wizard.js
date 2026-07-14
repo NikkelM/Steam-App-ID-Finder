@@ -33,6 +33,16 @@ export async function runWizard(outputPath = 'config.json') {
 			break;
 	}
 
+	// A shared, optional setting for every mode: only stored when changed from the default.
+	const outputDirectory = await input({
+		message: 'Output directory:',
+		default: 'output',
+		validate: (value) => value.trim() ? true : 'An output directory is required.'
+	});
+	if (outputDirectory.trim() !== 'output') {
+		config.outputDirectory = outputDirectory.trim();
+	}
+
 	// Sanity-check the assembled configuration against the schema before writing it.
 	validateConfig(config);
 
