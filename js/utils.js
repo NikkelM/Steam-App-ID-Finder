@@ -111,6 +111,11 @@ export function outputDir() {
 	return path.join(CONFIG.outputDirectory ?? 'output', CONFIG.mode);
 }
 
+// A path to a file inside the current mode's output directory, joined with OS-native separators
+export function outputPath(...segments) {
+	return path.join(outputDir(), ...segments);
+}
+
 function setupOutput() {
 	// Create the output directory if it doesn't exist
 	const dir = outputDir();

@@ -2,7 +2,7 @@
 
 import fs from 'fs';
 
-import { CONFIG, outputDir } from './utils.js';
+import { CONFIG, outputPath } from './utils.js';
 
 export async function getEpicGamesGames() {
 	console.log("Running in \"epicGamesAccount\" mode.\n");
@@ -28,8 +28,8 @@ export async function getEpicGamesGames() {
 		process.exit(1);
 	}
 
-	console.log(`\nWriting ${games.length} game names to "${outputDir()}/epicGamesGameNames.txt"`);
-	fs.writeFileSync(`${outputDir()}/epicGamesGameNames.txt`, games.join('\n'));
+	console.log(`\nWriting ${games.length} game names to "${outputPath('epicGamesGameNames.txt')}"`);
+	fs.writeFileSync(outputPath('epicGamesGameNames.txt'), games.join('\n'));
 }
 
 function addGamesFromOrders(orders, games) {
