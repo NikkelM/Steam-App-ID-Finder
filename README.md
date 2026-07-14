@@ -108,7 +108,12 @@ steam-app-id-finder gameNames --input games --steam-api-key <yourKey> --threshol
 | `-d, --delimiter <char>` | `inputFile.delimiter` | Delimiter between game names. Defaults to a newline for `txt` and a comma for `csv`. | No |
 | `--only-full-matches` | `onlyFullMatches` | Only output full matches; skip partial matches. Default `false`. | No |
 | `--threshold <number>` | `partialMatchThreshold` | Minimum similarity (`0`-`1`) for a partial match. `0` matches everything, `1` only full (case-insensitive) matches. Default `0.65`. | No |
+| `--refresh-cache` | `refreshCache` | Refetch the Steam app list even if a fresh cache exists. | No |
+| `--cache-hours <number>` | `appListCacheHours` | How long the cached Steam app list stays fresh, in hours. `0` disables caching. Default `24`. | No |
 | `-o, --out <dir>` | `outputDirectory` | Base directory for output files. Default `output`. | No |
+
+> The full Steam app list is large and slow to download, so it is cached in your system's temp directory and reused for up to `appListCacheHours` (24 by default).
+> Pass `--refresh-cache` to refetch it, or set the duration to `0` to disable caching.
 
 ### Output
 

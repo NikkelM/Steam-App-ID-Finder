@@ -1,10 +1,15 @@
 // Description: Utility to find Steam App IDs from a list of game names.
 
 import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import stringSimilarity from 'string-similarity';
 import cliProgress from 'cli-progress';
 
 import { CONFIG, outputPath } from './utils.js';
+
+// Machine-global cache for the large Steam app list, shared across working directories
+const APP_LIST_CACHE_FILE = path.join(os.tmpdir(), 'steam-app-id-finder', 'appList.json');
 
 // ----- Input -----
 
@@ -54,6 +59,51 @@ async function fetchSteamApps() {
 		process.exit(1);
 	}
 
+	const cacheHours = CONFIG.appListCacheHours ?? 24;
+	const cacheEnabled = cacheHours > 0;
+
+	// Reuse a fresh cache unless caching is disabled or a refresh was requested
+	if (cacheEnabled && !CONFIG.refreshCache) {
+		const cached = readAppListCache(cacheHours);
+		if (cached) {
+			console.log(`Using the cached Steam app list from ${new Date(cached.fetchedAt).toLocaleString()} (${cached.apps.length} apps). Pass --refresh-cache to refetch.`);
+			return cached.apps;
+		}
+	}
+
+	const apps = await fetchSteamAppListFromApi(apiKey);
+
+	if (cacheEnabled) {
+		writeAppListCache(apps);
+	}
+
+	return apps;
+}
+
+// Read the cached Steam app list if it exists and is younger than cacheHours, otherwise null
+function readAppListCache(cacheHours) {
+	try {
+		if (!fs.existsSync(APP_LIST_CACHE_FILE)) return null;
+		const cache = JSON.parse(fs.readFileSync(APP_LIST_CACHE_FILE, "utf8"));
+		if (!Array.isArray(cache?.apps) || typeof cache?.fetchedAt !== "number") return null;
+		const ageHours = (Date.now() - cache.fetchedAt) / (1000 * 60 * 60);
+		return ageHours <= cacheHours ? cache : null;
+	} catch {
+		return null;
+	}
+}
+
+// Best-effort cache write - a failure here never aborts the run
+function writeAppListCache(apps) {
+	try {
+		fs.mkdirSync(path.dirname(APP_LIST_CACHE_FILE), { recursive: true });
+		fs.writeFileSync(APP_LIST_CACHE_FILE, JSON.stringify({ fetchedAt: Date.now(), apps }));
+	} catch (error) {
+		console.error(`Warning: could not write the Steam app-list cache (${error.message ?? error}). Continuing without caching.`);
+	}
+}
+
+async function fetchSteamAppListFromApi(apiKey) {
 	// Page through the results (max 50,000 per request).
 	let apps = [];
 	let lastAppId = 0;

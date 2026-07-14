@@ -49,6 +49,17 @@
 			"default": 0.65,
 			"minimum": 0,
 			"maximum": 1
+		},
+		"appListCacheHours": {
+			"description": "How long the fetched Steam app list is cached (in your system's temp directory) before it is refetched, in hours. The full app list is large and slow to download, so caching makes repeated runs much faster. Set to 0 to disable caching. Defaults to 24.",
+			"type": "number",
+			"default": 24,
+			"minimum": 0
+		},
+		"refreshCache": {
+			"description": "If true, refetch the Steam app list even if a fresh cache exists, and update the cache with the result (equivalent to the --refresh-cache flag). Defaults to false.",
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"required": [
