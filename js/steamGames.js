@@ -2,7 +2,7 @@
 
 import fs from 'fs';
 
-import { CONFIG } from './utils.js';
+import { CONFIG, outputDir } from './utils.js';
 
 export async function steamAppIDsFromSteamAccount() {
 	console.log("Running in \"steamAccount\" mode.\n");
@@ -25,8 +25,8 @@ export async function steamAppIDsFromSteamAccount() {
 		output.push(formatPropertiesForApp(game, requestedProperties));
 	}
 
-	console.log(`\nWriting app information to "output/${CONFIG.mode}/${CONFIG.steamId}.json"...`);
-	fs.writeFileSync(`./output/${CONFIG.mode}/${CONFIG.steamId}.json`, JSON.stringify(output, null, 2));
+	console.log(`\nWriting app information to "${outputDir()}/${CONFIG.steamId}.json"...`);
+	fs.writeFileSync(`${outputDir()}/${CONFIG.steamId}.json`, JSON.stringify(output, null, 2));
 }
 
 async function getGameList() {
@@ -44,7 +44,7 @@ async function getGameList() {
 		json = await response.json();
 	} catch (error) {
 		console.error("\nERROR: Failed to fetch owned games from Steam Web API. See response body above.");
-		console.error(error);
+		console.error(error.message ?? error);
 		process.exit(1);
 	}
 

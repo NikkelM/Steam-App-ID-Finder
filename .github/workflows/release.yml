@@ -49,6 +49,7 @@ jobs:
           cp ./LICENSE ./release_files/LICENSE
           cp ./README.md ./release_files/README.md
           cp -r ./js ./release_files/js
+          cp -r ./bin ./release_files/bin
           mkdir release_files/config
           cp ./config/*.json ./release_files/config/
           rm -f ./release_files/config/config.json
@@ -63,11 +64,27 @@ jobs:
 
       - name: Create Release notes
         run: |
-          echo "## What's Changed
-          
-          " > CHANGELOG.md
-          LAST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
-          git log --pretty=format:'* %s' $LAST_TAG..HEAD >> CHANGELOG.md
+          cat > CHANGELOG.md <<'EOF'
+          > **Recommended:** install from npm with `npm install -g steam-app-id-finder` to always get the latest version. See the [README](https://github.com/NikkelM/Steam-App-ID-Finder#readme) for all commands and options.
+
+          ## What's Changed
+
+          EOF
+          LAST_TAG=$(git describe --tags "$(git rev-list --tags --max-count=1)")
+          git log --pretty=format:'* %s' "$LAST_TAG"..HEAD >> CHANGELOG.md
+          cat >> CHANGELOG.md <<'EOF'
+
+          ## Using the release asset
+
+          To run this version offline, download the attached `Steam.App.ID.Finder.zip`, unzip it, and from inside the folder run:
+
+          ```bash
+          npm ci                                # install dependencies from the bundled lockfile
+          node bin/cli.js <command> [options]   # e.g. node bin/cli.js gameNames --input games --steam-api-key <key>
+          ```
+
+          Requires [Node.js](https://nodejs.org) 22.13 or newer. Run `node bin/cli.js --help` to list every command.
+          EOF
 
       - name: Create Release
         uses: softprops/action-gh-release@v3
@@ -78,3 +95,45 @@ jobs:
           name: v${{ needs.CheckVersion.outputs.newVersion }}
           files: Steam.App.ID.Finder.zip
           body_path: CHANGELOG.md
+
+  PublishNpm:
+    needs: CheckVersion
+    if: needs.CheckVersion.outputs.versionChanged == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Required for npm Trusted Publishing (OIDC)
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v7
+
+      - name: Set up node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+
+      # Trusted Publishing (token-free OIDC) needs a recent npm; the bundled one may be too old.
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Publishing is idempotent: skip if this version is already on npm
+      - name: Skip if this version is already on npm
+        id: published
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          if [ -n "$(npm view "$NAME@$VERSION" version 2>/dev/null || true)" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Version $VERSION is already on npm - skipping publish."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Authentication and provenance are handled via OIDC Trusted Publishing
+      - name: Publish to npm
+        if: steps.published.outputs.exists == 'false'
+        run: npm publish

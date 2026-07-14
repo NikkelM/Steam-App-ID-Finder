@@ -2,7 +2,7 @@
 
 import fs from 'fs';
 
-import { CONFIG } from './utils.js';
+import { CONFIG, outputDir } from './utils.js';
 
 export async function getEpicGamesGames() {
 	console.log("Running in \"epicGamesAccount\" mode.\n");
@@ -22,13 +22,14 @@ export async function getEpicGamesGames() {
 			console.log(`  Page ${pageNumber} fetched - ${games.length} games so far.`);
 		} while (nextPageToken);
 	} catch (error) {
-		console.error("\nError fetching games from Epic Games account. Please check/refresh the \"epicGamesCookie\" in the configuration file and try again.");
+		console.error("\nError fetching games from Epic Games account. Please check/refresh your Epic Games cookie (--epic-cookie, the EPIC_COOKIE environment variable, or \"epicGamesCookie\" in your config) and try again.");
 		console.error(error.message ?? error);
+		console.error("\nIf Epic keeps blocking access, use the manual workaround: https://github.com/NikkelM/Steam-App-ID-Finder#workaround-if-the-tool-throws-an-error");
 		process.exit(1);
 	}
 
-	console.log(`\nWriting ${games.length} game names to "output/${CONFIG.mode}/epicGamesGameNames.txt"`);
-	fs.writeFileSync(`output/${CONFIG.mode}/epicGamesGameNames.txt`, games.join('\n'));
+	console.log(`\nWriting ${games.length} game names to "${outputDir()}/epicGamesGameNames.txt"`);
+	fs.writeFileSync(`${outputDir()}/epicGamesGameNames.txt`, games.join('\n'));
 }
 
 function addGamesFromOrders(orders, games) {

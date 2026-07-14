@@ -1,13 +1,28 @@
 {
 	"name": "steam-app-id-finder",
 	"type": "module",
-	"version": "1.8.0",
-	"description": "This project is a collection of utilities that can be used to find Steam App IDs for games from a variety of sources.",
+	"version": "2.0.0",
+	"description": "CLI to find Steam App IDs from game names or a Steam account, and export owned-game lists from GOG and Epic Games accounts.",
+	"keywords": [
+		"steam",
+		"steam-api",
+		"steam-app-id",
+		"app-id",
+		"appid",
+		"gog",
+		"epic-games",
+		"game-library",
+		"game-names"
+	],
 	"author": "NikkelM (https://github.com/NikkelM)",
 	"license": "GPL-3.0-or-later",
 	"homepage": "https://github.com/NikkelM/Steam-App-ID-Finder#readme",
 	"main": "index.js",
+	"bin": {
+		"steam-app-id-finder": "bin/cli.js"
+	},
 	"files": [
+		"bin/",
 		"index.js",
 		"js/",
 		"config/config.schema.json",
@@ -15,7 +30,7 @@
 		"config/*.default.json"
 	],
 	"engines": {
-		"node": ">=18"
+		"node": ">=22.13.0"
 	},
 	"scripts": {
 		"start": "node index.js",
@@ -27,13 +42,15 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/NikkelM/Steam-App-ID-Finder.git"
+		"url": "git+https://github.com/NikkelM/Steam-App-ID-Finder.git"
 	},
 	"bugs": {
 		"url": "https://github.com/NikkelM/Steam-App-ID-Finder/issues"
 	},
 	"dependencies": {
+		"@inquirer/prompts": "^8.5.2",
 		"cli-progress": "^3.11.2",
+		"commander": "^15.0.0",
 		"jsonschema": "^1.4.1",
 		"string-similarity": "^4.0.4"
 	}

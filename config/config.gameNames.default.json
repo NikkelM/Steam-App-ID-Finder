@@ -3,8 +3,7 @@
 	"mode": "gameNames",
 	"inputFile": {
 		"fileName": "gameNames",
-		"fileType": "txt",
-		"delimiter": ","
+		"fileType": "txt"
 	},
 	"steamAPIKey": "",
 	"onlyFullMatches": false,

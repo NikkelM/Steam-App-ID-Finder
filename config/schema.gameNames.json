@@ -5,8 +5,7 @@
 			"type": "object",
 			"default": {
 				"fileName": "gameNames",
-				"fileType": "txt",
-				"delimiter": ","
+				"fileType": "txt"
 			},
 			"properties": {
 				"fileName": {
@@ -24,30 +23,14 @@
 					]
 				},
 				"delimiter": {
-					"description": "The delimiter between game names when reading the game names from the input file.",
-					"type": "string",
-					"default": ","
+					"description": "The delimiter between game names in the input file. If omitted, defaults to a newline for \"txt\" files and a comma for \"csv\" files.",
+					"type": "string"
 				}
 			},
 			"required": [
 				"fileName",
 				"fileType"
 			],
-			"if": {
-				"properties": {
-					"fileType": {
-						"enum": [
-							"csv",
-							"txt"
-						]
-					}
-				}
-			},
-			"then": {
-				"required": [
-					"delimiter"
-				]
-			},
 			"additionalProperties": false
 		},
 		"onlyFullMatches": {

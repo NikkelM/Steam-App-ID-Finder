@@ -1,35 +1,15 @@
-// Description: This project is a collection of utilities that can be used to find Steam App IDs from a variety of sources.
+// Description: Find Steam App IDs from game names or a Steam account, and export owned-game lists from GOG and Epic Games accounts.
 
-// Suppresses the warning about the fetch API being unstable
-process.removeAllListeners('warning');
-
-import { CONFIG } from './js/utils.js';
-import { steamAppIDsFromGameNames } from './js/gameNames.js';
-import { steamAppIDsFromSteamAccount } from './js/steamGames.js';
-import { steamAppIDsFromGOGAccount } from './js/gogGames.js';
-import { getEpicGamesGames } from './js/epicGames.js';
+import { loadConfig } from './js/utils.js';
+import { runMode } from './js/run.js';
 
 // ---------- Main ----------
 
-await main();
-
-async function main() {
-	// Depending on the chosen "mode" in the config file, run the corresponding function
-	switch (CONFIG.mode) {
-		case 'gameNames':
-			await steamAppIDsFromGameNames();
-			break;
-		case 'steamAccount':
-			await steamAppIDsFromSteamAccount();
-			break;
-		case 'gogAccount':
-			await steamAppIDsFromGOGAccount();
-			break;
-		case 'epicGamesAccount':
-			await getEpicGamesGames();
-			break;
-		default:
-			console.error(`Error: No mode provided in the configuration file, or mode not supported: ${CONFIG.mode}.`);
-			process.exit(1);
-	}
+// Backwards-compatible entry point: load and validate the configuration file, then run the selected mode.
+// The CLI (bin/cli.js) is the primary interface.
+try {
+	await runMode(loadConfig());
+} catch (error) {
+	console.error("Error: " + (error?.message ?? error));
+	process.exit(1);
 }

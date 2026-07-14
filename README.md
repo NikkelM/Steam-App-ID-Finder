@@ -2,16 +2,17 @@
 
 ![Steam Banner](./images/SteamAppIdFinderBanner.png)
 
-This project is a collection of utilities that can be used to find Steam App IDs from a variety of sources.
+[![npm version](https://img.shields.io/npm/v/steam-app-id-finder)](https://www.npmjs.com/package/steam-app-id-finder)
+[![Tests](https://github.com/NikkelM/Steam-App-ID-Finder/actions/workflows/test.yml/badge.svg)](https://github.com/NikkelM/Steam-App-ID-Finder/actions/workflows/test.yml)
+<!-- [![npm downloads](https://img.shields.io/npm/dt/steam-app-id-finder)](https://www.npmjs.com/package/steam-app-id-finder) -->
 
-Choose from one of the `modes` described in [this section](#modes) to find the Steam App IDs from the source you are interested in.
+Find Steam App IDs from game names or a Steam account, and export owned-game lists from GOG and Epic Games accounts.
 
 ## Table of contents
 
-- [Setup](#setup)
+- [Installation](#installation)
 - [Usage](#usage)
 - [Output](#output)
-- [Configuration](#configuration)
 - [Modes](#modes)
 	- [Mode: `gameNames`](#mode-gamenames)
 	- [Mode: `steamAccount`](#mode-steamaccount)
@@ -20,103 +21,109 @@ Choose from one of the `modes` described in [this section](#modes) to find the S
 - [Related projects](#related-projects)
 - [Feedback](#feedback)
 
-## Setup
+## Installation
 
-Run `npm install` to install the required dependencies first.
+Run it on demand without installing anything (requires [Node.js](https://nodejs.org) 22.13 or newer):
 
-Following this, create a `config.json` file in the `config` directory of the project and fill it with your desired [configuration](#configuration).
-Use the default configuration file (`config.<mode>.default.json`) for the mode in which you wish to run the utility as a template if you wish.
+```bash
+npx steam-app-id-finder <command> [options]
+```
+
+Or install it globally to get a persistent `steam-app-id-finder` command:
+
+```bash
+npm install -g steam-app-id-finder
+```
 
 ## Usage
 
-After providing the `config.json` [configuration](#configuration) file and any additional input files if required by the mode, you can run the script using
+Each [mode](#modes) is a command.
+There are three ways to provide a mode's options:
+
+1. **Command-line flags** - the quickest way, documented for each mode below. For example:
+   ```bash
+   npx steam-app-id-finder gameNames --input games --steam-api-key <yourKey>
+   ```
+2. **The interactive wizard** - `steam-app-id-finder init` asks you a few questions, writes a `config.json`, and offers to run it right away.
+3. **A configuration file** - `steam-app-id-finder run` runs a `config.json` from the current directory (or pass `--config <path>`). This is handy for a setup you reuse often; the wizard can create the file for you, or you can write it by hand. Running a mode command with no flags (for example `steam-app-id-finder gameNames`) also falls back to this `config.json`, as long as its `mode` matches the command.
+
+List every command and its flags with:
 
 ```bash
-node index.js
+steam-app-id-finder --help
+steam-app-id-finder <command> --help
 ```
+
+Credentials can also be provided through environment variables instead of flags, which keeps them out of your shell history: `STEAM_API_KEY`, `GOG_REFRESH_TOKEN` and `EPIC_COOKIE`.
+
+> Configuration files are validated against a JSON schema (`config.schema.json`, shipped with the package).
+If you keep a copy of the schema next to your `config.json`, add `"$schema": "config.schema.json"` to it and your editor will flag mistakes as you type.
 
 ## Output
 
-All modes will save their respective output in the `output/<mode>` folder.
-You can find additional information about the output of each mode in the respective section below.
+Every mode writes its results to an `output/<mode>/` folder in the current working directory.
+Use `-o, --out <dir>` (or the `outputDirectory` config key) to write to a different base directory instead of `output`; the `<mode>` subfolder is always created inside it.
+See each mode's section for the exact files it produces.
 
-## Configuration
+## Modes
 
-The different modes have different requirements when it comes to the kind of input they require, and each mode gives you different options to configure the script's behaviour.
-For each `mode`, a default configuration is provided in the `config.<mode>.default.json` file, which you can use as a template for your own configuration file.
-
-### Schema validation
-
-The project provides an extensive `JSON` validation schema, which can help you with formatting your input and give you an idea of the options you have.
-
-The schema can be found in the `config.schema.json` file and used within your `config.json` by adding the following property:
-
-```json
-"$schema": "config.schema.json"
-```
-
-*NOTE: The script will always test your provided `config.json` against this schema, so make sure your configuration is valid.*
-*By adding the schema to your `config.json`, you will receive information about mistakes in the configuration.*
-
-### Properties
-
-The following is a list of all configuration items that are required no matter which `mode` you choose.
-
-If any given property is not present in the configuration file, it will automatically be assumed to have a value of `false` (or equivalent, depending on the property type).
-
-<details>
-<summary><code>mode</code></summary>
-
-The mode in which the script should run. Choose from any of the supported modes listed in the sections below.
-
-| Type | Default value | Possible values | Required |
-| --- | --- | --- | --- |
-| `string` | `gameNames` | `gameNames`, `steamAccount`, `gogAccount`, `epicGamesAccount` | Yes |
-</details>
-
-# Modes
-
-You can choose from any of the following modes when running the script:
-
-- [`gameNames`](#mode-gamenames): Do you have a list of game names and want to know which Steam App IDs they correspond to?
-This mode is able to find the Steam App IDs for any number of provided game names, even if the provided name is not an exact match to the game in the Steam database.
-- [`steamAccount`](#mode-steamaccount): This mode will fetch all apps (this includes games, but also e.g. soundtracks or movies) from a given Steam account and save them to a file.
-Make sure that the account's game library is public, otherwise the script will not be able to access it.
-- [`gogAccount`](#mode-gogaccount): With this mode, you can get the names for all games in your GOG account.
-You can then use this output as input for the [`gameNames`](#mode-gamenames) mode to find the Steam App IDs for the games.
-- [`epicGamesAccount`](#mode-epicgamesaccount): This mode enables you to get a list of all games you have ever purchased (excluding those that are refunded) on the Epic Games Store - including the weekly free game giveaways.
-You can then use this output as input for the [`gameNames`](#mode-gamenames) mode to find the Steam App IDs for the games.
+- [`gameNames`](#mode-gamenames): Do you have a list of game names and want to know which Steam App IDs they correspond to? This mode finds the Steam App IDs for any number of provided game names, even if a name is not an exact match to the game in the Steam database.
+- [`steamAccount`](#mode-steamaccount): Fetch all apps (this includes games, but also e.g. soundtracks or movies) from a given Steam account and save them to a file. The account's game library must be public.
+- [`gogAccount`](#mode-gogaccount): Get the names of all games in your GOG account. You can then feed this output into the [`gameNames`](#mode-gamenames) mode to find their Steam App IDs.
+- [`epicGamesAccount`](#mode-epicgamesaccount): Get a list of all games you have ever purchased (excluding refunds) on the Epic Games Store, including the weekly free giveaways. You can then feed this output into the [`gameNames`](#mode-gamenames) mode to find their Steam App IDs.
 
 ## Mode: `gameNames`
 
-> Since Steam retired the keyless `ISteamApps/GetAppList` endpoint, this mode now requires a Steam Web API key. You can get one for free here: [https://steamcommunity.com/dev/apikey](https://steamcommunity.com/dev/apikey). This app runs locally and does not send your API key to any third party. Keep this API key secret.
+> This mode requires a free Steam Web API key.
+> Get one at [https://steamcommunity.com/dev/apikey](https://steamcommunity.com/dev/apikey).
+> The tool runs locally and does not send your key anywhere; keep it secret.
+> You can also supply it via the `STEAM_API_KEY` environment variable instead of `--steam-api-key`.
 
-Do you have a list of game names and want to know which Steam App IDs they correspond to?
-This mode is able to find the Steam App IDs for any number of provided game names, even if the provided name is not an exact match to the game in the Steam database.
+This mode finds the Steam App IDs for all game names in an input file, starting with those that have an exact match in the Steam database.
+If no exact match is found, it matches the name to the Steam App ID of the game with the highest similarity score.
 
-When running the script in the `gameNames` mode, it will find the Steam App IDs for all game names provided in the specified input file, starting with those that have an exact match in the Steam database.
-If no exact match is found, the script will match the resulting game names to the Steam App ID of the game with the highest similarity score.
+Note that the mode will *always* find a match, even if the provided game name is not on Steam.
+Use `--threshold` to control false positives: a threshold of `0.65` finds almost all correct matches (games scoring lower are probably not on Steam) without too much clutter.
 
-Note that the script will *always* find a match, even if the provided game name is not on Steam.
-You can correct the number of false positives this may produce by providing a `partialMatchThreshold` in the [configuration](#configuration-gamenames) file.
-Through testing, I found that a threshold of 0.65 finds almost all correct matches (i.e. games with a lower score are probably not on Steam) without too much clutter, but you can adjust this depending on your list of games.
+### Usage
+
+```bash
+steam-app-id-finder gameNames --input <fileName> --steam-api-key <yourKey> [options]
+```
+
+The input is a plain-text or CSV file of game names in the current directory.
+For example, with a `games.txt` next to you:
+
+```bash
+steam-app-id-finder gameNames --input games --steam-api-key <yourKey> --threshold 0.7
+```
+
+### Options
+
+| Flag | Config key | Description | Required |
+| --- | --- | --- | --- |
+| `-i, --input <name>` | `inputFile.fileName` | Input file name, without the extension. | Yes |
+| `-k, --steam-api-key <key>` | `steamAPIKey` | Your Steam Web API key (or the `STEAM_API_KEY` env var). | Yes |
+| `-t, --type <type>` | `inputFile.fileType` | Input file type: `txt` or `csv`. Default `txt`. | No |
+| `-d, --delimiter <char>` | `inputFile.delimiter` | Delimiter between game names. Defaults to a newline for `txt` and a comma for `csv`. | No |
+| `--only-full-matches` | `onlyFullMatches` | Only output full matches; skip partial matches. Default `false`. | No |
+| `--threshold <number>` | `partialMatchThreshold` | Minimum similarity (`0`-`1`) for a partial match. `0` matches everything, `1` only full (case-insensitive) matches. Default `0.65`. | No |
+| `-o, --out <dir>` | `outputDirectory` | Base directory for output files. Default `output`. | No |
 
 ### Output
 
 You will find the resulting data in the created `output/gameNames` folder.
 
-For games with a single full match, the results will be saved in a file called `steamAppIds_fullMatches.json`, with the games' names as keys and their corresponding Steam App IDs as values.
+For games with a single full match, the results are saved in `steamAppIds_fullMatches.json`, with the games' names as keys and their corresponding Steam App IDs as values.
 
-For games with multiple full matches, the results will be saved in a file called `steamAppIds_multipleFullMatches.json`, with the games' names as keys and an array of the corresponding Steam App IDs as values.
-You can use tools such as [steamDB](https://steamdb.info/) to find out which of the found Steam App IDs is the correct one for your game.
+For games with multiple full matches, the results are saved in `steamAppIds_multipleFullMatches.json`, with the games' names as keys and an array of the corresponding Steam App IDs as values.
+You can use tools such as [steamDB](https://steamdb.info/) to find out which App ID is the correct one.
 
-For partial matches, the results will be saved in a file called `steamAppIds_bestMatch.json`, with the games' names as keys and the name and Steam App ID of the most similar game name as well as the similarity score as the value.
+For partial matches, the results are saved in `steamAppIds_bestMatch.json`, with the games' names as keys and the name, Steam App ID and similarity score of the most similar game as the value.
 
-Games for which no satisfying match was found (due to the similarity score being below the `partialMatchThreshold`) will be saved in a file called `steamAppIds_noMatch.json`.
+Games for which no satisfying match was found (similarity below `--threshold`) are saved in `steamAppIds_noMatch.json`.
 
-Find some examples of the output format for a partial match below:
-
-#### Examples
+Some examples of the output format for a partial match:
 
 ```json
 {
@@ -128,7 +135,7 @@ Find some examples of the output format for a partial match below:
 }
 ```
 
-In this case, the matched game was correct, but this is not always the case:
+In this case the matched game was correct, but this is not always the case:
 
 ```json
 {
@@ -140,370 +147,149 @@ In this case, the matched game was correct, but this is not always the case:
 }
 ```
 
-Such a mismatch can have a number of reasons, in the case of `Control` it is that Steam does not list the base `Control` game (only `Control Ultimate Edition`), so no full match is found. The short search term then ends up more similar to unrelated games such as `MAXCONTROL` (similarity `0.8`) than to the actual `Control Ultimate Edition` (which only scores `0.44`), leading to the wrong game being matched.
+Such a mismatch can have a number of reasons; in the case of `Control` it is that Steam does not list the base `Control` game (only `Control Ultimate Edition`), so no full match is found.
+The short search term then ends up more similar to unrelated games such as `MAXCONTROL` (similarity `0.8`) than to the actual `Control Ultimate Edition` (which only scores `0.44`), leading to the wrong game being matched.
 
 These examples also show well how a higher similarity score does not necessarily mean a better match.
 
 #### Matches with a similarity score of 1
 
 It is possible for a game to have a partial match with a similarity score of 1.
-This can happen as the search for full matches is case-sensitive, but the search for partial matches is not, meaning that the following two game names would *not* be considered a full match, but their similarity score would be 1:
+This can happen because the search for full matches is case-sensitive, while the search for partial matches is not, meaning the following two game names would *not* be considered a full match, but their similarity score would be 1:
 
 - `My Time at Portia`
 - `My Time At Portia`
 
-### Configuration: `gameNames`
-
-#### Properties
-
-The following is a list of all configuration items, their defaults and the values they can take.
-
-<details>
-<summary><code>inputFile</code></summary>
-
-The file to read the game names from.
-
-| Type | Default value | Possible values | Required |
-| --- | --- | --- | --- |
-| `object` | See item below | See sections below | Yes |
-
-```json
-"inputFile": {
-  "fileName": "gameNames",
-  "fileType": "txt",
-  "delimiter": ","
-}
-```
-
-<h3>Possible values</h3>
-
-<h4><code>fileName</code></h4>
-
-The name of the file to read the game names from.
-
-Note: Do *not* provide the file's type/extension here.
-
-| Type | Default value | Possible values | Required |
-| --- | --- | --- | --- |
-| `string` | `gameNames` | Any valid file name | Yes |
-
-<h4><code>fileType</code></h4>
-
-The file type of the input file.
-Choose from any of the supported file types listed.
-
-| Type | Default value | Possible values | Required |
-| --- | --- | --- | --- |
-| `string` | `txt` | `txt`, `csv` | Yes |
-
-<h4><code>delimiter</code></h4>
-
-The delimiter to use when parsing the input file.
-
-| Type | Default value | Possible values | Required |
-| --- | --- | --- | --- |
-| `string` | `,` | Any valid delimiter | Yes, if the file type requires it (`txt`, `csv`) |
-</details>
-
-
-<details>
-<summary><code>steamAPIKey</code></summary>
-
-Your Steam Web API key.
-You can get one for free here: [https://steamcommunity.com/dev/apikey](https://steamcommunity.com/dev/apikey).
-Steam retired the keyless `ISteamApps/GetAppList` endpoint, so this mode now fetches the list of Steam apps through `IStoreService/GetAppList`, which requires an API key.
-
-| Type | Default value | Possible values | Required |
-| --- | --- | --- | --- |
-| `string` | `""` | A valid Steam Web API key | Yes |
-</details>
-
-<details>
-<summary><code>onlyFullMatches</code></summary>
-
-Whether to only get Steam App IDs for full matches or also for partial matches.
-If set to `false`, partial matches will be saved to a different output file.
-
-| Type | Default value | Possible values | Required |
-| --- | --- | --- | --- |
-| `boolean` | `false` | `true`, `false` | No |
-</details>
-
-<details>
-<summary><code>partialMatchThreshold</code></summary>
-
-The threshold for partial matches.
-This means that the most similar game name must have a similarity score of at least this threshold to be added to the output.
-The threshold must be between `0` and `1`.
-Use `0` to get a match for every game and `1` to only get full matches (case insensitive).
-If the value is omitted, a match will be found for every game.
-
-| Type | Default value | Possible values | Required |
-| --- | --- | --- | --- |
-| `number` | `0.65` | Number between `0` and `1` | No |
-</details>
-
 ## Mode: `steamAccount`
 
-> You will need to provide a Steam Web API key for this mode to work. You can get one for free here: [https://steamcommunity.com/dev/apikey](https://steamcommunity.com/dev/apikey). This app runs locally and does not send your API key to any third party. Keep this API Key secret.
+> This mode requires a free Steam Web API key.
+> Get one at [https://steamcommunity.com/dev/apikey](https://steamcommunity.com/dev/apikey).
+> The tool runs locally and does not send your key anywhere; keep it secret.
+> You can also supply it via the `STEAM_API_KEY` environment variable instead of `--steam-api-key`.
 
-> You will additionally need to provide the account's `SteamID64`, which is a 17-digit number that uniquely identifies a Steam account. See the `steamId` category in the [configuration section](#configuration-steamaccount) for more information on how to find this ID.
+This mode fetches all apps (this includes games, but also e.g. soundtracks or movies) from a given Steam account and saves them to a file.
+The account's game library must be public if it is not your own, otherwise the tool cannot access it.
+You can check whether a library is public by opening [https://steamcommunity.com/id/<accountName>/games](https://steamcommunity.com/id/accountName/games) in a private browsing session.
 
-This mode will fetch all apps (this includes games, but also e.g. soundtracks or movies) from a given Steam account and save them to a file.
-Make sure that the account's game library is public if it is not your own, otherwise the script will not be able to access it.
+### Usage
 
-You can check if the game library for a given `accountName` is public by logging out of Steam (or opening a private browsing session) and visiting this link: [https://steamcommunity.com/id/<accountName>/games](https://steamcommunity.com/id/accountName/games).
+```bash
+steam-app-id-finder steamAccount --steam-id <steamID64> --steam-api-key <yourKey> [--props <list>]
+```
+
+### Options
+
+| Flag | Config key | Description | Required |
+| --- | --- | --- | --- |
+| `-s, --steam-id <id>` | `steamId` | The account's SteamID64 (17-digit number). Find it under your account name at [store.steampowered.com/account](https://store.steampowered.com/account/), in a profile URL (`.../profiles/<id>/`), or via [steamid.io](https://steamid.io). | Yes |
+| `-k, --steam-api-key <key>` | `steamAPIKey` | Your Steam Web API key (or the `STEAM_API_KEY` env var). | Yes |
+| `-p, --props <list>` | `outputProperties` | Comma-separated list of properties to include. Default `appID,name`. | No |
+| `-o, --out <dir>` | `outputDirectory` | Base directory for output files. Default `output`. | No |
+
+The available `--props` values are: `appID` (the game's App ID), `name` (its name), `logo` (URL to the logo), `storeLink` (URL to the store page), `statsLink` (URL to this user's stats page for the game), and `globalStatsLink` (URL to the global stats page).
+Properties that are not available for an app are omitted from the output.
 
 ### Output
 
-You will find the resulting data in the created `output/steamAccount` folder in a file named after the account's Steam ID.
-
-### Configuration: `steamAccount`
-
-#### Properties
-
-The following is a list of all configuration items, their defaults and the values they can take.
-
-<details>
-<summary><code>steamId</code></summary>
-
-The Steam ID of the Steam account for which the App IDs should be fetched.
-The Steam ID is a 17-digit number that uniquely identifies a Steam account.
-It is located under your account name on the top left of [https://store.steampowered.com/account/](https://store.steampowered.com/account/).
-The Steam ID can also be found in the URL when viewing a profile, the URL will look similar to https://steamcommunity.com/profiles/00000000000000000/.
-Alternatively, use sites such as [https://steamid.io](https://steamid.io) to get the `SteamID64` value for a given account name.
-
-| Type | Default value | Possible values | Required |
-| --- | --- | --- | --- |
-| `string` | `steamId` | A valid 17-digit SteamID64 value | Yes |
-</details>
-
-<details>
-<summary><code>steamAPIKey</code></summary>
-
-Your Steam Web API key.
-You can get one for free here: [https://steamcommunity.com/dev/apikey](https://steamcommunity.com/dev/apikey).
-
-| Type | Default value | Possible values | Required |
-| --- | --- | --- | --- |
-| `string` | `steamAPIKey` | A valid Steam Web API key | Yes |
-</details>
-
-<details>
-<summary><code>outputProperties</code></summary>
-
-Which of the properties provided by the Steam API should be included in the resulting `JSON` object. Properties that are not available for an app will be omitted in the output.
-
-| Type | Default value | Possible values | Required |
-| --- | --- | --- | --- |
-| `object` | See item below | See sections below | Yes, and at least one property defined |
-
-```json
-{
-	"appID": true,
-	"name": true,
-	"logo": false,
-	"storeLink": false,
-	"statsLink": false,
-	"globalStatsLink": false
-}
-```
-</details>
-
-#### outputProperties
-
-You can choose any combination (at least one) of the following properties to be included in the output file:
-
-<details>
-<summary><code>appID</code></summary>
-
-The App ID of the game.
-
-| Type | Default value | Possible values | Required |
-| --- | --- | --- | --- |
-| `boolean` | `true` | `true`, `false` | No |
-</details>
-
-<details>
-<summary><code>name</code></summary>
-
-The name of the game.
-
-| Type | Default value | Possible values | Required |
-| --- | --- | --- | --- |
-| `boolean` | `true` | `true`, `false` | No |
-</details>
-
-<details>
-<summary><code>logo</code></summary>
-
-The URL to the game's logo.
-
-| Type | Default value | Possible values | Required |
-| --- | --- | --- | --- |
-| `boolean` | `false` | `true`, `false` | No |
-</details>
-
-<details>
-<summary><code>storeLink</code></summary>
-
-The URL to the game's store page.
-
-| Type | Default value | Possible values | Required |
-| --- | --- | --- | --- |
-| `boolean` | `false` | `true`, `false` | No |
-</details>
-
-<details>
-<summary><code>statsLink</code></summary>
-
-The URL to this users stats page for this game.
-
-| Type | Default value | Possible values | Required |
-| --- | --- | --- | --- |
-| `boolean` | `false` | `true`, `false` | No |
-</details>
-
-<details>
-<summary><code>globalStatsLink</code></summary>
-
-The URL to the global stats page for this game.
-
-| Type | Default value | Possible values | Required |
-| --- | --- | --- | --- |
-| `boolean` | `false` | `true`, `false` | No |
-</details>
+You will find the resulting data in the created `output/steamAccount` folder, in a file named after the account's Steam ID.
 
 ## Mode: `gogAccount`
 
-With this mode, you can get the names for all games in your GOG account. You can then use this output as input for the [`gameNames`](#mode-gamenames) mode to find the Steam App IDs for the games.
+Get the names of all games in your GOG account.
+You can then feed the output into the [`gameNames`](#mode-gamenames) mode to find their Steam App IDs.
 
-Unfortunately, due to limitations of the GOG API, setup for this mode is a bit more complicated than for the other modes:
+Because of limitations of the GOG API, this mode needs a one-time login to obtain an access token.
 
-### Setup
+### Getting a login code
 
-Start setting up as usual by creating a `config.json` file in the `config` folder with the `mode` set to `gogAccount`.
+1. Open the official [GOG login page](https://auth.gog.com/auth?client_id=46899977096215655&redirect_uri=https%3A%2F%2Fembed.gog.com%2Fon_login_success%3Forigin%3Dclient&response_type=code&layout=client2) and log in.
+2. You will be redirected to a blank page with a URL like `https://embed.gog.com/on_login_success?origin=client&code=1234567890abcdef`.
+3. Copy the value of the `code` parameter.
 
-If you are using this mode for the first time, you will need to log in to your GOG account using this link to the official [GOG login page](https://auth.gog.com/auth?client_id=46899977096215655&redirect_uri=https%3A%2F%2Fembed.gog.com%2Fon_login_success%3Forigin%3Dclient&response_type=code&layout=client2), with a custom response type.
+### Usage
 
-After logging in, you will be redirected to a blank page with a URL that looks something like this: 
+Run the mode with the login code **immediately** - it is only valid for about 60 seconds:
 
-```text
-https://embed.gog.com/on_login_success?origin=client&code=1234567890abcdef
+```bash
+steam-app-id-finder gogAccount --gog-login-code <code>
 ```
 
-Copy the value of the `code` parameter from this URL and set it as the value of the `gogLoginCode` property in the `config.json` file.
-This allows the script to generate an access token for your GOG account, which authenticates you for the GOG API.
+On success, the tool writes a long-lived refresh token to `output/gogAccount/gogRefreshToken.txt`. Use it on future runs to skip the login step (via `--refresh-token`, or the `GOG_REFRESH_TOKEN` environment variable):
 
-After setting the `gogLoginCode` property, run the script immediately - the login code is only valid for 60 seconds, after which it will expire and you would need to log in again.
+```bash
+steam-app-id-finder gogAccount --refresh-token <token>
+```
 
-After running the script once, you will find a file named `gogRefreshToken.txt` in the `output/gogAccount` folder.
-This file contains the refresh token for your GOG account, which allows the script to generate a new access token when the current one expires.
-To run the script with this refresh token in use, set it as the value of the `refreshToken` property in the `config.json` file.
-You can then remove the `gogLoginCode` property from the `config.json` file.
+### Options
+
+| Flag | Config key | Description | Required |
+| --- | --- | --- | --- |
+| `--gog-login-code <code>` | `gogLoginCode` | A fresh GOG login code (valid ~60 seconds). Ignored if a refresh token is given. | One of the two |
+| `-r, --refresh-token <token>` | `refreshToken` | A GOG refresh token from a previous run (or the `GOG_REFRESH_TOKEN` env var). | One of the two |
+| `-o, --out <dir>` | `outputDirectory` | Base directory for output files. Default `output`. | No |
 
 ### Output
 
-You will find the list of games in your GOG account in the `output/gogAccount` folder as a `.txt` file named `gogGameNames.txt`.
-You can use this file as input for the [`gameNames`](#mode-gamenames) mode to find the Steam App IDs for the games.
-To do this, simply set the following as the value of the `inputFile` property in the `config.json` file, along with the other configuration options:
+The list of games is written to `output/gogAccount/gogGameNames.txt`, and the current refresh token to `output/gogAccount/gogRefreshToken.txt` for reuse.
 
-```json
-"inputFile": {
-	"fileName": "output/gogAccount/gogGameNames",
-	"fileType": "txt",
-	"delimiter": "\n"
-}
+The file is newline-separated, which is the default for `txt` input, so you can feed it straight into the [`gameNames`](#mode-gamenames) mode:
+
+```bash
+steam-app-id-finder gameNames --input output/gogAccount/gogGameNames --steam-api-key <yourKey>
 ```
-
-The script will also save the current refresh token to the `gogRefreshToken.txt` file in the `output/gogAccount` folder.
-You can use this token to avoid needing to log in again when using the script in the (near) future.
-
-### Configuration: `gogAccount`
-
-#### Properties
-
-The following is a list of all configuration items, their defaults and the values they can take.
-
-<details>
-<summary><code>gogLoginCode</code></summary>
-
-The code you received after logging in.
-Be fast, this code is only valid for one minute.
-If you don't start the script within that time, it will not be able to generate an access token from it.
-If a refresh token is also provided, this option is ignored.
-
-| Type | Default value | Possible values | Required |
-| --- | --- | --- | --- |
-| `string` | `"gogLoginCodeHereIfAvailable"` | A valid login code for your account | Yes, if no `refreshToken` is provided |
-</details>
-
-<details>
-<summary><code>refreshToken</code></summary>
-
-If you have used the script before and have a refresh token, enter it here to avoid having to log in again to generate a login code.
-After running the script, the refresh token will be saved to `output/gogAccount/gogRefreshToken.txt`.
-You can then use it here to avoid having to log in again.
-
-| Type | Default value | Possible values | Required |
-| --- | --- | --- | --- |
-| `string` | `"refreshTokenHereIfAvailable"` | A valid refresh token for your account | Yes, if no `gogLoginCode` is provided |
-</details>
 
 ## Mode: `epicGamesAccount`
 
-> This mode reads your purchase history from Epic's account API (`accounts.epicgames.com`) using a browser cookie (see the setup steps below). If Epic changes their access protection and the tool can no longer reach your account, use the [workaround](#workaround-if-the-tool-throws-an-error) provided below.
+> This mode reads your purchase history from Epic's account API (`accounts.epicgames.com`) using a browser cookie (see below).
+> If Epic changes their access protection and the tool can no longer reach your account, use the [workaround](#workaround-if-the-tool-throws-an-error).
 
-This mode enables you to get a list of all games you have ever purchased (excluding those that are refunded) on the Epic Games Store - including the weekly free game giveaways.
-You can then use this output as input for the [`gameNames`](#mode-gamenames) mode to find the Steam App IDs for the games.
+Get a list of all games you have ever purchased (excluding refunds) on the Epic Games Store, including the weekly free giveaways.
+You can then feed the output into the [`gameNames`](#mode-gamenames) mode to find their Steam App IDs.
 
-Unfortunately, due to Epic Games not providing a dedicated public API for this, the setup for this mode is a bit more complicated than for the other modes:
+### Getting the cookie
 
-### Setup
+Epic does not provide a public API for this, so you need to supply the value of your `EPIC_BEARER_TOKEN` cookie:
 
-Start setting up as usual by creating a `config.json` file in the `config` folder with the `mode` set to `epicGamesAccount`.
+1. Open [https://accounts.epicgames.com/account/transactions/purchases](https://accounts.epicgames.com/account/transactions/purchases) in your browser, logging in if necessary.
+2. Open your browser's developer tools (usually `F12` or `Ctrl+Shift+I`) and go to the `Application` tab (Chrome/Edge) or the `Storage` tab (Firefox).
+3. Expand `Cookies`, select `https://accounts.epicgames.com`, and find the `EPIC_BEARER_TOKEN` cookie. It is valid for about 8 hours, after which you repeat these steps.
+4. Copy the `Value` of that cookie. The tool runs locally and does not send your cookie anywhere; keep it secret.
 
-You will see that you only need to provide one additional configuration item: `epicGamesCookie`.
-As mentioned before, Epic Games does not provide a public API for getting a list of games owned by a user (as e.g. Steam does), so we need to use a workaround to get this information.
+### Usage
 
-To allow the script to access your account's purchase history, you need to provide it with a cookie (`EPIC_BEARER_TOKEN`) that allows temporary access to your account purchase history.
-You can get this cookie by following the steps below:
+Pass the cookie's **value** through `--epic-cookie` (you can also use the `EPIC_COOKIE` environment variable):
 
-1. Open the following page in your browser: [https://accounts.epicgames.com/account/transactions/purchases](https://accounts.epicgames.com/account/transactions/purchases), logging in if necessary.
-2. Open your browser's developer tools (usually `F12` or `Ctrl+Shift+I`) and go to the `Application` tab (in Google Chrome/Microsoft Edge) or the `Storage` tab (in Firefox).
-3. In the sidebar, expand `Cookies` and select the `https://accounts.epicgames.com` entry, then find the `EPIC_BEARER_TOKEN` cookie. This token will be valid for 8 hours, after which you will need to repeat the steps above to get a new cookie.
-4. Copy the `Value` of this cookie and set it as the value of the `epicGamesCookie` property in the `config.json` file. This app runs locally and does not send your cookie to any third party. Keep this cookie secret.
-
-```json
-"epicGamesCookie": "<yourCopiedCookieValue>"
+```bash
+steam-app-id-finder epicGamesAccount --epic-cookie <yourCopiedCookieValue>
 ```
 
-You can now run the script as usual to get a list of all games that are present in the Epic Games purchase history of your account.
-It is possible that the number of game names you get from this utility is shorter than the amount of games you see in your library, as items such as beta branches and DLCs are sometimes not included in the purchase history.
+The number of games may be shorter than your library, as items such as beta branches and DLCs are sometimes not included in the purchase history.
+
+### Options
+
+| Flag | Config key | Description | Required |
+| --- | --- | --- | --- |
+| `-e, --epic-cookie <value>` | `epicGamesCookie` | The value of your `EPIC_BEARER_TOKEN` cookie (or the `EPIC_COOKIE` env var). | Yes |
+| `-o, --out <dir>` | `outputDirectory` | Base directory for output files. Default `output`. | No |
 
 ### Output
 
-You will find the list of games in your Epic Games purchase history in the `output/epicGamesAccount` folder as a `.txt` file named `epicGamesGameNames.txt`.
-You can use this file as input for the [`gameNames`](#mode-gamenames) mode to find the Steam App IDs for the games.
-To do this, simply set the following as the value of the `inputFile` property in the `config.json` file, along with the other configuration options:
+The list of games is written to `output/epicGamesAccount/epicGamesGameNames.txt`.
+It is newline-separated, which is the default for `txt` input, so you can feed it straight into the [`gameNames`](#mode-gamenames) mode:
 
-```json
-"inputFile": {
-	"fileName": "output/epicGamesAccount/epicGamesGameNames",
-	"fileType": "txt",
-	"delimiter": "\n"
-}
+```bash
+steam-app-id-finder gameNames --input output/epicGamesAccount/epicGamesGameNames --steam-api-key <yourKey>
 ```
 
 ### Workaround if the tool throws an error
 
-If the tool throws an error when trying to fetch games from your Epic Games account, it is possible that the tool's access to your account is being blocked by an additional security check run by Epic Games.
-As a workaround, please follow the following steps to manually fetch a list of games from the browser:
+If the tool throws an error when trying to fetch games from your Epic Games account, it is possible that its access is being blocked by an additional security check run by Epic Games.
+As a workaround, you can fetch the list manually from your browser:
 
 1. Log in to your account and go to [https://accounts.epicgames.com/account/transactions/purchases](https://accounts.epicgames.com/account/transactions/purchases).
 2. Open the developer console of your browser (usually by pressing `F12` or `Ctrl+Shift+I`).
-3. Go to the `Console` tab of the console. This is usually the default tab when opening the developer view.
-4. Paste the following code snippet into the console and press `Enter`. This will fetch the list of purchased games from your account using the same method as the tool would.
+3. Go to the `Console` tab. This is usually the default tab when opening the developer view.
+4. Paste the following code snippet into the console and press `Enter`. This fetches the list of purchased games using the same method as the tool.
 
 ```javascript
 const fetchGamesList = async (pageToken = '', existingList = []) => { 
@@ -521,31 +307,16 @@ fetchGamesList().then(console.log);
 6. Right-click on the output (the list of game names) and select `Copy object`.
 7. Create a new text (`.txt`) file (e.g. through Notepad), paste the copied object into the file and save it.
 
-Optionally, you can now use the saved file as input for the [`gameNames`](#mode-gamenames) mode to find the Steam App IDs for the games.
-Note that due to the formatting of the output you get from the workaround, you will need to set the following as the `delimiter` option in your configuration file to get the best results: `\",\r\n    \"`
-For best results, also remove the leading `[` and trailing `]` from the file.
-
-### Configuration: `epicGamesAccount`
-
-#### Properties
-
-The following is a list of all configuration items, their defaults and the values they can take.
-
-<details>
-<summary><code>epicGamesCookie</code></summary>
-
-The value of the EPIC_BEARER_TOKEN cookie for your Epic Games account. You can find more information in the setup section above.
-
-| Type | Default value | Possible values | Required |
-| --- | --- | --- | --- |
-| `string` | `"1234567890abcdef"` | The value of a valid `EPIC_BEARER_TOKEN` cookie | Yes |
-</details>
+You can now use the saved file as input for the [`gameNames`](#mode-gamenames) mode.
+Due to the formatting of the copied output, set `--delimiter` to `\",\r\n    \"` for the best results, and remove the leading `[` and trailing `]` from the file first.
 
 ## Related projects
 
-Wondering what to do with the Steam App IDs you just found? You could try organizing all of your Steam games in Notion using the [Notion Steam API integration](https://github.com/NikkelM/Notion-Steam-API-Integration).
+Wondering what to do with the Steam App IDs you just found?
+You could try organizing all of your Steam games in Notion using the [Notion Steam API integration](https://github.com/NikkelM/Notion-Steam-API-Integration).
 
-Would you like to know what games are currently available on Game Pass for your platform? Check out the [Game Pass API](https://github.com/NikkelM/Game-Pass-API) project.
+Would you like to know what games are currently available on Game Pass for your platform?
+Check out the [Game Pass API](https://github.com/NikkelM/Game-Pass-API) project.
 
 ## Feedback
 

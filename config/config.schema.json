@@ -31,6 +31,11 @@
 					"title": "In this mode, the script gets the game names for all games owned (in this case, purchased, including weekly free games) by your Epic Games account. Due to Epic Games not providing a public API, some workarounds need to be taken. See the README.md for more information."
 				}
 			]
+		},
+		"outputDirectory": {
+			"description": "The directory to write output files to. Defaults to \"output\". A subfolder named after the mode is created inside it, so files end up in \"<outputDirectory>/<mode>/\".",
+			"type": "string",
+			"default": "output"
 		}
 	},
 	"required": [

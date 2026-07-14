@@ -4,9 +4,16 @@ import fs from 'fs';
 import stringSimilarity from 'string-similarity';
 import cliProgress from 'cli-progress';
 
-import { CONFIG } from './utils.js';
+import { CONFIG, outputDir } from './utils.js';
 
 // ----- Input -----
+
+// Resolve the input file path, tolerating the extension already being part of the
+// configured file name (it is expected without one, e.g. "games" -> "games.txt").
+function resolveInputPath() {
+	const { fileName, fileType } = CONFIG.inputFile;
+	return fileName.endsWith(`.${fileType}`) ? fileName : `${fileName}.${fileType}`;
+}
 
 async function loadInputGameNames() {
 	if (!["csv", "txt"].includes(CONFIG.inputFile.fileType)) {
@@ -14,17 +21,25 @@ async function loadInputGameNames() {
 		process.exit(1);
 	}
 
+	const inputPath = resolveInputPath();
+
+	let fileContents;
 	try {
-		var gameNames = fs.readFileSync(`${CONFIG.inputFile.fileName}.${CONFIG.inputFile.fileType}`, 'utf8');
+		fileContents = fs.readFileSync(inputPath, 'utf8');
 	} catch (error) {
-		console.error("Error: Could not read input file.");
-		console.error(error);
+		console.error(`\nERROR: Could not read the input file "${inputPath}".`);
+		console.error(error.code === 'ENOENT'
+			? "The file does not exist. Check that the path is correct and relative to your current directory."
+			: (error.message ?? error));
 		process.exit(1);
 	}
 
-	// Split the input by the provided delimiter, then trim any stray characters to ensure optimal full match functionality
-	return gameNames
-		.split(CONFIG.inputFile.delimiter)
+	// The delimiter defaults to a newline for txt files and a comma for csv files.
+	const delimiter = CONFIG.inputFile.delimiter ?? (CONFIG.inputFile.fileType === "csv" ? "," : "\n");
+
+	// Split the input by the delimiter, then trim any stray characters (e.g. a trailing \r) to ensure optimal full match functionality
+	return fileContents
+		.split(delimiter)
 		.map((gameName) => gameName.trim())
 		.filter((gameName) => gameName.length > 0);
 }
@@ -35,7 +50,7 @@ async function fetchSteamApps() {
 	if (!apiKey) {
 		console.error("\nERROR: A Steam Web API key is required to fetch the list of Steam apps.");
 		console.error("Steam retired the keyless \"ISteamApps/GetAppList\" endpoint; this mode now uses \"IStoreService/GetAppList\", which needs an API key.");
-		console.error("Add a free Steam Web API key (https://steamcommunity.com/dev/apikey) as \"steamAPIKey\" in your config.");
+		console.error("Provide a free Steam Web API key (https://steamcommunity.com/dev/apikey) via --steam-api-key, the STEAM_API_KEY environment variable, or \"steamAPIKey\" in your config.");
 		process.exit(1);
 	}
 
@@ -66,7 +81,7 @@ async function fetchSteamApps() {
 		if (!response.ok) {
 			const body = await response.text().catch(() => "");
 			console.error(`\nERROR: Steam's IStoreService/GetAppList responded with status ${response.status}${response.statusText ? ` ${response.statusText}` : ""}.`);
-			if (response.status === 403) console.error("A 403 usually means the \"steamAPIKey\" in your config is missing or invalid.");
+			if (response.status === 403) console.error("A 403 usually means your Steam Web API key (--steam-api-key / STEAM_API_KEY / \"steamAPIKey\") is missing or invalid.");
 			if (body) console.error(`Response body: ${body.slice(0, 200)}`);
 			process.exit(1);
 		}
@@ -97,13 +112,13 @@ async function fetchSteamApps() {
 export async function steamAppIDsFromGameNames() {
 	console.log("Running in \"gameNames\" mode.\n");
 
+	// Read the input file first, so a missing or empty input path fails fast, before the slow Steam fetch.
+	let gameNames = await loadInputGameNames();
+	console.log(`The input file (${resolveInputPath()}) contained ${gameNames.length} game names.`);
+
 	// Fetch Steam games from API
 	const steamApps = await fetchSteamApps();
-	console.log(`Found ${steamApps.length} games in Steam's database.`);
-
-	// Import the game names from the input file
-	let gameNames = await loadInputGameNames();
-	console.log(`The input file (${CONFIG.inputFile.fileName}.${CONFIG.inputFile.fileType}) contained ${Object.keys(gameNames).length} game names.\n`);
+	console.log(`Found ${steamApps.length} games in Steam's database.\n`);
 
 	// Find Steam App ID's for full matches
 	const { steamIDsSingleFullMatch, steamIDsMultipleFullMatches, remainingGameNames } = await findSteamAppIdsFullMatch(gameNames, steamApps);
@@ -111,12 +126,12 @@ export async function steamAppIDsFromGameNames() {
 
 	// Save the full matches to .json files
 	if (Object.keys(steamIDsSingleFullMatch).length > 0) {
-		console.log(`Writing game names and Steam App ID's for games with one full match (total of ${Object.keys(steamIDsSingleFullMatch).length}) to "output/${CONFIG.mode}/steamAppIds_fullMatches.json"...`);
-		fs.writeFileSync(`./output/${CONFIG.mode}/steamAppIds_fullMatches.json`, JSON.stringify(steamIDsSingleFullMatch, null, 2));
+		console.log(`Writing game names and Steam App ID's for games with one full match (total of ${Object.keys(steamIDsSingleFullMatch).length}) to "${outputDir()}/steamAppIds_fullMatches.json"...`);
+		fs.writeFileSync(`${outputDir()}/steamAppIds_fullMatches.json`, JSON.stringify(steamIDsSingleFullMatch, null, 2));
 	}
 	if (Object.keys(steamIDsMultipleFullMatches).length > 0) {
-		console.log(`Writing game names and Steam App ID's for games with multiple full matches (total of ${Object.keys(steamIDsMultipleFullMatches).length}) to "output/${CONFIG.mode}/steamAppIds_multipleFullMatches.json"...`);
-		fs.writeFileSync(`./output/${CONFIG.mode}/steamAppIds_multipleFullMatches.json`, JSON.stringify(steamIDsMultipleFullMatches, null, 2));
+		console.log(`Writing game names and Steam App ID's for games with multiple full matches (total of ${Object.keys(steamIDsMultipleFullMatches).length}) to "${outputDir()}/steamAppIds_multipleFullMatches.json"...`);
+		fs.writeFileSync(`${outputDir()}/steamAppIds_multipleFullMatches.json`, JSON.stringify(steamIDsMultipleFullMatches, null, 2));
 	}
 	console.log();
 
@@ -125,12 +140,12 @@ export async function steamAppIDsFromGameNames() {
 		const { steamIDsBestMatch, steamIDsNoMatch } = await findSteamAppIdsBestMatch(gameNames, steamApps);
 
 		// Save the best matches to a .json file
-		console.log(`\nWriting game names and Steam App ID's for partial matches to "output/${CONFIG.mode}/steamAppIds_bestMatch.json"...`);
-		fs.writeFileSync(`./output/${CONFIG.mode}/steamAppIds_bestMatch.json`, JSON.stringify(steamIDsBestMatch, null, 2));
+		console.log(`\nWriting game names and Steam App ID's for partial matches to "${outputDir()}/steamAppIds_bestMatch.json"...`);
+		fs.writeFileSync(`${outputDir()}/steamAppIds_bestMatch.json`, JSON.stringify(steamIDsBestMatch, null, 2));
 
 		if (Object.keys(steamIDsNoMatch).length > 0) {
-			console.log(`Writing the names of the remaining ${Object.keys(steamIDsNoMatch).length} games for which no satisfying match was found to "output/${CONFIG.mode}/steamAppIds_noMatch.json"...`);
-			fs.writeFileSync(`./output/${CONFIG.mode}/steamAppIds_noMatch.json`, JSON.stringify(steamIDsNoMatch, null, 2));
+			console.log(`Writing the names of the remaining ${Object.keys(steamIDsNoMatch).length} games for which no satisfying match was found to "${outputDir()}/steamAppIds_noMatch.json"...`);
+			fs.writeFileSync(`${outputDir()}/steamAppIds_noMatch.json`, JSON.stringify(steamIDsNoMatch, null, 2));
 		}
 	}
 }
