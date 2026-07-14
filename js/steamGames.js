@@ -21,6 +21,10 @@ export async function steamAppIDsFromSteamAccount() {
 		process.exit(1);
 	}
 
+	// Normalize to the validated values so the request, output file name, and links use the trimmed forms
+	CONFIG.steamId = steamId;
+	CONFIG.steamAPIKey = apiKey;
+
 	console.log(`Getting information for apps owned by Steam account ID "${CONFIG.steamId}"...`);
 
 	const rawGameList = await getGameList();
@@ -58,6 +62,9 @@ async function getGameList() {
 		if (!response.ok) {
 			const body = await response.text().catch(() => '');
 			console.error(`Steam Web API responded with status ${response.status}${response.statusText ? ' ' + response.statusText : ''}`);
+			if (response.status === 401 || response.status === 403) {
+				console.error('This usually means your Steam Web API key is invalid or revoked. Verify or regenerate it at https://steamcommunity.com/dev/apikey.');
+			}
 			if (body) console.error('Response body:', body);
 			throw new Error(`Steam Web API responded with status ${response.status}`);
 		}

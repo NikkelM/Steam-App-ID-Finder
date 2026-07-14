@@ -1,7 +1,7 @@
 {
 	"name": "steam-app-id-finder",
 	"type": "module",
-	"version": "2.0.0",
+	"version": "2.1.0",
 	"description": "CLI to find Steam App IDs from game names or a Steam account, and export owned-game lists from GOG and Epic Games accounts.",
 	"keywords": [
 		"steam",
