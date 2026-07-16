@@ -8,21 +8,29 @@ export let CONFIG;
 
 // ----- Config -----
 
+// Load a config from the given path, or discover ./config.json in the current directory, then validate it against the shipped schema
 export function loadConfig(configPath) {
-	let config;
 	let configFileName = configPath;
-	try {
-		if (!configFileName && fs.existsSync('config.json')) {
+	if (!configFileName) {
+		if (fs.existsSync('config.json')) {
+			console.log("Loading configuration file \"config.json\"...");
 			configFileName = 'config.json';
-		}
-		if (!configFileName || !fs.existsSync(configFileName)) {
-			console.error("Error loading configuration file: no configuration file found. Provide a \"config.json\" (or run a mode directly with flags - see --help).");
+		} else {
+			console.error("Error loading configuration file: no \"config.json\" found in the current directory. Run \"steam-app-id-finder init\" to create one, pass --config <path>, or run a mode directly with flags (see --help).");
 			process.exit(1);
 		}
+	} else if (!fs.existsSync(configFileName)) {
+		console.error(`Error loading configuration file: no configuration file found at "${configFileName}".`);
+		process.exit(1);
+	} else {
 		console.log(`Loading configuration file "${configFileName}"...`);
+	}
+
+	let config;
+	try {
 		config = JSON.parse(fs.readFileSync(configFileName, 'utf8').replace(/^\uFEFF/, ''));
 	} catch (error) {
-		console.error("Error loading configuration file: " + error);
+		console.error(`Error parsing configuration file "${configFileName}" as JSON: ${error.message ?? error}`);
 		process.exit(1);
 	}
 

@@ -265,7 +265,7 @@ describe('CLI command wrappers', () => {
 		it(`${command} with no flags and no config file reports a missing config`, () => {
 			const result = runCli([command]);
 			assert.notEqual(result.status, 0);
-			assert.match(result.stderr, /no configuration file found/i);
+			assert.match(result.stderr, /no "config\.json" found/i);
 		});
 	}
 
