@@ -2,7 +2,6 @@
 	"$schema": "config.schema.json",
 	"mode": "steamAccount",
 	"steamId": "00000000000000000",
-	"steamAPIKey": "",
 	"outputProperties": {
 		"appID": true,
 		"name": true,

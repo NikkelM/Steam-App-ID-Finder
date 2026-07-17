@@ -14,9 +14,9 @@ const packageRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), '..'
 const pkg = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'));
 
 // Validate a config assembled from flags, then run its mode.
-async function runConfig(config) {
+async function runConfig(config, flags = {}) {
 	validateConfig(config);
-	await runMode(config);
+	await runMode(config, flags);
 }
 
 // True if the user passed at least one option for this command on the command line
@@ -73,7 +73,7 @@ program
 			await runConfigFile('gameNames');
 			return;
 		}
-		await runConfig(buildGameNamesConfig(options));
+		await runConfig(buildGameNamesConfig(options), options);
 	})
 	.addHelpText('after', () => '\n' + describeConfigFields('gameNames'));
 
@@ -90,7 +90,7 @@ program
 			await runConfigFile('steamAccount');
 			return;
 		}
-		await runConfig(buildSteamAccountConfig(options));
+		await runConfig(buildSteamAccountConfig(options), options);
 	})
 	.addHelpText('after', () => '\n' + describeConfigFields('steamAccount'));
 
@@ -106,7 +106,7 @@ program
 			await runConfigFile('gogAccount');
 			return;
 		}
-		await runConfig(buildGogAccountConfig(options));
+		await runConfig(buildGogAccountConfig(options), options);
 	})
 	.addHelpText('after', () => '\n' + describeConfigFields('gogAccount'));
 
@@ -121,7 +121,7 @@ program
 			await runConfigFile('epicGamesAccount');
 			return;
 		}
-		await runConfig(buildEpicGamesConfig(options));
+		await runConfig(buildEpicGamesConfig(options), options);
 	})
 	.addHelpText('after', () => '\n' + describeConfigFields('epicGamesAccount'));
 

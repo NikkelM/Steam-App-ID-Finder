@@ -32,7 +32,7 @@ function withOutputDirectory(config, options) {
 	return config;
 }
 
-export function buildGameNamesConfig(options, env = process.env) {
+export function buildGameNamesConfig(options) {
 	if (!options.input) {
 		throw new Error('provide -i, --input (the input file name, without extension), or a config.json.');
 	}
@@ -42,8 +42,7 @@ export function buildGameNamesConfig(options, env = process.env) {
 	}
 	const config = {
 		mode: 'gameNames',
-		inputFile,
-		steamAPIKey: options.steamApiKey ?? env.STEAM_API_KEY ?? ''
+		inputFile
 	};
 	if (options.onlyFullMatches) {
 		config.onlyFullMatches = true;
@@ -60,7 +59,7 @@ export function buildGameNamesConfig(options, env = process.env) {
 	return withOutputDirectory(config, options);
 }
 
-export function buildSteamAccountConfig(options, env = process.env) {
+export function buildSteamAccountConfig(options) {
 	if (!options.steamId) {
 		throw new Error('provide -s, --steam-id (a 17-digit SteamID64), or a config.json.');
 	}
@@ -76,30 +75,14 @@ export function buildSteamAccountConfig(options, env = process.env) {
 	return withOutputDirectory({
 		mode: 'steamAccount',
 		steamId: options.steamId,
-		steamAPIKey: options.steamApiKey ?? env.STEAM_API_KEY ?? '',
 		outputProperties
 	}, options);
 }
 
-export function buildGogAccountConfig(options, env = process.env) {
-	const config = { mode: 'gogAccount' };
-	const refreshToken = options.refreshToken ?? env.GOG_REFRESH_TOKEN;
-	if (refreshToken) {
-		config.refreshToken = refreshToken;
-	}
-	if (options.gogLoginCode) {
-		config.gogLoginCode = options.gogLoginCode;
-	}
-	if (!config.refreshToken && !config.gogLoginCode) {
-		throw new Error('provide --refresh-token (or the GOG_REFRESH_TOKEN env var) or --gog-login-code, or a config.json.');
-	}
-	return withOutputDirectory(config, options);
+export function buildGogAccountConfig(options) {
+	return withOutputDirectory({ mode: 'gogAccount' }, options);
 }
 
-export function buildEpicGamesConfig(options, env = process.env) {
-	const epicGamesCookie = options.epicCookie ?? env.EPIC_COOKIE;
-	if (!epicGamesCookie) {
-		throw new Error('provide --epic-cookie (or the EPIC_COOKIE env var), or a config.json.');
-	}
-	return withOutputDirectory({ mode: 'epicGamesAccount', epicGamesCookie }, options);
+export function buildEpicGamesConfig(options) {
+	return withOutputDirectory({ mode: 'epicGamesAccount' }, options);
 }

@@ -1,5 +1,4 @@
 {
 	"$schema": "config.schema.json",
-	"mode": "epicGamesAccount",
-	"epicGamesCookie": "1234567890abcdef"
+	"mode": "epicGamesAccount"
 }

@@ -45,13 +45,11 @@ const isValid = (config) => validateConfigResult(config).errors.length === 0;
 describe('CLI config builders', () => {
 	it('gameNames maps flags to the expected config and validates', () => {
 		const config = buildGameNamesConfig(
-			{ input: 'games', type: 'txt', delimiter: ',', steamApiKey: 'KEY', threshold: 0.7 },
-			{}
+			{ input: 'games', type: 'txt', delimiter: ',', threshold: 0.7 }
 		);
 		assert.deepEqual(config, {
 			mode: 'gameNames',
 			inputFile: { fileName: 'games', fileType: 'txt', delimiter: ',' },
-			steamAPIKey: 'KEY',
 			partialMatchThreshold: 0.7
 		});
 		assert.ok(isValid(config));
@@ -68,11 +66,6 @@ describe('CLI config builders', () => {
 		const config = buildGameNamesConfig({ input: 'g', type: 'txt', steamApiKey: 'K' }, {});
 		assert.ok(!('delimiter' in config.inputFile));
 		assert.ok(isValid(config));
-	});
-
-	it('steamAPIKey falls back to the STEAM_API_KEY env var', () => {
-		const config = buildGameNamesConfig({ input: 'g', type: 'txt', delimiter: ',' }, { STEAM_API_KEY: 'FROM_ENV' });
-		assert.equal(config.steamAPIKey, 'FROM_ENV');
 	});
 
 	it('gameNames throws when --input is missing', () => {
@@ -138,28 +131,15 @@ describe('CLI config builders', () => {
 		assert.ok(isValid(config));
 	});
 
-	it('gogAccount takes the refresh token from a flag or the env var', () => {
-		assert.deepEqual(buildGogAccountConfig({ refreshToken: 'T' }, {}), { mode: 'gogAccount', refreshToken: 'T' });
-		assert.deepEqual(buildGogAccountConfig({}, { GOG_REFRESH_TOKEN: 'ENV' }), { mode: 'gogAccount', refreshToken: 'ENV' });
+	it('gogAccount builds a bare config (credentials are resolved at runtime)', () => {
+		assert.deepEqual(buildGogAccountConfig({}), { mode: 'gogAccount' });
+		assert.deepEqual(buildGogAccountConfig({ refreshToken: 'T' }), { mode: 'gogAccount' });
+		assert.ok(isValid(buildGogAccountConfig({})));
 	});
 
-	it('gogAccount accepts a login code', () => {
-		const config = buildGogAccountConfig({ gogLoginCode: 'CODE' }, {});
-		assert.deepEqual(config, { mode: 'gogAccount', gogLoginCode: 'CODE' });
-		assert.ok(isValid(config));
-	});
-
-	it('gogAccount throws when neither credential is provided', () => {
-		assert.throws(() => buildGogAccountConfig({}, {}), /refresh-token|login-code/);
-	});
-
-	it('epicGamesAccount takes the cookie from a flag or the env var', () => {
-		assert.deepEqual(buildEpicGamesConfig({ epicCookie: 'C' }, {}), { mode: 'epicGamesAccount', epicGamesCookie: 'C' });
-		assert.deepEqual(buildEpicGamesConfig({}, { EPIC_COOKIE: 'ENV' }), { mode: 'epicGamesAccount', epicGamesCookie: 'ENV' });
-	});
-
-	it('epicGamesAccount throws when no cookie is provided', () => {
-		assert.throws(() => buildEpicGamesConfig({}, {}), /epic-cookie/);
+	it('epicGamesAccount builds a bare config (the cookie is resolved at runtime)', () => {
+		assert.deepEqual(buildEpicGamesConfig({}), { mode: 'epicGamesAccount' });
+		assert.ok(isValid(buildEpicGamesConfig({})));
 	});
 
 	it('parseThreshold accepts values in [0, 1] and rejects the rest', () => {
@@ -311,8 +291,8 @@ describe('CLI command wrappers', () => {
 	it('gameNames errors on an empty input file before fetching', () => {
 		const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'saif-empty-'));
 		fs.writeFileSync(path.join(dir, 'games.txt'), '');
-		fs.writeFileSync(path.join(dir, 'config.json'), JSON.stringify({ mode: 'gameNames', inputFile: { fileName: 'games', fileType: 'txt' }, steamAPIKey: 'K' }));
-		const result = runCli(['run'], {}, dir);
+		fs.writeFileSync(path.join(dir, 'config.json'), JSON.stringify({ mode: 'gameNames', inputFile: { fileName: 'games', fileType: 'txt' } }));
+		const result = runCli(['run'], { STEAM_API_KEY: 'K' }, dir);
 		assert.notEqual(result.status, 0);
 		assert.match(result.stderr, /no game names/i);
 	});
