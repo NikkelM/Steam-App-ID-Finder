@@ -45,6 +45,7 @@ There are three ways to provide a mode's options:
    ```bash
    npx steam-app-id-finder gameNames --input games --steam-api-key <yourKey>
    ```
+   Add `--save-config` to a flag-driven run to also write the assembled configuration to a `config.json` (or `--save-config <path>`), so you can reuse or edit it later. Credentials are never stored.
 2. **The interactive wizard** - `steam-app-id-finder init` asks you a few questions, writes a `config.json`, and offers to run it right away. Running `steam-app-id-finder` with no arguments and no `config.json` present starts this wizard automatically.
 3. **A configuration file** - `steam-app-id-finder run` (or just `steam-app-id-finder`) runs a `config.json` from the current directory (or pass `--config <path>`). This is handy for a setup you reuse often; the wizard can create the file for you, or you can write it by hand. Running a mode command with no flags (for example `steam-app-id-finder gameNames`) also falls back to this `config.json`, as long as its `mode` matches the command.
 
@@ -114,6 +115,7 @@ steam-app-id-finder gameNames --input games --steam-api-key <yourKey> --threshol
 | `--refresh-cache` | `refreshCache` | Refetch the Steam app list even if a fresh cache exists. | No |
 | `--cache-hours <number>` | `appListCacheHours` | How long the cached Steam app list stays fresh, in hours. `0` disables caching. Default `24`. | No |
 | `-o, --out <dir>` | `outputDirectory` | Base directory for output files. Default `output`. | No |
+| `--save-config [path]` | - | Also write the assembled configuration to a file for reuse. Default `config.json`. | No |
 
 > The full Steam app list is large and slow to download, so it is cached in your system's temp directory and reused for up to `appListCacheHours` (24 by default).
 > Pass `--refresh-cache` to refetch it, or set the duration to `0` to disable caching.
@@ -193,6 +195,7 @@ steam-app-id-finder steamAccount --steam-id <steamID64> --steam-api-key <yourKey
 | `-k, --steam-api-key <key>` | `steamAPIKey` | Your Steam Web API key (or the `STEAM_API_KEY` env var). | Yes |
 | `-p, --props <list>` | `outputProperties` | Comma-separated list of properties to include. Default `appID,name`. | No |
 | `-o, --out <dir>` | `outputDirectory` | Base directory for output files. Default `output`. | No |
+| `--save-config [path]` | - | Also write the assembled configuration to a file for reuse. Default `config.json`. | No |
 
 The available `--props` values are: `appID` (the game's App ID), `name` (its name), `logo` (URL to the logo), `storeLink` (URL to the store page), `statsLink` (URL to this user's stats page for the game), and `globalStatsLink` (URL to the global stats page).
 Properties that are not available for an app are omitted from the output.
@@ -235,6 +238,7 @@ steam-app-id-finder gogAccount --refresh-token <token>
 | `--gog-login-code <code>` | `gogLoginCode` | A fresh GOG login code (valid ~60 seconds). Ignored if a refresh token is given. | One of the two |
 | `-r, --refresh-token <token>` | `refreshToken` | A GOG refresh token from a previous run (or the `GOG_REFRESH_TOKEN` env var). | One of the two |
 | `-o, --out <dir>` | `outputDirectory` | Base directory for output files. Default `output`. | No |
+| `--save-config [path]` | - | Also write the assembled configuration to a file for reuse. Default `config.json`. | No |
 
 ### Output
 
@@ -279,6 +283,7 @@ The number of games may be shorter than your library, as items such as beta bran
 | --- | --- | --- | --- |
 | `-e, --epic-cookie <value>` | `epicGamesCookie` | The value of your `EPIC_BEARER_TOKEN` cookie (or the `EPIC_COOKIE` env var). | Yes |
 | `-o, --out <dir>` | `outputDirectory` | Base directory for output files. Default `output`. | No |
+| `--save-config [path]` | - | Also write the assembled configuration to a file for reuse. Default `config.json`. | No |
 
 ### Output
 
