@@ -5,7 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { Command } from 'commander';
 
-import { loadConfig, validateConfig, describeConfigFields } from '../js/utils.js';
+import { loadConfig, validateConfig, describeConfigFields, saveConfigToFile } from '../js/utils.js';
 import { runMode } from '../js/run.js';
 import { runWizard } from '../js/wizard.js';
 import { parseThreshold, parseCacheHours, buildGameNamesConfig, buildSteamAccountConfig, buildGogAccountConfig, buildEpicGamesConfig } from '../js/cliConfig.js';
@@ -13,9 +13,13 @@ import { parseThreshold, parseCacheHours, buildGameNamesConfig, buildSteamAccoun
 const packageRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const pkg = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'));
 
-// Validate a config assembled from flags, then run its mode.
+// Validate a config assembled from flags, optionally persist it for reuse, then run its mode.
 async function runConfig(config, flags = {}) {
 	validateConfig(config);
+	// Persist before running, so any secret resolved during the run is never written to the file
+	if (flags.saveConfig) {
+		await saveConfigToFile(config, flags.saveConfig === true ? 'config.json' : flags.saveConfig, ['steamAPIKey', 'refreshToken', 'gogLoginCode', 'epicGamesCookie']);
+	}
 	await runMode(config, flags);
 }
 
@@ -68,6 +72,7 @@ program
 	.option('--refresh-cache', 'refetch the Steam app list even if a fresh cache exists')
 	.option('--cache-hours <number>', 'how long the cached Steam app list stays fresh, in hours (0 disables caching; default 24)', parseCacheHours)
 	.option('-o, --out <dir>', 'directory to write output files to (default: output)')
+	.option('--save-config [path]', 'also write the assembled configuration to a file for reuse (default: config.json)')
 	.action(async (options, command) => {
 		if (!usedCliFlags(command)) {
 			await runConfigFile('gameNames');
@@ -85,6 +90,7 @@ program
 	.option('-k, --steam-api-key <key>', 'Steam Web API key (falls back to the STEAM_API_KEY env var)')
 	.option('-p, --props <list>', 'comma-separated output properties (appID,name,logo,storeLink,statsLink,globalStatsLink)', 'appID,name')
 	.option('-o, --out <dir>', 'directory to write output files to (default: output)')
+	.option('--save-config [path]', 'also write the assembled configuration to a file for reuse (default: config.json)')
 	.action(async (options, command) => {
 		if (!usedCliFlags(command)) {
 			await runConfigFile('steamAccount');
@@ -101,6 +107,7 @@ program
 	.option('--gog-login-code <code>', 'GOG login code (valid for ~60 seconds)')
 	.option('-r, --refresh-token <token>', 'GOG refresh token (falls back to the GOG_REFRESH_TOKEN env var)')
 	.option('-o, --out <dir>', 'directory to write output files to (default: output)')
+	.option('--save-config [path]', 'also write the assembled configuration to a file for reuse (default: config.json)')
 	.action(async (options, command) => {
 		if (!usedCliFlags(command)) {
 			await runConfigFile('gogAccount');
@@ -116,6 +123,7 @@ program
 	.description('Get the names of games from an Epic Games purchase history')
 	.option('-e, --epic-cookie <value>', 'EPIC_BEARER_TOKEN cookie value (falls back to the EPIC_COOKIE env var)')
 	.option('-o, --out <dir>', 'directory to write output files to (default: output)')
+	.option('--save-config [path]', 'also write the assembled configuration to a file for reuse (default: config.json)')
 	.action(async (options, command) => {
 		if (!usedCliFlags(command)) {
 			await runConfigFile('epicGamesAccount');
