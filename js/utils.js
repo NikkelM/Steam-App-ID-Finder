@@ -2,10 +2,33 @@ import jsonschema from 'jsonschema';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { password } from '@inquirer/prompts';
+import { password, confirm } from '@inquirer/prompts';
 
 const packageConfigDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'config');
 export let CONFIG;
+
+// ----- Saving a config -----
+
+// Write a flag-built config to disk for reuse, stripping any secret fields so they are never persisted
+// Prompts before overwriting an existing file in an interactive shell; refuses to overwrite non-interactively
+export async function saveConfigToFile(config, outputPath, secretFields = []) {
+	const toWrite = { ...config };
+	for (const field of secretFields) {
+		delete toWrite[field];
+	}
+	if (fs.existsSync(outputPath)) {
+		if (!process.stdin.isTTY) {
+			throw new Error(`"${outputPath}" already exists - remove it, or pass --save-config <path> with a different path.`);
+		}
+		const overwrite = await confirm({ message: `"${outputPath}" already exists. Overwrite it?`, default: false });
+		if (!overwrite) {
+			console.log('The existing configuration file was not changed.');
+			return;
+		}
+	}
+	fs.writeFileSync(outputPath, JSON.stringify(toWrite, null, 2));
+	console.log(`Wrote configuration to "${outputPath}".`);
+}
 
 // ----- Config -----
 
