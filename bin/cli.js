@@ -43,10 +43,15 @@ program
 	.version(pkg.version);
 
 program
-	.command('run')
+	.command('run', { isDefault: true })
 	.description('Run using a configuration file (the mode is read from the file)')
 	.option('-c, --config <path>', 'path to a config.json (defaults to ./config.json)')
 	.action(async (options) => {
+		// Start the interactive wizard when there is no config to load, but only in an interactive shell so scripts still get the friendly no-config error
+		if (!options.config && !fs.existsSync('config.json') && process.stdin.isTTY) {
+			await runWizard('config.json');
+			return;
+		}
 		await runMode(loadConfig(options.config));
 	});
 
@@ -129,11 +134,6 @@ program
 	});
 
 program.showHelpAfterError('(run with --help to see available commands)');
-
-// Show help when invoked with no command.
-if (process.argv.length <= 2) {
-	program.help();
-}
 
 try {
 	await program.parseAsync(process.argv);

@@ -207,10 +207,10 @@ describe('CLI command wrappers', () => {
 		}
 	});
 
-	it('no arguments prints help and exits 0', () => {
+	it('no arguments with no config file reports a missing config (non-interactive)', () => {
 		const result = runCli([]);
-		assert.equal(result.status, 0);
-		assert.match(result.stdout, /Usage:/);
+		assert.notEqual(result.status, 0);
+		assert.match(result.stderr, /no "config\.json" found/i);
 	});
 
 	it('an unknown command exits non-zero', () => {
