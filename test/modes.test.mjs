@@ -86,7 +86,6 @@ describe('Steam live smoke tests', () => {
 		const config = {
 			mode: 'gameNames',
 			inputFile: { fileName: 'testInput', fileType: 'txt', delimiter: ',' },
-			steamAPIKey: process.env.STEAM_API_KEY,
 			onlyFullMatches: true,
 		};
 		const { code, stderr, dir } = runMode(config, { 'testInput.txt': 'Portal,Half-Life 2,Celeste' });
@@ -103,7 +102,7 @@ describe('Steam live smoke tests', () => {
 
 	it('steamAccount returns owned games with appID + name', { skip: (process.env.STEAM_API_KEY && process.env.STEAM_TEST_STEAMID) ? false : 'STEAM_API_KEY and/or STEAM_TEST_STEAMID not set' }, () => {
 		const steamId = process.env.STEAM_TEST_STEAMID;
-		const config = { mode: 'steamAccount', steamId, steamAPIKey: process.env.STEAM_API_KEY, outputProperties: { appID: true, name: true } };
+		const config = { mode: 'steamAccount', steamId, outputProperties: { appID: true, name: true } };
 		const { code, stderr, dir } = runMode(config);
 		try {
 			assert.equal(code, 0, `tool exited ${code}: ${stderr.trim().slice(0, 200)}`);
@@ -118,7 +117,7 @@ describe('Steam live smoke tests', () => {
 
 describe('GOG/Epic live smoke tests', () => {
 	it('gogAccount writes a non-empty list of game names', { skip: process.env.GOG_REFRESH_TOKEN ? false : 'GOG_REFRESH_TOKEN not set' }, (t) => {
-		const config = { mode: 'gogAccount', refreshToken: process.env.GOG_REFRESH_TOKEN };
+		const config = { mode: 'gogAccount' };
 		const { code, stdout, stderr, dir } = runMode(config);
 		try {
 			if (code !== 0 && isExpiredCredentialFailure(stdout + stderr)) {
@@ -134,7 +133,7 @@ describe('GOG/Epic live smoke tests', () => {
 	});
 
 	it('epicGamesAccount writes a non-empty list of game names', { skip: process.env.EPIC_COOKIE ? false : 'EPIC_COOKIE not set' }, (t) => {
-		const config = { mode: 'epicGamesAccount', epicGamesCookie: process.env.EPIC_COOKIE };
+		const config = { mode: 'epicGamesAccount' };
 		const { code, stdout, stderr, dir } = runMode(config);
 		try {
 			if (code !== 0 && isExpiredCredentialFailure(stdout + stderr)) {
