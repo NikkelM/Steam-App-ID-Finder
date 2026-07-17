@@ -18,6 +18,7 @@ Find Steam App IDs from game names or a Steam account, and export owned-game lis
 	- [Mode: `steamAccount`](#mode-steamaccount)
 	- [Mode: `gogAccount`](#mode-gogaccount)
 	- [Mode: `epicGamesAccount`](#mode-epicgamesaccount)
+- [Security](#security)
 - [Related projects](#related-projects)
 - [Feedback](#feedback)
 
@@ -54,7 +55,9 @@ steam-app-id-finder --help
 steam-app-id-finder <command> --help
 ```
 
-Credentials can also be provided through environment variables instead of flags, which keeps them out of your shell history: `STEAM_API_KEY`, `GOG_REFRESH_TOKEN` and `EPIC_COOKIE`.
+Credentials are read from an environment variable (`STEAM_API_KEY`, `GOG_REFRESH_TOKEN` or `EPIC_COOKIE`), from the matching flag, or - if neither is set and the terminal is interactive - you are prompted for them when the command runs.
+They are never written to your `config.json`.
+See [Security](#security) for details.
 
 > Configuration files are validated against a JSON schema (`config.schema.json`, shipped with the package).
 If you keep a copy of the schema next to your `config.json`, add `"$schema": "config.schema.json"` to it and your editor will flag mistakes as you type.
@@ -219,7 +222,7 @@ Run the mode with the login code **immediately** - it is only valid for about 60
 steam-app-id-finder gogAccount --gog-login-code <code>
 ```
 
-On success, the tool writes a long-lived refresh token to `output/gogAccount/gogRefreshToken.txt`. Use it on future runs to skip the login step (via `--refresh-token`, or the `GOG_REFRESH_TOKEN` environment variable):
+On success, the tool prints your long-lived GOG refresh token. Set it as the `GOG_REFRESH_TOKEN` environment variable, or pass it with `--refresh-token`, to skip the login step on future runs:
 
 ```bash
 steam-app-id-finder gogAccount --refresh-token <token>
@@ -235,7 +238,7 @@ steam-app-id-finder gogAccount --refresh-token <token>
 
 ### Output
 
-The list of games is written to `output/gogAccount/gogGameNames.txt`, and the current refresh token to `output/gogAccount/gogRefreshToken.txt` for reuse.
+The list of games is written to `output/gogAccount/gogGameNames.txt`. The refresh token is shown once in the console so you can set it as `GOG_REFRESH_TOKEN` for reuse.
 
 The file is newline-separated, which is the default for `txt` input, so you can feed it straight into the [`gameNames`](#mode-gamenames) mode:
 
@@ -314,6 +317,18 @@ fetchGamesList().then(console.log);
 
 You can now use the saved file as input for the [`gameNames`](#mode-gamenames) mode.
 Due to the formatting of the copied output, set `--delimiter` to `\",\r\n    \"` for the best results, and remove the leading `[` and trailing `]` from the file first.
+
+## Security
+
+Your Steam, GOG and Epic credentials are secrets, so this tool never writes them to disk.
+
+- They are read from an environment variable (`STEAM_API_KEY`, `GOG_REFRESH_TOKEN` or `EPIC_COOKIE`), from the matching flag, or you are prompted for them interactively when a command runs.
+- They are never written to `config.json` or any other file, and are never logged.
+- For backwards compatibility the schema still allows the credential fields, but if a credential is found in `config.json` the tool refuses to run and asks you to move it to the matching environment variable instead.
+- The GOG refresh token obtained by `gogAccount` mode is displayed once in the console and is not saved to any file.
+
+Provide a credential inline for a single run, for example `STEAM_API_KEY=xxxx steam-app-id-finder run`, or export it in your shell profile.
+Grant API keys only the access they need, and rotate them if they may have been exposed.
 
 ## Related projects
 

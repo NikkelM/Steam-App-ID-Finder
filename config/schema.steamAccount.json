@@ -6,7 +6,7 @@
 			"default": "00000000000000000"
 		},
 		"steamAPIKey": {
-			"description": "Your Steam Web API key. You can get one for free here: https://steamcommunity.com/dev/apikey",
+			"description": "Your Steam Web API key. You can get one for free here: https://steamcommunity.com/dev/apikey. Provide this via the STEAM_API_KEY environment variable - storing it here is no longer allowed and the tool will refuse to run if it is set.",
 			"type": "string",
 			"default": ""
 		},
@@ -59,7 +59,6 @@
 	},
 	"required": [
 		"steamId",
-		"steamAPIKey",
 		"outputProperties"
 	]
 }

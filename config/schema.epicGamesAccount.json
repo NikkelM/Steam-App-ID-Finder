@@ -1,13 +1,10 @@
 {
 	"properties": {
 		"epicGamesCookie": {
-			"description": "The value of the EPIC_BEARER_TOKEN cookie for your Epic Games account. You can find more information in the README.",
+			"description": "The value of the EPIC_BEARER_TOKEN cookie for your Epic Games account. You can find more information in the README. Provide this via the EPIC_COOKIE environment variable - storing it here is not allowed and the tool will refuse to run if it is set.",
 			"type": "string",
 			"default": "1234567890abcdef",
 			"minLength": 1
 		}
-	},
-	"required": [
-		"epicGamesCookie"
-	]
+	}
 }

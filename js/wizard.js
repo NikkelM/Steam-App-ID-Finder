@@ -1,10 +1,18 @@
 // Interactive configuration builder for the CLI (`steam-app-id-finder init`).
 
 import fs from 'fs';
-import { input, select, checkbox, confirm, password } from '@inquirer/prompts';
+import { input, select, checkbox, confirm } from '@inquirer/prompts';
 
-import { validateConfig } from './utils.js';
+import { validateConfig, envVarInstructions } from './utils.js';
 import { runMode } from './run.js';
+
+// The environment variable each mode's credential is read from, shown to the user after the wizard writes the config
+const SECRET_ENV_VARS = {
+	gameNames: 'STEAM_API_KEY',
+	steamAccount: 'STEAM_API_KEY',
+	gogAccount: 'GOG_REFRESH_TOKEN',
+	epicGamesAccount: 'EPIC_COOKIE'
+};
 
 export async function runWizard(outputPath = 'config.json') {
 	const mode = await select({
@@ -16,6 +24,16 @@ export async function runWizard(outputPath = 'config.json') {
 			{ name: 'epicGamesAccount - games from an Epic Games purchase history', value: 'epicGamesAccount' }
 		]
 	});
+
+	const secretEnvVar = SECRET_ENV_VARS[mode];
+	console.log(`\nCredentials for this mode are read from the ${secretEnvVar} environment variable and are never written to the configuration file.`);
+	if (process.env[secretEnvVar]?.trim()) {
+		console.log(`${secretEnvVar} is set - it will be used automatically.\n`);
+	} else {
+		console.log(`${secretEnvVar} is not set - you will be asked for the credential when the mode runs, which works fine.`);
+		console.log('To avoid entering it every time, set it as an environment variable and re-run:');
+		console.log(envVarInstructions(secretEnvVar) + '\n');
+	}
 
 	let config;
 	switch (mode) {
@@ -86,17 +104,11 @@ async function gameNamesWizard() {
 	if (delimiter === 'custom') {
 		delimiter = await input({ message: 'Enter the delimiter:', validate: (value) => value.length > 0 ? true : 'A delimiter is required.' });
 	}
-	const steamAPIKey = await password({
-		message: 'Steam Web API key (get one at https://steamcommunity.com/dev/apikey):',
-		mask: true,
-		validate: (value) => value.trim() ? true : 'A Steam Web API key is required for this mode.'
-	});
 	const onlyFullMatches = await confirm({ message: 'Only output full matches?', default: false });
 
 	const config = {
 		mode: 'gameNames',
 		inputFile: { fileName: fileName.trim(), fileType, delimiter },
-		steamAPIKey: steamAPIKey.trim(),
 		onlyFullMatches
 	};
 
@@ -132,11 +144,6 @@ async function steamAccountWizard() {
 		message: 'SteamID64 (17-digit number):',
 		validate: (value) => /^\d{17}$/.test(value.trim()) ? true : 'Enter a 17-digit SteamID64.'
 	});
-	const steamAPIKey = await password({
-		message: 'Steam Web API key (get one at https://steamcommunity.com/dev/apikey):',
-		mask: true,
-		validate: (value) => value.trim() ? true : 'A Steam Web API key is required for this mode.'
-	});
 	const selected = await checkbox({
 		message: 'Which properties should be included in the output?',
 		required: true,
@@ -155,32 +162,13 @@ async function steamAccountWizard() {
 		outputProperties[property] = true;
 	}
 
-	return { mode: 'steamAccount', steamId: steamId.trim(), steamAPIKey: steamAPIKey.trim(), outputProperties };
+	return { mode: 'steamAccount', steamId: steamId.trim(), outputProperties };
 }
 
 async function gogAccountWizard() {
-	const method = await select({
-		message: 'How do you want to authenticate with GOG?',
-		choices: [
-			{ name: 'Refresh token (from a previous run)', value: 'refreshToken' },
-			{ name: 'Login code (from the GOG login page)', value: 'gogLoginCode' }
-		]
-	});
-	const value = await input({
-		message: method === 'refreshToken' ? 'Enter your GOG refresh token:' : 'Enter your GOG login code:',
-		validate: (entered) => entered.trim() ? true : 'A value is required.'
-	});
-
-	return { mode: 'gogAccount', [method]: value.trim() };
+	return { mode: 'gogAccount' };
 }
 
 async function epicGamesWizard() {
-	console.log('\nGet the EPIC_BEARER_TOKEN cookie value from https://accounts.epicgames.com/account/transactions/purchases');
-	console.log('(open DevTools with F12 -> Application -> Cookies -> accounts.epicgames.com -> EPIC_BEARER_TOKEN).\n');
-	const epicGamesCookie = await input({
-		message: 'EPIC_BEARER_TOKEN cookie value:',
-		validate: (value) => value.trim() ? true : 'The cookie value is required.'
-	});
-
-	return { mode: 'epicGamesAccount', epicGamesCookie: epicGamesCookie.trim() };
+	return { mode: 'epicGamesAccount' };
 }

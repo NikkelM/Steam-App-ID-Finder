@@ -5,7 +5,6 @@
 		"fileName": "gameNames",
 		"fileType": "txt"
 	},
-	"steamAPIKey": "",
 	"onlyFullMatches": false,
 	"partialMatchThreshold": 0.65
 }

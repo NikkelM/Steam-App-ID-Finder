@@ -3,7 +3,7 @@
 import fs from 'fs';
 import cliProgress from 'cli-progress';
 
-import { CONFIG, outputPath } from './utils.js';
+import { CONFIG, outputPath, envVarInstructions } from './utils.js';
 
 export async function steamAppIDsFromGOGAccount() {
 	let accessToken, refreshToken;
@@ -19,8 +19,9 @@ export async function steamAppIDsFromGOGAccount() {
 		process.exit(1);
 	}
 
-	console.log(`Writing refresh token to "${outputPath('gogRefreshToken.txt')}". Use it via --refresh-token, the GOG_REFRESH_TOKEN environment variable, or "refreshToken" in your config to skip logging in next time.\n`);
-	fs.writeFileSync(outputPath('gogRefreshToken.txt'), refreshToken, 'utf8');
+	console.log('\nYour GOG refresh token is shown once below and is not saved to any file.');
+	console.log('To reuse it without logging in again, set it as an environment variable (or pass it with --refresh-token):');
+	console.log(envVarInstructions('GOG_REFRESH_TOKEN', refreshToken) + '\n');
 
 	// Get the list of apps owned on GOG
 	const gogAppIds = await getGogApps(accessToken);

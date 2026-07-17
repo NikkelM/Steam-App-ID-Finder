@@ -39,7 +39,7 @@
 			"default": false
 		},
 		"steamAPIKey": {
-			"description": "Your Steam Web API key. You can get one for free here: https://steamcommunity.com/dev/apikey. Required because Steam retired the keyless \"ISteamApps/GetAppList\" endpoint; this mode now uses \"IStoreService/GetAppList\", which needs an API key.",
+			"description": "Your Steam Web API key. You can get one for free here: https://steamcommunity.com/dev/apikey. Provide it via the STEAM_API_KEY environment variable - storing it here is no longer allowed and the tool will refuse to run if it is set.",
 			"type": "string",
 			"default": ""
 		},
@@ -63,7 +63,6 @@
 		}
 	},
 	"required": [
-		"inputFile",
-		"steamAPIKey"
+		"inputFile"
 	]
 }
