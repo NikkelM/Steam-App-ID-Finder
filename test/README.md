@@ -1,6 +1,19 @@
 # Tests
 
-Integration tests that verify the upstream Steam/GOG/Epic endpoints are still alive and run each mode end to end against real credentials.
+Offline unit tests plus integration tests that verify the upstream Steam/GOG/Epic endpoints are still alive and run each mode end to end against real credentials.
+
+## Files
+
+| File | What it covers |
+| --- | --- |
+| `cli.test.mjs` | The CLI command wrappers and config-loading guards (version, help, missing/malformed/unknown-key config, BOM), run as subprocesses |
+| `cliConfig.test.mjs` | The flag -> config builders, the config-field help text, and `saveConfigToFile` |
+| `validation.test.mjs` | Schema accept/reject cases across the four per-mode schemas |
+| `secrets.test.mjs` | Runtime secret resolution (flag/env/config precedence) and the per-mode wiring |
+| `format.test.mjs` | The game-name matching helpers (exact-match classification and similarity ranking) |
+| `modes.test.mjs` | Endpoint liveness (no credentials) and the credential-gated live smoke tests |
+
+The offline files (`cli`, `cliConfig`, `validation`, `secrets`, `format`) need no network and always run. `modes.test.mjs` is described below.
 
 ## Running
 
@@ -50,7 +63,7 @@ curl.exe -s "https://auth.gog.com/token" `
 
 3. Copy the `refresh_token` from the JSON response (ignore `access_token`, it is short-lived). It is long-lived; regenerate if it ever stops working.
 
-Alternatively, run the tool once with `gogLoginCode` set - it writes the token to `output/gogAccount/gogRefreshToken.txt`.
+Alternatively, run the tool once with `gogLoginCode` set - it prints the refresh token to the console once so you can set it as `GOG_REFRESH_TOKEN`.
 
 ## Getting an Epic cookie
 
