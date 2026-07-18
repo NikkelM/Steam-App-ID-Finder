@@ -206,9 +206,8 @@ export async function steamAppIDsFromGameNames() {
 
 // ---------- ID matching ----------
 
-async function findSteamAppIdsFullMatch(gameNames, steamApps) {
-	console.log("Searching for full matches...");
-
+// Classify each game name as a single full match, multiple full matches, or no match at all (pure - the core exact-match logic)
+export function classifyFullMatches(gameNames, steamApps) {
 	let steamIDsSingleFullMatch = {};
 	let steamIDsMultipleFullMatches = {};
 	let remainingGameNames = [];
@@ -228,6 +227,46 @@ async function findSteamAppIdsFullMatch(gameNames, steamApps) {
 		}
 	}
 
+	return { steamIDsSingleFullMatch, steamIDsMultipleFullMatches, remainingGameNames };
+}
+
+// Rank the remaining game names against the Steam catalogue by similarity, keeping those at or above the threshold (pure - onProgress reports per-item progress)
+export function rankPartialMatches(gameNames, steamApps, threshold, onProgress = () => {}) {
+	// Convert to lowercase to make matches case insensitive and thereby more accurate
+	const steamAppsLowercase = steamApps.map((app) => (app.name ?? "").toLowerCase());
+	const gameNamesLowercase = gameNames.map((game) => game.toLowerCase());
+
+	// For all games we couldn't get a full match, find the most similar title
+	let steamIDsBestMatch = {};
+	let steamIDsNoMatch = [];
+
+	for (let i = 0; i < gameNamesLowercase.length; i++) {
+		const bestMatch = stringSimilarity.findBestMatch(gameNamesLowercase[i], steamAppsLowercase);
+		if (bestMatch.bestMatch.rating >= threshold) {
+			steamIDsBestMatch[gameNames[i]] = {
+				"appId": steamApps[bestMatch.bestMatchIndex].appid,
+				"similarity": bestMatch.bestMatch.rating,
+				"steamName": steamApps[bestMatch.bestMatchIndex].name
+			}
+		} else {
+			// The similarity score is too low
+			steamIDsNoMatch.push(gameNames[i]);
+		}
+
+		onProgress();
+	}
+
+	// Sort the matches by similarity score
+	steamIDsBestMatch = Object.fromEntries(Object.entries(steamIDsBestMatch).sort(([, a], [, b]) => b.similarity - a.similarity));
+
+	return { steamIDsBestMatch, steamIDsNoMatch };
+}
+
+async function findSteamAppIdsFullMatch(gameNames, steamApps) {
+	console.log("Searching for full matches...");
+
+	const { steamIDsSingleFullMatch, steamIDsMultipleFullMatches, remainingGameNames } = classifyFullMatches(gameNames, steamApps);
+
 	const multipleMatchCount = Object.keys(steamIDsMultipleFullMatches).length;
 	console.log(`Found full matches for ${Object.keys(steamIDsSingleFullMatch).length + multipleMatchCount} games${multipleMatchCount > 0 ? `, of which ${multipleMatchCount} game${multipleMatchCount === 1 ? '' : 's'} had more than one match.` : "."}\n`);
 
@@ -239,14 +278,6 @@ async function findSteamAppIdsBestMatch(gameNames, steamApps) {
 
 	console.log(`Searching for partial matches with a similarity score >=${partialMatchThreshold} for the remaining ${gameNames.length} games...`);
 
-	// Convert to lowercase to make matches case insensitive and thereby more accurate
-	const steamAppsLowercase = steamApps.map((app) => (app.name ?? "").toLowerCase());
-	const gameNamesLowercase = gameNames.map((game) => game.toLowerCase());
-
-	// For all games we couldn't get a full match, find the most similar title
-	let steamIDsBestMatch = {};
-	let steamIDsNoMatch = [];
-
 	const progressBar = new cliProgress.SingleBar({
 		hideCursor: true,
 		format: '|{bar}| {percentage}% | {eta}s left | {value}/{total} games processed'
@@ -254,26 +285,9 @@ async function findSteamAppIdsBestMatch(gameNames, steamApps) {
 
 	progressBar.start(gameNames.length, 0);
 
-	for (let i = 0; i < gameNamesLowercase.length; i++) {
-		const bestMatch = stringSimilarity.findBestMatch(gameNamesLowercase[i], steamAppsLowercase);
-		if (bestMatch.bestMatch.rating >= partialMatchThreshold) {
-			steamIDsBestMatch[gameNames[i]] = {
-				"appId": steamApps[bestMatch.bestMatchIndex].appid,
-				"similarity": bestMatch.bestMatch.rating,
-				"steamName": steamApps[bestMatch.bestMatchIndex].name
-			}
-		} else {
-			// The similarity score is too low
-			steamIDsNoMatch.push(gameNames[i]);
-		}
-
-		progressBar.increment();
-	}
+	const { steamIDsBestMatch, steamIDsNoMatch } = rankPartialMatches(gameNames, steamApps, partialMatchThreshold, () => progressBar.increment());
 
 	progressBar.stop();
-
-	// Sort the matches by similarity score
-	steamIDsBestMatch = Object.fromEntries(Object.entries(steamIDsBestMatch).sort(([, a], [, b]) => b.similarity - a.similarity));
 
 	console.log(`Found partial matches with a similarity score >=${partialMatchThreshold} for ${Object.keys(steamIDsBestMatch).length} games.`);
 
