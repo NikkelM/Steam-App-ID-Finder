@@ -56,12 +56,19 @@ async function gogResponseToJson(response, description) {
 async function getGogApps(accessToken) {
 	console.log("Getting apps owned on GOG...");
 
-	const gogResponse = await fetch('https://embed.gog.com/user/data/games', {
+	let gogResponse;
+	try {
+		gogResponse = await fetch('https://embed.gog.com/user/data/games', {
 		method: 'GET',
 		headers: {
 			'Authorization': `Bearer ${accessToken}`
 		}
 	});
+	} catch (error) {
+		console.error("\nERROR: Network error while fetching your GOG library (user/data/games).");
+		console.error(error.message ?? error);
+		process.exit(1);
+	}
 
 	const gogAppIds = (await gogResponseToJson(gogResponse, "user/data/games")).owned ?? [];
 
@@ -112,12 +119,18 @@ async function getGogGameNames(gogGameIds, accessToken) {
 }
 
 async function getGogGameName(gogGameId, accessToken) {
-	const gameResponse = await fetch(`https://embed.gog.com/account/gameDetails/${gogGameId}.json`, {
+	let gameResponse;
+	try {
+		gameResponse = await fetch(`https://embed.gog.com/account/gameDetails/${gogGameId}.json`, {
 		method: 'GET',
 		headers: {
 			'Authorization': `Bearer ${accessToken}`
 		}
 	});
+	} catch {
+		// A network-level failure (DNS, reset, timeout) - treat it like any other transient error so the retry/count path handles it instead of killing the whole run
+		return { status: "error", code: "network" };
+	}
 
 	if (gameResponse.status === 404) {
 		// A 404 means GOG has no game details for this id (typically DLC)
@@ -141,7 +154,9 @@ async function getGogGameName(gogGameId, accessToken) {
 async function getGogAccessToken(gogLoginCode, gogRefreshToken) {
 	console.log("Getting/refreshing GOG access token...");
 
-	const tokenResponse = await fetch('https://auth.gog.com/token', {
+	let tokenResponse;
+	try {
+		tokenResponse = await fetch('https://auth.gog.com/token', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded'
@@ -150,6 +165,11 @@ async function getGogAccessToken(gogLoginCode, gogRefreshToken) {
 			? `client_id=46899977096215655&client_secret=9d85c43b1482497dbbce61f6e4aa173a433796eeae2ca8c5f6129f2dc4de46d9&grant_type=authorization_code&code=${gogLoginCode}&redirect_uri=https%3A%2F%2Fembed.gog.com%2Fon_login_success%3Forigin%3Dclient`
 			: `client_id=46899977096215655&client_secret=9d85c43b1482497dbbce61f6e4aa173a433796eeae2ca8c5f6129f2dc4de46d9&grant_type=refresh_token&refresh_token=${gogRefreshToken}`
 	});
+	} catch (error) {
+		console.error("\nERROR: Network error while contacting the GOG token endpoint (auth.gog.com/token).");
+		console.error(error.message ?? error);
+		process.exit(1);
+	}
 
 	if (!tokenResponse.ok) {
 		const body = await tokenResponse.text().catch(() => "");
@@ -178,9 +198,13 @@ async function getGogAccessToken(gogLoginCode, gogRefreshToken) {
 	const refreshToken = data.refresh_token;
 
 	if (!accessToken || !refreshToken) {
-		console.error("Error: Could not fetch GOG access and/or refresh token. The GOG API returned the following response:");
-		console.log(data);
-		console.log("If this keeps happening, try logging in to GOG again and getting a new login code.");
+		console.error("Error: Could not fetch GOG access and/or refresh token. The GOG API response was missing the expected token(s).");
+		// Redact any token that is present so a partial response never echoes a live credential to the console
+		const redacted = { ...data };
+		if (redacted.access_token) redacted.access_token = "[redacted]";
+		if (redacted.refresh_token) redacted.refresh_token = "[redacted]";
+		console.error(JSON.stringify(redacted, null, 2));
+		console.error("If this keeps happening, try logging in to GOG again and getting a new login code.");
 		process.exit(1);
 	}
 

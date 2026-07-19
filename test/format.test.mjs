@@ -71,4 +71,12 @@ describe('rankPartialMatches', () => {
 		rankPartialMatches(['Portal', 'Celeste', 'Bastion'], apps, 0.65, () => ticks++);
 		assert.equal(ticks, 3);
 	});
+
+	it('treats every name as a no-match when the catalogue is empty instead of crashing (regression)', () => {
+		let ticks = 0;
+		const { steamIDsBestMatch, steamIDsNoMatch } = rankPartialMatches(['Celeste', 'Portal'], [], 0.65, () => ticks++);
+		assert.deepEqual(steamIDsBestMatch, {});
+		assert.deepEqual(steamIDsNoMatch, ['Celeste', 'Portal']);
+		assert.equal(ticks, 2);
+	});
 });

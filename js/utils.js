@@ -116,7 +116,7 @@ function unknownTopLevelKeys(config) {
 // used to enrich the CLI's per-mode --help output.
 export function describeConfigFields(mode) {
 	const schema = JSON.parse(fs.readFileSync(path.join(packageConfigDir, `schema.${mode}.json`), 'utf8'));
-	const lines = ['Configuration fields (each maps to an option above and can also be set in a config.json):', ''];
+	const lines = ['Configuration fields (each maps to an option above, all but the secret keys can also be set in a config.json):', ''];
 
 	function wrap(text, indent) {
 		const width = 80 - indent.length;
