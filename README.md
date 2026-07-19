@@ -332,7 +332,7 @@ Your Steam, GOG and Epic credentials are secrets, so this tool never writes them
 - For backwards compatibility the schema still allows the credential fields, but if a credential is found in `config.json` the tool refuses to run and asks you to move it to the matching environment variable instead.
 - The GOG refresh token obtained by `gogAccount` mode is displayed once in the console and is not saved to any file.
 
-Provide a credential inline for a single run, for example `STEAM_API_KEY=xxxx steam-app-id-finder run`, or export it in your shell profile.
+Provide a credential inline for a single run (for example `STEAM_API_KEY=xxxx steam-app-id-finder run`), or set it permanently so you are not asked again: `setx STEAM_API_KEY "xxxx"` on Windows (then open a new terminal), or add an `export` to your shell profile on macOS/Linux.
 Grant API keys only the access they need, and rotate them if they may have been exposed.
 
 ## Related projects
