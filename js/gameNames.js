@@ -73,6 +73,14 @@ async function fetchSteamApps() {
 
 	const apps = await fetchSteamAppListFromApi(apiKey);
 
+	// An empty catalogue means Steam gave us nothing usable (transient outage or a key without access).
+	// Treat it as a failure and never cache it, otherwise the empty list poisons the cache for appListCacheHours.
+	if (apps.length === 0) {
+		console.error("\nERROR: Steam's IStoreService/GetAppList returned an empty app list.");
+		console.error("This is usually a temporary Steam-side issue or an API key without access. Try again in a few minutes.");
+		process.exit(1);
+	}
+
 	if (cacheEnabled) {
 		writeAppListCache(apps);
 	}
@@ -232,6 +240,12 @@ export function classifyFullMatches(gameNames, steamApps) {
 
 // Rank the remaining game names against the Steam catalogue by similarity, keeping those at or above the threshold (pure - onProgress reports per-item progress)
 export function rankPartialMatches(gameNames, steamApps, threshold, onProgress = () => {}) {
+	// With no catalogue to compare against, every game is a no-match. findBestMatch throws on an empty list, so guard first.
+	if (steamApps.length === 0) {
+		gameNames.forEach(() => onProgress());
+		return { steamIDsBestMatch: {}, steamIDsNoMatch: [...gameNames] };
+	}
+
 	// Convert to lowercase to make matches case insensitive and thereby more accurate
 	const steamAppsLowercase = steamApps.map((app) => (app.name ?? "").toLowerCase());
 	const gameNamesLowercase = gameNames.map((game) => game.toLowerCase());

@@ -65,7 +65,7 @@ async function getGameList() {
 			if (response.status === 401 || response.status === 403) {
 				console.error('This usually means your Steam Web API key is invalid or revoked. Verify or regenerate it at https://steamcommunity.com/dev/apikey.');
 			}
-			if (body) console.error('Response body:', body);
+			if (body) console.error('Response body:', body.slice(0, 200));
 			throw new Error(`Steam Web API responded with status ${response.status}`);
 		}
 		json = await response.json();
@@ -87,7 +87,8 @@ async function getGameList() {
 
 	console.error("\nERROR: Steam Web API response does not contain a games list. The profile's game details may be private, or the API key/steamId is incorrect.");
 	console.error("The response returned by Steam was:");
-	console.error(JSON.stringify(json, null, 2));
+	const rendered = JSON.stringify(json, null, 2);
+	console.error(rendered.length > 500 ? `${rendered.slice(0, 500)}\n... (truncated)` : rendered);
 	process.exit(1);
 }
 

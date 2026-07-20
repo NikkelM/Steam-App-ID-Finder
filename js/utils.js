@@ -116,7 +116,7 @@ function unknownTopLevelKeys(config) {
 // used to enrich the CLI's per-mode --help output.
 export function describeConfigFields(mode) {
 	const schema = JSON.parse(fs.readFileSync(path.join(packageConfigDir, `schema.${mode}.json`), 'utf8'));
-	const lines = ['Configuration fields (each maps to an option above and can also be set in a config.json):', ''];
+	const lines = ['Configuration fields (each maps to an option above, all but the secret keys can also be set in a config.json):', ''];
 
 	function wrap(text, indent) {
 		const width = 80 - indent.length;
@@ -167,7 +167,14 @@ export function initConfig(config) {
 // ----- Secrets -----
 
 export function envVarInstructions(envVar, value = '<value>') {
-	return `  PowerShell:  $env:${envVar} = '${value}'\n  bash/zsh:    export ${envVar}='${value}'`;
+	return [
+		`  Permanently (recommended; then open a new terminal):`,
+		`    PowerShell:  setx ${envVar} "${value}"`,
+		`    bash/zsh:    echo 'export ${envVar}="${value}"' >> ~/.profile`,
+		`  For the current terminal only:`,
+		`    PowerShell:  $env:${envVar} = '${value}'`,
+		`    bash/zsh:    export ${envVar}='${value}'`
+	].join('\n');
 }
 
 // Resolve a secret from an explicit flag, then the environment, then an interactive prompt
@@ -185,6 +192,7 @@ export async function resolveSecret({ flagValue, envVar, configValue, configFiel
 		return fromEnv;
 	}
 	if (process.stdin.isTTY) {
+		console.log(`Tip: to skip this prompt next time, set ${envVar} permanently ("setx ${envVar} <value>" on Windows, or add an export to your shell profile on macOS/Linux).`);
 		const entered = await password({ message: promptMessage, mask: true, validate: (value) => value.trim() ? true : `The ${label} is required.` });
 		return entered.trim();
 	}

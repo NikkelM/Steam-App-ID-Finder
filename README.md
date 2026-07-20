@@ -47,7 +47,7 @@ There are three ways to provide a mode's options:
    ```
    Add `--save-config` to a flag-driven run to also write the assembled configuration to a `config.json` (or `--save-config <path>`), so you can reuse or edit it later. Credentials are never stored.
 2. **The interactive wizard** - `steam-app-id-finder init` asks you a few questions, writes a `config.json`, and offers to run it right away. Running `steam-app-id-finder` with no arguments and no `config.json` present starts this wizard automatically. Pass `-o, --output <path>` to write the configuration file somewhere other than `config.json`.
-3. **A configuration file** - `steam-app-id-finder run` (or just `steam-app-id-finder`) runs a `config.json` from the current directory (or pass `--config <path>`). This is handy for a setup you reuse often; the wizard can create the file for you, or you can write it by hand. Running a mode command with no flags (for example `steam-app-id-finder gameNames`) also falls back to this `config.json`, as long as its `mode` matches the command.
+3. **A configuration file** - `steam-app-id-finder run` (or just `steam-app-id-finder`) runs a `config.json` from the current directory (or pass `--config <path>`). This is handy for a setup you reuse often; the wizard can create the file for you, or you can write it by hand (a complete example for each mode ships with the package as `config/config.<mode>.default.json`, for example `config/config.gameNames.default.json`). Running a mode command with no flags (for example `steam-app-id-finder gameNames`) also falls back to this `config.json`, as long as its `mode` matches the command.
 
 List every command and its flags with:
 
@@ -332,7 +332,7 @@ Your Steam, GOG and Epic credentials are secrets, so this tool never writes them
 - For backwards compatibility the schema still allows the credential fields, but if a credential is found in `config.json` the tool refuses to run and asks you to move it to the matching environment variable instead.
 - The GOG refresh token obtained by `gogAccount` mode is displayed once in the console and is not saved to any file.
 
-Provide a credential inline for a single run, for example `STEAM_API_KEY=xxxx steam-app-id-finder run`, or export it in your shell profile.
+Provide a credential inline for a single run (for example `STEAM_API_KEY=xxxx steam-app-id-finder run`), or set it permanently so you are not asked again: `setx STEAM_API_KEY "xxxx"` on Windows (then open a new terminal), or add an `export` to your shell profile on macOS/Linux.
 Grant API keys only the access they need, and rotate them if they may have been exposed.
 
 ## Related projects
